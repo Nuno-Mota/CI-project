@@ -2,3 +2,5 @@ out/
 CI-project.iml
 torcs.properties
 .idea/
+lib/
+train_data/
