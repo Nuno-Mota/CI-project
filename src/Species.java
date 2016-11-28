@@ -1,12 +1,34 @@
-/**
- * Created by alex on 24-11-16.
- */
-public class Species {
-    final double c1 = 1.0;
-    final double c2 = 1.0;
-    final double c3 = 3.0;
-    final double differenceThreshold = 3.0;
+import java.util.ArrayList;
+import java.util.List;
 
-    double fitness;
-    double noImprovementCounter;
+public class Species {
+
+    /**********************
+     * Internal Variables *
+     **********************/
+
+    private List<NeatGenome> _individuals = new ArrayList<NeatGenome>();
+
+
+
+    /***************
+     * Constructor *
+     ***************/
+
+    public Species(List<NeatGenome> individuals) {
+        _individuals = individuals;
+    }
+
+
+
+    /***********************
+     * Getters and Setters *
+     ***********************/
+
+    public List<NeatGenome> getIndividuals() {
+        return _individuals;
+    }
+    private void setIndividuals(List<NeatGenome> individuals) {
+        _individuals = individuals;
+    }
 }

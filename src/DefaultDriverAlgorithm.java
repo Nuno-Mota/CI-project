@@ -40,6 +40,12 @@ public class DefaultDriverAlgorithm extends AbstractAlgorithm {
         //DriversUtils.clearCheckpoint();
     }
 
+
+
+    /************************
+     * Driver's main method *     //This is the one to be run when racing. Otherwise comment for training?
+     ************************/
+
     public static void main(String[] args) {
 
         //Set path to torcs.properties
