@@ -41,7 +41,7 @@ public class Innovation implements Serializable {
     private void setInnovationType(int innovationType) { _innovationType = innovationType; }
 
     public int getInnovationID() { return _innovationID; }
-    private void setInnovationID(int innovationID) { _innovationID = innovationID; }
+    public void setInnovationID(int innovationID) { _innovationID = innovationID; }
 
     public int getInputNeuronID() { return _inputNeuronID; }
     private void setInputNeuronID(int inputNeuronID) { _inputNeuronID = inputNeuronID; }

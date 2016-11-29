@@ -1,13 +1,14 @@
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class InnovationsTable {
+public class InnovationsTable implements Serializable {
 
     /**********************
      * Internal Variables *
      **********************/
 
-    private int                     _globalInnovationNumber = 0;
+    private int                     _globalInnovationNumber = -1;
     private List<Innovation>        _innovations            = new ArrayList<>();
     private static InnovationsTable _instance               = null;
 
@@ -42,7 +43,8 @@ public class InnovationsTable {
         return -1;  //Return -1 if innovation does not exist
     }
     public void addInnovation(Innovation innovation) {
-      _innovations.add(innovation);
+        innovation.setInnovationID(++_globalInnovationNumber);
+        _innovations.add(innovation);
     }
     private void setInnovations(List<Innovation> innovations) { _innovations = innovations; }
 

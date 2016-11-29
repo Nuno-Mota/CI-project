@@ -10,6 +10,7 @@ public class NeatGenome implements Serializable{
      * Internal Variables *
      **********************/
 
+    private InnovationsTable     _innovationsTable = InnovationsTable.getInstance();
     private int                  _genomeID;
     private List<NeuronGene>     _neurons           = new ArrayList<NeuronGene>();
     private List<ConnectionGene> _connections       = new ArrayList<ConnectionGene>();
@@ -21,11 +22,13 @@ public class NeatGenome implements Serializable{
     private int                  _numberOfOutputs;      //Check how useful these are
     private int                  _speciesID;            //For display's purpose. Check how useful these are
 
+    private Random               _rand                         = new Random();
+    private final int            _biasSTDEV                    = 4;                    //Check for good value?
+    private final int            _weightSTDEV                  = 2;                    //Check for good value?
+
 //    private List<ConnectionGene> _possibleConnections          = new ArrayList<ConnectionGene>();
 //    private List<ConnectionGene> _possibleRecurrentConnections = new ArrayList<ConnectionGene>();
-//    private Random               _rand                         = new Random();
-//    private final int            _biasSTDEV                    = 4;                    //Check for good value?
-//    private final int            _weightSTDEV                  = 2;                    //Check for good value?
+
 
 
     /****************
@@ -152,7 +155,10 @@ public class NeatGenome implements Serializable{
 
         if (Math.random() > chanceOfLooped) {
             while (numberOfTriesToFindLoop-- != 0){
+
+
                 int neuronNumber = ThreadLocalRandom.current().nextInt(_numberOfInputs + 1, _neurons.size() - 1);
+
 
                 if (!_neurons.get(neuronNumber).getIsRecurrent() &&
                      _neurons.get(neuronNumber).getType() != 0 &&
@@ -167,14 +173,18 @@ public class NeatGenome implements Serializable{
         }
         else {
             while (numberOfTriesToAddConnection-- != 0) {
+
+
                 int inputNeuronNumber = ThreadLocalRandom.current().nextInt(0, _neurons.size() - 1);
+                inputNeuronID = _neurons.get(inputNeuronNumber).getNeuronID();
                 int outputNeuronNumber = ThreadLocalRandom.current().nextInt(_numberOfInputs + 1, _neurons.size() - 1);
+                outputNeuronID = _neurons.get(outputNeuronNumber).getNeuronID();
+
 
                 if (_neurons.get(outputNeuronNumber).getType() == 3)
                     continue;
 
-                if (!(duplicateConnection(_neurons.get(inputNeuronNumber).getNeuronID(), _neurons.get(outputNeuronNumber).getNeuronID()) &&
-                    _neurons.get(inputNeuronNumber).getNeuronID() == _neurons.get(outputNeuronNumber).getNeuronID()))
+                if (!(isDuplicateConnection(inputNeuronID, outputNeuronID) && inputNeuronID == outputNeuronID))
                     numberOfTriesToAddConnection = 0;
 
                 else
@@ -182,48 +192,47 @@ public class NeatGenome implements Serializable{
             }
         }
 
-
-
         if (inputNeuronID == -1 || outputNeuronID == -1)
             return;
+
+
+
+        Innovation newInnovation = new Innovation(1, -1, inputNeuronID, outputNeuronID, -1, 4);
+        int innovationID = _innovationsTable.getInnovationID(newInnovation);
+
+        NeuronGene inputNeuron  = getNeuron(inputNeuronID);
+        NeuronGene outputNeuron = getNeuron(outputNeuronID);
+        double weight = _rand.nextGaussian()*_weightSTDEV;
+
+
+        if (inputNeuron.getPositionY() > outputNeuron.getPositionY())
+            isRecurrent = true;
+
+        if (innovationID < 0) {
+            _innovationsTable.addInnovation(newInnovation); //addInnovation corrects innovation number automatically
+            int innovationNumber = _innovationsTable.getGlobalInnovationNumber();
+            _connections.add(new ConnectionGene(inputNeuron, outputNeuron, weight, true, isRecurrent, innovationNumber));
+        }
+        else
+            _connections.add(new ConnectionGene(inputNeuron, outputNeuron, weight, true, isRecurrent, innovationID));
     }
 
-//    private void addConnection() {   //THIS LOOKS VERY INEFFICIENT!!!! Maybe create at start a list of possible connections
-//        int breakCycle = 0;
-//        List<Integer> testedIndexes = new ArrayList<Integer>();
-//        NeuronGene ngToConnect;
-//
-//
-//        while (testedIndexes.size() != _neurons.size()) {
-//            Integer index = _rand.nextInt(_neurons.size());
-//
-//            if (!testedIndexes.contains(index)) {
-//                NeuronGene ng = _neurons.get(index);
-//
-//                if (ng.getPossibleIncoming() != null && ng.getPossibleOutgoing() != null) {
-//                    if (ThreadLocalRandom.current().nextInt(1, 2 + 1) == 1)
-//                        ngToConnect = ng.getPossibleIncoming().get(_rand.nextInt(ng.getPossibleIncoming().size()));
-//                    else
-//                        ngToConnect = ng.getPossibleOutgoing().get(_rand.nextInt(ng.getPossibleOutgoing().size()));
-//                }
-//                else if (ng.getPossibleIncoming() == null && ng.getPossibleOutgoing() != null)
-//                    ngToConnect = ng.getPossibleOutgoing().get(_rand.nextInt(ng.getPossibleOutgoing().size()));
-//                else if (ng.getPossibleIncoming() != null && ng.getPossibleOutgoing() == null)
-//                    ngToConnect = ng.getPossibleIncoming().get(_rand.nextInt(ng.getPossibleIncoming().size()));
-//                else {
-//                    testedIndexes.add(index);
-//                    breakCycle = 1;
-//                }
-//
-//
-//                if (breakCycle == 0) {
-//                    _connections.add(new ConnectionGene());
-//                }
-//
-//
-//            }
-//        }
-//    }
+    public boolean isDuplicateConnection(int inputNeuronID, int outputNeuronID) {
+        for (ConnectionGene cg: _connections) {
+            if (cg.getInputNode().getNeuronID() == inputNeuronID &&
+                cg.getOutputNode().getNeuronID() == outputNeuronID)
+                return true;
+        }
+        return false;
+    }
+
+    public NeuronGene getNeuron(int neuronID) { //Should throw an exception when ID doesn't exist blah blah
+        for (NeuronGene ng: _neurons) {
+            if (ng.getNeuronID() == neuronID)
+                return ng;
+        }
+        return null;    //SHOULD NEVER HAPPEN. SHOULD BE HANDLED WITH EXCEPTION, but who the hell cares...
+    }
 }
 
 

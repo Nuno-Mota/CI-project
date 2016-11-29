@@ -13,9 +13,8 @@ public class NeuronGene implements Serializable{
     private boolean          _isRecurrent;
     private double           _activationResponse;
     private double           _positionX, _positionY;
-    private double           _value;
-    private List<NeuronGene> _possibleIncoming = new ArrayList<NeuronGene>();
-    private List<NeuronGene> _possibleOutgoing = new ArrayList<NeuronGene>();
+    private List<NeuronGene> _possibleIncoming = new ArrayList<>();
+    private List<NeuronGene> _possibleOutgoing = new ArrayList<>();
 
 
 
@@ -23,8 +22,8 @@ public class NeuronGene implements Serializable{
      * Constructor *
      ***************/
 
-    public NeuronGene(int neuronID, int type, boolean isRecurrent, double activationResponse,
-                      double positionX, double positionY, double value,
+    public NeuronGene(int neuronID, int type, boolean isRecurrent,
+                      double activationResponse, double positionX, double positionY,
                       List<NeuronGene> possibleIncoming, List<NeuronGene> possibleOutgoing) {
         _neuronID           = neuronID;
         _type               = type;
@@ -32,7 +31,6 @@ public class NeuronGene implements Serializable{
         _activationResponse = activationResponse;
         _positionX          = positionX;
         _positionY          = positionY;
-        _value              = value;
         _possibleIncoming   = possibleIncoming;
         _possibleOutgoing   = possibleOutgoing;
     }
@@ -83,13 +81,6 @@ public class NeuronGene implements Serializable{
     }
     private void setPositionY(double positionY) {
         _positionY = positionY;
-    }
-
-    public double getValue() {
-        return _value;
-    }
-    private void setValue(double value) {
-        _value = value;
     }
 
     public List<NeuronGene> getPossibleIncoming() {
