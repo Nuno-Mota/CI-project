@@ -44,7 +44,7 @@ public class NeatGenome implements Serializable{
         _numberOfOutputs = numberOfOutputs;
 
 
-        //TODO
+        //TODO: code a proper constructor
     }
 //    public NeatGenome(int inputNodesNumber, int outputNodesNumber) { //For initialization
 //        for (int i = 0; i < inputNodesNumber; ++i) {
@@ -161,7 +161,7 @@ public class NeatGenome implements Serializable{
                 int neuronNumber = ThreadLocalRandom.current().nextInt(_numberOfInputs + 1, _neurons.size() - 1);
 
                 if (!_neurons.get(neuronNumber).getIsRecurrent() &&
-                     _neurons.get(neuronNumber).getType() != 0 &&
+                     _neurons.get(neuronNumber).getType() != 0   &&
                      _neurons.get(neuronNumber).getType() != 3) {
 
                     inputNeuronID = outputNeuronID = _neurons.get(neuronNumber).getNeuronID();
@@ -176,8 +176,8 @@ public class NeatGenome implements Serializable{
 
 
                 int inputNeuronNumber = ThreadLocalRandom.current().nextInt(0, _neurons.size() - 1);
-                inputNeuronID = _neurons.get(inputNeuronNumber).getNeuronID();
                 int outputNeuronNumber = ThreadLocalRandom.current().nextInt(_numberOfInputs + 1, _neurons.size() - 1);
+                inputNeuronID = _neurons.get(inputNeuronNumber).getNeuronID();
                 outputNeuronID = _neurons.get(outputNeuronNumber).getNeuronID();
 
                 if (_neurons.get(outputNeuronNumber).getType() == 3)
@@ -196,7 +196,7 @@ public class NeatGenome implements Serializable{
 
 
 
-        Innovation newInnovation = new Innovation(1, -1, inputNeuronID, outputNeuronID, -1, 4);
+        Innovation newInnovation = new Innovation(1, -1, inputNeuronID, outputNeuronID, -1, 4, 0);
         int innovationID = _innovationsTable.getInnovationID(newInnovation);
 
         NeuronGene inputNeuron  = getNeuron(inputNeuronID);
@@ -209,10 +209,10 @@ public class NeatGenome implements Serializable{
         if (innovationID < 0) {
             _innovationsTable.addInnovation(newInnovation); //addInnovation corrects innovation number automatically
             int innovationNumber = _innovationsTable.getGlobalInnovationNumber();
-            _connections.add(new ConnectionGene(inputNeuron, outputNeuron, weight, true, isRecurrent, innovationNumber));
+            _connections.add(new ConnectionGene(inputNeuron, outputNeuron, weight, true, isRecurrent, innovationNumber, 0));
         }
         else
-            _connections.add(new ConnectionGene(inputNeuron, outputNeuron, weight, true, isRecurrent, innovationID));
+            _connections.add(new ConnectionGene(inputNeuron, outputNeuron, weight, true, isRecurrent, innovationID, 0));
     }
 
 
@@ -232,8 +232,8 @@ public class NeatGenome implements Serializable{
             return;
 
 
-        boolean connectionFound         = false;
         int chosenConnectionNumber      = 0;
+        boolean connectionFound         = false;
         final int hiddenNeuronThreshold = _numberOfInputs + _numberOfOutputs + 5;   //should change with network size?
 
 
@@ -241,8 +241,8 @@ public class NeatGenome implements Serializable{
         if(_connections.size() <= hiddenNeuronThreshold) {      //Bias towards older connections for small networks
             while(numberOfTriesToFindOldLink-- != 0) {
                 int maxConnectionNumber = _connections.size() - 1 - (int)Math.sqrt(_connections.size());
-                chosenConnectionNumber = ThreadLocalRandom.current().nextInt(0, maxConnectionNumber);
-                int inputNeuronType = _connections.get(chosenConnectionNumber).getInputNode().getType();
+                chosenConnectionNumber  = ThreadLocalRandom.current().nextInt(0, maxConnectionNumber);
+                int inputNeuronType     = _connections.get(chosenConnectionNumber).getInputNode().getType();
 
                 if(_connections.get(chosenConnectionNumber).getIsEnabled() &&
                    _connections.get(chosenConnectionNumber).getIsRecurrent() &&
@@ -257,41 +257,97 @@ public class NeatGenome implements Serializable{
                 return;
         }
         else {
-            while(!connectionFound) {
+            while (!connectionFound) {
                 int maxConnectionNumber = _connections.size() - 1;
                 chosenConnectionNumber = ThreadLocalRandom.current().nextInt(0, maxConnectionNumber);
                 int inputNeuronType = _connections.get(chosenConnectionNumber).getInputNode().getType();
 
-                if(_connections.get(chosenConnectionNumber).getIsEnabled() &&
-                   _connections.get(chosenConnectionNumber).getIsRecurrent() &&
-                   inputNeuronType != 3)
+                if (_connections.get(chosenConnectionNumber).getIsEnabled() &&
+                        _connections.get(chosenConnectionNumber).getIsRecurrent() &&
+                        inputNeuronType != 3)
                     connectionFound = true;
-
-
-                _connections.get(chosenConnectionNumber).setIsEnabled(false);
-                double originalWeight = _connections.get(chosenConnectionNumber).getWeight();
-                int inputNeuronID = _connections.get(chosenConnectionNumber).getInputNode().getNeuronID();
-                int outputNeuronID = _connections.get(chosenConnectionNumber).getOutputNode().getNeuronID();
-
-                double newDepth = (getNeuron(inputNeuronID).getPositionY() + getNeuron(outputNeuronID).getPositionY())/2;
-                double newWidth = (getNeuron(inputNeuronID).getPositionX() + getNeuron(outputNeuronID).getPositionX())/2;
-
-                Innovation newInnovation = new Innovation(0, -1, inputNeuronID, outputNeuronID, -1, 2);
-                int innovationID = _innovationsTable.getInnovationID(newInnovation);
-
-
-                //HOW TO PROPERLY SOLVE PROBLEM OF PAGE 411???? the book doesn't seem to give a good explanation...
             }
         }
+
+        int numberOfTimesDisabled = _connections.get(chosenConnectionNumber).getNumberOfTimesDisabled();
+        _connections.get(chosenConnectionNumber).setIsEnabled(false);
+        double originalWeight     = _connections.get(chosenConnectionNumber).getWeight();
+        int inputNeuronID         = _connections.get(chosenConnectionNumber).getInputNode().getNeuronID();
+        int outputNeuronID        = _connections.get(chosenConnectionNumber).getOutputNode().getNeuronID();
+
+        double newDepth = (getNeuron(inputNeuronID).getPositionY() + getNeuron(outputNeuronID).getPositionY())/2;
+        double newWidth = (getNeuron(inputNeuronID).getPositionX() + getNeuron(outputNeuronID).getPositionX())/2;
+
+        Innovation newInnovation = new Innovation(0, -1, inputNeuronID,
+                                                  outputNeuronID, -1, 2, numberOfTimesDisabled);
+        int innovationID = _innovationsTable.getInnovationID(newInnovation);
+
+
+        //HOW TO PROPERLY SOLVE PROBLEM OF PAGE 411???? the book doesn't seem to give a good explanation... SOLVED IT?
+        //TODO: make sure that this part works properly! Not according to the book!!!!
+        double activationResponse = 3;  //TODO: check what a proper value is
+        List<NeuronGene> possibleIncoming = checkPossibleIncoming();    //TODO: make sure it is needed
+        List<NeuronGene> possibleOutgoing = checkPossibleOutgoing();    //TODO: make sure it is needed
+        int neuronID;
+
+        if(innovationID < 0) {
+            _innovationsTable.addInnovation(newInnovation);
+            int innovationNumber = _innovationsTable.getGlobalInnovationNumber();
+            neuronID = _innovationsTable.getGlobalNeuronNumber();
+            _neurons.add(new NeuronGene(neuronID, 2, false, activationResponse, newWidth, newDepth,
+                                        possibleIncoming, possibleOutgoing));
+        }
+        else {
+            neuronID = _innovationsTable.getNeuronID(innovationID);
+            _neurons.add(new NeuronGene(neuronID, 2, false, activationResponse, newWidth, newDepth,
+                    possibleIncoming, possibleOutgoing));
+        }
+
+        //TODO: push neuron to possibleIncoming and possibleOutgoing lists of each neuron that should have it
+        NeuronGene newNeuron = getNeuron(neuronID);
+        NeuronGene inputNeuron  = getNeuron(inputNeuronID);
+        NeuronGene outputNeuron  = getNeuron(outputNeuronID);
+
+
+
+        double weight;
+        //ADD INCOMING CONNECTION
+        newInnovation = new Innovation(1, -1, inputNeuronID, neuronID, -1, 4, 0);
+        innovationID = _innovationsTable.getInnovationID(newInnovation);
+
+        weight           = 1;
+
+        if (innovationID < 0) {
+            _innovationsTable.addInnovation(newInnovation); //addInnovation corrects innovation number automatically
+            int innovationNumber = _innovationsTable.getGlobalInnovationNumber();
+            _connections.add(new ConnectionGene(inputNeuron, newNeuron, weight, true, false, innovationNumber, 0));
+        }
+        else
+            _connections.add(new ConnectionGene(inputNeuron, newNeuron, weight, true, false, innovationID, 0));
+
+        //ADD OUTGOING CONNECTION
+        newInnovation = new Innovation(1, -1, neuronID, outputNeuronID, -1, 4, 0);
+        innovationID = _innovationsTable.getInnovationID(newInnovation);
+
+        weight           = originalWeight;
+
+        if (innovationID < 0) {
+            _innovationsTable.addInnovation(newInnovation); //addInnovation corrects innovation number automatically
+            int innovationNumber = _innovationsTable.getGlobalInnovationNumber();
+            _connections.add(new ConnectionGene(newNeuron, outputNeuron, weight, true, false, innovationNumber, 0));
+        }
+        else
+            _connections.add(new ConnectionGene(newNeuron, outputNeuron, weight, true, false, innovationID, 0));
+
     }
 
 
-    public NeuronGene getNeuron(int neuronID) { //Should throw an exception when ID doesn't exist blah blah
+    public NeuronGene getNeuron(int neuronID) {
         for (NeuronGene ng: _neurons) {
             if (ng.getNeuronID() == neuronID)
                 return ng;
         }
-        return null;    //SHOULD NEVER HAPPEN. SHOULD BE HANDLED WITH EXCEPTION, but who the hell cares...
+        return null;
     }
 }
 

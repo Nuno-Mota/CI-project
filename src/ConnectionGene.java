@@ -12,6 +12,7 @@ public class ConnectionGene implements Serializable{
     private boolean    _isEnabled;
     private boolean    _isRecurrent;
     private int        _innovationN;
+    private int        _numberOfTimesDisabled = 0;
 
 
 
@@ -20,13 +21,15 @@ public class ConnectionGene implements Serializable{
      ***************/
 
     public ConnectionGene(NeuronGene inputNode, NeuronGene outputNode, double weight,
-                          boolean isEnabled, boolean isRecurrent, int innovationN) {
-        _inputNode   = inputNode;
-        _outputNode  = outputNode;
-        _weight      = weight;
-        _isEnabled   = isEnabled;
-        _isRecurrent = isRecurrent;
-        _innovationN = innovationN;
+                          boolean isEnabled, boolean isRecurrent, int innovationN,
+                          int numberOfTimesDisabled) {
+        _inputNode             = inputNode;
+        _outputNode            = outputNode;
+        _weight                = weight;
+        _isEnabled             = isEnabled;
+        _isRecurrent           = isRecurrent;
+        _innovationN           = innovationN;
+        _numberOfTimesDisabled = numberOfTimesDisabled;
     }
 
 
@@ -75,6 +78,13 @@ public class ConnectionGene implements Serializable{
     }
     private void setInnovationN(int innovationN) {
         _innovationN = innovationN;
+    }
+
+    public int getNumberOfTimesDisabled() {
+        return _numberOfTimesDisabled;
+    }
+    private void setNumberOfTimesDisabled(int numberOfTimesDisabled) {
+        _numberOfTimesDisabled = numberOfTimesDisabled;
     }
 
 
