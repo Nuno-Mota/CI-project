@@ -59,7 +59,7 @@ public class ConnectionGene implements Serializable{
     public boolean getIsEnabled() {
         return _isEnabled;
     }
-    private void setIsEnabled(boolean isEnabled) {
+    public void setIsEnabled(boolean isEnabled) {
         _isEnabled = isEnabled;
     }
 
