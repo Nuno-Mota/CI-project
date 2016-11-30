@@ -18,8 +18,8 @@ public class NeatGenome implements Serializable{
     private double               _fitness;
     private double               _adjustedFitness;
     private double               _amountToSpawn;
-    private int                  _numberOfInputs;                     //Check how useful these are
-    private int                  _numberOfOutputs;                    //Check how useful these are
+    private int                  _numberOfInputs;
+    private int                  _numberOfOutputs;
     private int                  _speciesID;                          //For display's purpose. Check how useful these are
 
     private Random               _rand             = new Random();
@@ -46,11 +46,11 @@ public class NeatGenome implements Serializable{
 
         //TODO: code a proper constructor
     }
-//    public NeatGenome(int inputNodesNumber, int outputNodesNumber) { //For initialization
-//        for (int i = 0; i < inputNodesNumber; ++i) {
+//    public NeatGenome(int inputNeuronsNumber, int outputNeuronsNumber) { //For initialization
+//        for (int i = 0; i < inputNeuronsNumber; ++i) {
 //            _neurons.add(new NeuronGene(0, 0, _rand.nextGaussian()*_biasSTDEV, null, null));
 //        }
-//        for (int i = 0; i < outputNodesNumber; ++i) {
+//        for (int i = 0; i < outputNeuronsNumber; ++i) {
 //            _neurons.add(new NeuronGene(2, 0, _rand.nextGaussian()*_biasSTDEV, null, null));
 //        }
 //
@@ -94,8 +94,8 @@ public class NeatGenome implements Serializable{
 //        }
 //    }
 //
-//    public NeatGenome(List<NeuronGene> nodes, List<ConnectionGene> connections) { //To load from memory, or after mating?
-//        _neurons = nodes;
+//    public NeatGenome(List<NeuronGene> Neurons, List<ConnectionGene> connections) { //To load from memory, or after mating?
+//        _neurons = Neurons;
 //        _connections = connections;
 //    }
 
@@ -114,25 +114,25 @@ public class NeatGenome implements Serializable{
     public List<ConnectionGene> getConnections() { return _connections; }
     private void setConnections(List<ConnectionGene> connections) { _connections = connections; }
 
-    private NeuralNetwork getNeuralNetwork() { return _neuralNetwork; }
+    public NeuralNetwork getNeuralNetwork() { return _neuralNetwork; }
     private void setNeuralNetwork(NeuralNetwork neuralNetwork) { _neuralNetwork = neuralNetwork; }
 
-    private double getFitness() { return _fitness; }
+    public double getFitness() { return _fitness; }
     private void setFitness(double fitness) { _fitness = fitness; }
 
-    private double getAdjustedFitness() { return _adjustedFitness; }
+    public double getAdjustedFitness() { return _adjustedFitness; }
     private void setAdjustedFitness(double adjustedFitness) { _adjustedFitness = adjustedFitness; }
 
-    private double getAmountToSpawn() { return _amountToSpawn; }
+    public double getAmountToSpawn() { return _amountToSpawn; }
     private void setAmountToSpawn(double amountToSpawn) { _amountToSpawn = amountToSpawn; }
 
-    private int getNumberOfInputs() { return _numberOfInputs; }
+    public int getNumberOfInputs() { return _numberOfInputs; }
     private void setNumberOfInputs(int numberOfInputs) { _numberOfInputs = numberOfInputs; }
 
-    private int getNumberOfOutputs() { return _numberOfOutputs; }
+    public int getNumberOfOutputs() { return _numberOfOutputs; }
     private void setNumberOfOutputs(int numberOfOutputs) { _numberOfOutputs = numberOfOutputs; }
 
-    private int getSpeciesID() { return _speciesID; }
+    public int getSpeciesID() { return _speciesID; }
     private void setSpeciesID(int speciesID) { _speciesID = speciesID; }
 
 
@@ -216,10 +216,10 @@ public class NeatGenome implements Serializable{
     }
 
 
-    public boolean isDuplicateConnection(int inputNeuronID, int outputNeuronID) {
+    private boolean isDuplicateConnection(int inputNeuronID, int outputNeuronID) {
         for (ConnectionGene cg: _connections) {
-            if (cg.getInputNode().getNeuronID() == inputNeuronID &&
-                cg.getOutputNode().getNeuronID() == outputNeuronID)
+            if (cg.getInputNeuron().getNeuronID() == inputNeuronID &&
+                cg.getOutputNeuron().getNeuronID() == outputNeuronID)
                 return true;
         }
         return false;
@@ -242,7 +242,7 @@ public class NeatGenome implements Serializable{
             while(numberOfTriesToFindOldLink-- != 0) {
                 int maxConnectionNumber = _connections.size() - 1 - (int)Math.sqrt(_connections.size());
                 chosenConnectionNumber  = ThreadLocalRandom.current().nextInt(0, maxConnectionNumber);
-                int inputNeuronType     = _connections.get(chosenConnectionNumber).getInputNode().getType();
+                int inputNeuronType     = _connections.get(chosenConnectionNumber).getInputNeuron().getType();
 
                 if(_connections.get(chosenConnectionNumber).getIsEnabled() &&
                    _connections.get(chosenConnectionNumber).getIsRecurrent() &&
@@ -260,7 +260,7 @@ public class NeatGenome implements Serializable{
             while (!connectionFound) {
                 int maxConnectionNumber = _connections.size() - 1;
                 chosenConnectionNumber = ThreadLocalRandom.current().nextInt(0, maxConnectionNumber);
-                int inputNeuronType = _connections.get(chosenConnectionNumber).getInputNode().getType();
+                int inputNeuronType = _connections.get(chosenConnectionNumber).getInputNeuron().getType();
 
                 if (_connections.get(chosenConnectionNumber).getIsEnabled() &&
                         _connections.get(chosenConnectionNumber).getIsRecurrent() &&
@@ -272,8 +272,8 @@ public class NeatGenome implements Serializable{
         int numberOfTimesDisabled = _connections.get(chosenConnectionNumber).getNumberOfTimesDisabled();
         _connections.get(chosenConnectionNumber).setIsEnabled(false);
         double originalWeight     = _connections.get(chosenConnectionNumber).getWeight();
-        int inputNeuronID         = _connections.get(chosenConnectionNumber).getInputNode().getNeuronID();
-        int outputNeuronID        = _connections.get(chosenConnectionNumber).getOutputNode().getNeuronID();
+        int inputNeuronID         = _connections.get(chosenConnectionNumber).getInputNeuron().getNeuronID();
+        int outputNeuronID        = _connections.get(chosenConnectionNumber).getOutputNeuron().getNeuronID();
 
         double newDepth = (getNeuron(inputNeuronID).getPositionY() + getNeuron(outputNeuronID).getPositionY())/2;
         double newWidth = (getNeuron(inputNeuronID).getPositionX() + getNeuron(outputNeuronID).getPositionX())/2;
@@ -283,29 +283,27 @@ public class NeatGenome implements Serializable{
         int innovationID = _innovationsTable.getInnovationID(newInnovation);
 
 
-        //HOW TO PROPERLY SOLVE PROBLEM OF PAGE 411???? the book doesn't seem to give a good explanation... SOLVED IT?
         //TODO: make sure that this part works properly! Not according to the book!!!!
         double activationResponse = 3;  //TODO: check what a proper value is
-        List<NeuronGene> possibleIncoming = checkPossibleIncoming();    //TODO: make sure it is needed
-        List<NeuronGene> possibleOutgoing = checkPossibleOutgoing();    //TODO: make sure it is needed
+        List<NeuronGene> possibleIncoming = checkPossibleNeurons(inputNeuronID);
+        List<NeuronGene> possibleOutgoing = checkPossibleNeurons(outputNeuronID);
         int neuronID;
 
         if(innovationID < 0) {
             _innovationsTable.addInnovation(newInnovation);
-            int innovationNumber = _innovationsTable.getGlobalInnovationNumber();
             neuronID = _innovationsTable.getGlobalNeuronNumber();
-            _neurons.add(new NeuronGene(neuronID, 2, false, activationResponse, newWidth, newDepth,
-                                        possibleIncoming, possibleOutgoing));
         }
-        else {
+        else
             neuronID = _innovationsTable.getNeuronID(innovationID);
-            _neurons.add(new NeuronGene(neuronID, 2, false, activationResponse, newWidth, newDepth,
-                    possibleIncoming, possibleOutgoing));
-        }
 
-        //TODO: push neuron to possibleIncoming and possibleOutgoing lists of each neuron that should have it
-        NeuronGene newNeuron = getNeuron(neuronID);
-        NeuronGene inputNeuron  = getNeuron(inputNeuronID);
+
+        NeuronGene newNeuron = new NeuronGene(neuronID, 2, false, activationResponse, newWidth,
+                                              newDepth, possibleIncoming, possibleOutgoing);
+        _neurons.add(newNeuron);
+
+
+        pushToPossibleLists(inputNeuronID, newNeuron, outputNeuronID);
+        NeuronGene inputNeuron   = getNeuron(inputNeuronID);
         NeuronGene outputNeuron  = getNeuron(outputNeuronID);
 
 
@@ -342,12 +340,36 @@ public class NeatGenome implements Serializable{
     }
 
 
-    public NeuronGene getNeuron(int neuronID) {
+    private NeuronGene getNeuron(int neuronID) {
         for (NeuronGene ng: _neurons) {
             if (ng.getNeuronID() == neuronID)
                 return ng;
         }
         return null;
+    }
+
+
+    private List<NeuronGene> checkPossibleNeurons(int NeuronID) {
+        List<NeuronGene> possibleIncoming = new ArrayList<>();
+        for (NeuronGene ng : _neurons) {
+            if (ng.getNeuronID() != NeuronID)
+                possibleIncoming.add(ng);
+        }
+        return possibleIncoming;
+    }
+
+
+    private void pushToPossibleLists(int inputNeuronID, NeuronGene newNeuron, int outputNeuronID) {
+        for (NeuronGene ng: _neurons) {
+            if (ng.getNeuronID() == inputNeuronID)
+                ng.getPossibleIncoming().add(newNeuron);
+            else if (ng.getNeuronID() == outputNeuronID)
+                ng.getPossibleOutgoing().add(newNeuron);
+            else {
+                ng.getPossibleIncoming().add(newNeuron);
+                ng.getPossibleOutgoing().add(newNeuron);
+            }
+        }
     }
 }
 

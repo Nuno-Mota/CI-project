@@ -36,6 +36,16 @@ public class NeuronGene implements Serializable{
     }
 
 
+    public NeuronGene(NeuronGene neuronToBeCopied) {
+        _neuronID           = neuronToBeCopied.getNeuronID();
+        _type               = neuronToBeCopied.getType();
+        _isRecurrent        = neuronToBeCopied.getIsRecurrent();
+        _activationResponse = neuronToBeCopied.getActivationResponse();
+        _positionX          = neuronToBeCopied.getPositionX();
+        _positionY          = neuronToBeCopied.getPositionY();
+    }
+
+
 
     /***********************
      * Getters and Setters *
@@ -87,7 +97,7 @@ public class NeuronGene implements Serializable{
         return _possibleIncoming;
     }
     public void addPossibleIncoming(NeuronGene newPossibleIncoming) { _possibleIncoming.add(newPossibleIncoming); }
-    private void setPossibleIncoming(List<NeuronGene> possibleIncoming) {
+    public void setPossibleIncoming(List<NeuronGene> possibleIncoming) {
         _possibleIncoming = possibleIncoming;
     }
 
@@ -95,7 +105,7 @@ public class NeuronGene implements Serializable{
         return _possibleOutgoing;
     }
     public void addPossibleOutgoing(NeuronGene newPossibleOutgoing) { _possibleOutgoing.add(newPossibleOutgoing); }
-    private void setPossibleOutgoing(List<NeuronGene> possibleOutgoing) {
+    public void setPossibleOutgoing(List<NeuronGene> possibleOutgoing) {
         _possibleOutgoing = possibleOutgoing;
     }
 }
