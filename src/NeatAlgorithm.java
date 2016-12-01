@@ -17,12 +17,12 @@ public class NeatAlgorithm {
 
         if (savedGeneration.exists() && !savedGeneration.isDirectory()) {   //If there is a population in memory load it
             try {
-                FileInputStream fis = new FileInputStream(savedGeneration);
+                FileInputStream fis   = new FileInputStream(savedGeneration);
                 ObjectInputStream ois = new ObjectInputStream(fis);
 
-                int numberOfInputs = (int)ois.readObject();
-                int numberOfOutputs = (int)ois.readObject();
-                int populationSize = (int)ois.readObject();
+                int numberOfInputs   = (int)ois.readObject();
+                int numberOfOutputs  = (int)ois.readObject();
+                int populationSize   = (int)ois.readObject();
                 int generationNumber = (int)ois.readObject();
                 List<NeatGenome> currentPopulation = (List<NeatGenome>)ois.readObject();
                 neat = new Neat(numberOfInputs, numberOfOutputs, populationSize, generationNumber, currentPopulation);
@@ -41,8 +41,6 @@ public class NeatAlgorithm {
                 System.out.println("Error reading from generation file: Downcast class does not exist.");
                 return;
             }
-
-            neat.createNextGeneration();
         }
 
         else
@@ -51,10 +49,8 @@ public class NeatAlgorithm {
 
 
         while (true) {
-            neat.defineSpecies();
-            neat.estimateFitness();
+            neat.epoch();
             neat.saveRelevantData();
-            neat.createNextGeneration();
         }
 
     }

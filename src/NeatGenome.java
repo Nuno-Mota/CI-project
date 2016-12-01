@@ -60,13 +60,12 @@ public class NeatGenome implements Serializable{
 
 
     public NeatGenome(List<NeuronGene> neurons, List<ConnectionGene> connections,
-                      int numberOfInputs, int numberOfOutputs, int speciesID) {
+                      int numberOfInputs, int numberOfOutputs) {
         _genomeID        = _globalGenomeID++;
         _neurons         = neurons;
         _connections     = connections;
         _numberOfInputs  = numberOfInputs;
         _numberOfOutputs = numberOfOutputs;
-        _speciesID       = speciesID;
     }
 //    public NeatGenome(int inputNeuronsNumber, int outputNeuronsNumber) { //For initialization
 //        for (int i = 0; i < inputNeuronsNumber; ++i) {

@@ -92,10 +92,10 @@ public class Neat {
      * NEAT's methods *
      ******************/
 
-    public void createNextGeneration() {
+    public void createNewGeneration() {
         System.out.println("Creating next generation. Generation number " + _generationNumber + 1 + ".");//Check +1 part
         //TODO
-        _generationNumber++;
+        ++_generationNumber;
         System.out.println("Generation number " + _generationNumber + " created.");
     }
 
@@ -119,7 +119,7 @@ public class Neat {
             System.out.println("Population species redefined.");
     }
 
-    public void estimateFitness() {
+    public void estimateFitness(List<NeuralNetwork> phenotypes) {
         System.out.println("Starting fitness estimation.");
         //TODO
         System.out.println("Fitness estimation finished.");
@@ -135,8 +135,6 @@ public class Neat {
 
 
     private void speciate() {
-        _currentSpecies = new ArrayList<>();
-
         for(NeatGenome ng: _currentPopulation) {
             if(_currentSpecies.size() == 0) {
                 List<NeatGenome> membersOfSpecies = new ArrayList<>();
@@ -155,6 +153,13 @@ public class Neat {
                 _currentSpecies.add(new Species(membersOfSpecies));
             }
         }
+
+        for(Species sp : _currentSpecies){
+            //TODO: implement sorter
+        }
+        for(Species sp : _currentSpecies){
+            //TODO: implement sorter
+        }
     }
 
 
@@ -162,25 +167,25 @@ public class Neat {
         int i1 = 0;
         int i2 = 0;
         int disjointGenes = 0;
-        int exessGenes = 0;
+        int excessGenes = 0;
         double matchingGenes = 0;
         double weightDifference = 0.0;
         int i1InnovN;
         int i2InnovN;
-        double maxGenes;
+        double maxGenes = 1;
 
         while (elementToCompare.getConnections().size() > i1
                 || representative.getConnections().size() > i2) {
 
             if (i1 == elementToCompare.getConnections().size()) {
                 ++i2;
-                ++exessGenes;
+                ++excessGenes;
                 continue;
             }
 
             if (i2 == elementToCompare.getConnections().size()) {
                 ++i1;
-                ++exessGenes;
+                ++excessGenes;
                 continue;
             }
 
@@ -190,7 +195,7 @@ public class Neat {
 
             if (i1InnovN == i2InnovN) {
                 ++i1;
-                ++i2:
+                ++i2;
                 ++matchingGenes;
                 weightDifference += Math.abs(elementToCompare.getConnections().get(i1).getWeight()
                         - representative.getConnections().get(i2).getWeight());
@@ -203,11 +208,30 @@ public class Neat {
                 ++disjointGenes;
             }
             maxGenes = elementToCompare.getConnections().size() > representative.getConnections().size()
-                    ? elementToCompare.getConnections().size() : representative.getConnections().size();
+                     ? elementToCompare.getConnections().size() : representative.getConnections().size();
         }
 
-        double score = ((c1 * exessGenes / maxGenes) + (c2 * disjointGenes / maxGenes)
+        double score = ((c1 * excessGenes / maxGenes) + (c2 * disjointGenes / maxGenes)
                 + (c3 * weightDifference / matchingGenes));
 
-        return score < _compatibilityThreshold;}
+        return score < _compatibilityThreshold;
+    }
+
+
+    public void epoch() {
+
+        if(getCurrentPopulation().size() == 0)
+            createPopulation();
+        else
+            createNewGeneration();
+
+        estimateFitness(generatePhenotypes());
+
+        speciate();
+    }
+
+
+    public List<NeuralNetwork> generatePhenotypes() {
+
+    }
 }

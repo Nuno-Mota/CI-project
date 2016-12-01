@@ -177,7 +177,7 @@ public class Species {
         }
 
         createPossibleListsForEachNeuron(babyNeurons, babyConnections);
-        //TODO: finish creating the new genome
+        return new NeatGenome(babyNeurons, babyConnections, parent1.getNumberOfInputs(), parent1.getNumberOfOutputs());
     }
 
 
