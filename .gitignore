@@ -4,3 +4,4 @@ torcs.properties
 .idea/
 lib/
 train_data/
+torcs_template.iml

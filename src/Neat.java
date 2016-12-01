@@ -15,6 +15,7 @@ public class Neat {
     private List<NeatGenome>    _currentPopulation = new ArrayList<NeatGenome>();
     private List<Species>       _currentSpecies    = new ArrayList<>();
     private double              _compatibilityThreshold = 10;
+    private int                 c1 = 1, c2 = 1, c3 = 5;
 
 
 
@@ -158,6 +159,59 @@ public class Neat {
 
 
     private boolean compatible(NeatGenome elementToCompare, NeatGenome representative) {
+        int i1 = 0;
+        int i2 = 0;
+        int disjointGenes = 0;
+        int exessGenes = 0;
+        double matchingGenes = 0;
+        double weightDifference = 0.0;
+        int i1InnovN;
+        int i2InnovN;
+        double maxGenes;
+
+        while (elementToCompare.getConnections().size() > i1
+                || representative.getConnections().size() > i2) {
+
+            if (i1 == elementToCompare.getConnections().size()) {
+                ++i2;
+                ++exessGenes;
+                continue;
+            }
+
+            if (i2 == elementToCompare.getConnections().size()) {
+                ++i1;
+                ++exessGenes;
+                continue;
+            }
+
+
+            i1InnovN = elementToCompare.getConnections().get(i1).getInnovationN();
+            i2InnovN = representative.getConnections().get(i2).getInnovationN();
+
+            if (i1InnovN == i2InnovN) {
+                ++i1;
+                ++i2:
+                ++matchingGenes;
+                weightDifference += Math.abs(elementToCompare.getConnections().get(i1).getWeight()
+                        - representative.getConnections().get(i2).getWeight());
+                continue;
+            } else if (i1 < i2) {
+                ++i1;
+                ++disjointGenes;
+            } else {
+                ++i2;
+                ++disjointGenes;
+            }
+            maxGenes = elementToCompare.getConnections().size() > representative.getConnections().size()
+                    ? elementToCompare.getConnections().size() : representative.getConnections().size();
+        }
+
+        double score = ((c1 * exessGenes / maxGenes) + (c2 * disjointGenes / maxGenes)
+                + (c3 * weightDifference / matchingGenes));
+
+        return score < _compatibilityThreshold ? true : false;
+
+
 
     }
 }
