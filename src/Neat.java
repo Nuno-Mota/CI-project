@@ -13,6 +13,8 @@ public class Neat {
     private int                 _populationSize;
     private int                 _generationNumber  = 1;
     private List<NeatGenome>    _currentPopulation = new ArrayList<NeatGenome>();
+    private List<Species>       _currentSpecies    = new ArrayList<>();
+    private double              _compatibilityThreshold = 10;
 
 
 
@@ -128,5 +130,34 @@ public class Neat {
         //TODO
         System.out.println("Relevant data saved.");
         System.out.println("PROGRAM CAN NOW BE STOPPED!");
+    }
+
+
+    private void speciate() {
+        _currentSpecies = new ArrayList<>();
+
+        for(NeatGenome ng: _currentPopulation) {
+            if(_currentSpecies.size() == 0) {
+                List<NeatGenome> membersOfSpecies = new ArrayList<>();
+                membersOfSpecies.add(ng);
+                _currentSpecies.add(new Species(membersOfSpecies));
+            }
+            else {
+                for(Species species : _currentSpecies) {
+                    if(compatible(ng, species.getRepresentative())) {
+                        species.getIndividuals().add(ng);
+                        break;
+                    }
+                }
+                List<NeatGenome> membersOfSpecies = new ArrayList<>();
+                membersOfSpecies.add(ng);
+                _currentSpecies.add(new Species(membersOfSpecies));
+            }
+        }
+    }
+
+
+    private boolean compatible(NeatGenome elementToCompare, NeatGenome representative) {
+
     }
 }

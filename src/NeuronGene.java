@@ -23,6 +23,20 @@ public class NeuronGene implements Serializable{
      ***************/
 
     public NeuronGene(int neuronID, int type, boolean isRecurrent,
+                      double activationResponse, double positionX, double positionY/*,
+                      List<NeuronGene> possibleIncoming, List<NeuronGene> possibleOutgoing*/) {
+        _neuronID           = neuronID;
+        _type               = type;
+        _isRecurrent        = isRecurrent;
+        _activationResponse = activationResponse;
+        _positionX          = positionX;
+        _positionY          = positionY;
+//        _possibleIncoming   = possibleIncoming;
+//        _possibleOutgoing   = possibleOutgoing;
+    }
+
+
+    public NeuronGene(int neuronID, int type, boolean isRecurrent,
                       double activationResponse, double positionX, double positionY,
                       List<NeuronGene> possibleIncoming, List<NeuronGene> possibleOutgoing) {
         _neuronID           = neuronID;

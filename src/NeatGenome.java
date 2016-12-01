@@ -11,6 +11,7 @@ public class NeatGenome implements Serializable{
      **********************/
 
     private InnovationsTable     _innovationsTable = InnovationsTable.getInstance();
+    private static int           _globalGenomeID   = 0;     //TODO:add getters and setters
     private int                  _genomeID;
     private List<NeuronGene>     _neurons          = new ArrayList<NeuronGene>();
     private List<ConnectionGene> _connections      = new ArrayList<ConnectionGene>();
@@ -35,16 +36,37 @@ public class NeatGenome implements Serializable{
      * Constructors *
      ****************/
 
-    public NeatGenome() {}
-
-
-    public NeatGenome(int genomeID, int numberOfInputs, int numberOfOutputs) {
-        _genomeID        = genomeID;
+    public NeatGenome(int numberOfInputs, int numberOfOutputs) {
+        _genomeID        = _globalGenomeID++;
         _numberOfInputs  = numberOfInputs;
         _numberOfOutputs = numberOfOutputs;
 
+        for(int i = 0; i < _numberOfInputs; ++i)
+            _neurons.add(new NeuronGene(i, 0, false, 4.9, i/1.0, 0));
+        for(int i = 0; i < _numberOfInputs; ++i)
+            _neurons.add(new NeuronGene(i + _numberOfInputs, 1, false, 4.9, i/1.0, 1));
 
-        //TODO: code a proper constructor
+        for(NeuronGene ng : _neurons) {
+            for(NeuronGene ngCheck : _neurons){
+                ng.getPossibleIncoming().add(ngCheck);
+                ng.getPossibleOutgoing().add(ngCheck);
+            }
+        }
+
+        for(int i = 0; i < _numberOfInputs; ++i)
+            for(int j = _numberOfInputs; j < _numberOfInputs + _numberOfOutputs; ++j)
+                addNewConnection(_neurons.get(i).getNeuronID(), _neurons.get(j).getNeuronID(), false);
+    }
+
+
+    public NeatGenome(List<NeuronGene> neurons, List<ConnectionGene> connections,
+                      int numberOfInputs, int numberOfOutputs, int speciesID) {
+        _genomeID        = _globalGenomeID++;
+        _neurons         = neurons;
+        _connections     = connections;
+        _numberOfInputs  = numberOfInputs;
+        _numberOfOutputs = numberOfOutputs;
+        _speciesID       = speciesID;
     }
 //    public NeatGenome(int inputNeuronsNumber, int outputNeuronsNumber) { //For initialization
 //        for (int i = 0; i < inputNeuronsNumber; ++i) {
@@ -195,12 +217,27 @@ public class NeatGenome implements Serializable{
             return;
 
 
+        addNewConnection(inputNeuronID, outputNeuronID, isRecurrent);
+    }
 
+
+    private boolean isDuplicateConnection(int inputNeuronID, int outputNeuronID) {
+        for (ConnectionGene cg: _connections) {
+            if (cg.getInputNeuron().getNeuronID() == inputNeuronID &&
+                cg.getOutputNeuron().getNeuronID() == outputNeuronID)
+                return true;
+        }
+        return false;
+    }
+
+
+    public void addNewConnection(int inputNeuronID, int outputNeuronID, boolean isRecurrent) {
         Innovation newInnovation = new Innovation(1, -1, inputNeuronID, outputNeuronID, -1, 4, 0);
         int innovationID = _innovationsTable.getInnovationID(newInnovation);
 
         NeuronGene inputNeuron  = getNeuron(inputNeuronID);
         NeuronGene outputNeuron = getNeuron(outputNeuronID);
+        //TODO: REMOVE FROM POSSIBLE INCOMING AND OUTGOING LISTS
         double weight           = _rand.nextGaussian()*_weightSTDEV;
 
         if (inputNeuron.getPositionY() > outputNeuron.getPositionY())
@@ -213,17 +250,7 @@ public class NeatGenome implements Serializable{
         }
         else
             _connections.add(new ConnectionGene(inputNeuron, outputNeuron, weight, true, isRecurrent, innovationID, 0));
-    }
-
-
-    private boolean isDuplicateConnection(int inputNeuronID, int outputNeuronID) {
-        for (ConnectionGene cg: _connections) {
-            if (cg.getInputNeuron().getNeuronID() == inputNeuronID &&
-                cg.getOutputNeuron().getNeuronID() == outputNeuronID)
-                return true;
-        }
-        return false;
-    }
+}
 
 
     public void addNeuron(double mutationRate, int numberOfTriesToFindOldLink) {

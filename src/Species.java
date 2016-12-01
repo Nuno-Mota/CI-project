@@ -29,6 +29,9 @@ public class Species {
     public List<NeatGenome> getIndividuals() {
         return _individuals;
     }
+    public NeatGenome getRepresentative() {
+        return _individuals.get(0);
+    }
     private void setIndividuals(List<NeatGenome> individuals) {
         _individuals = individuals;
     }
