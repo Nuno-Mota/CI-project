@@ -12,7 +12,7 @@ public class Neat {
     private int                 _numberOfOutputs;
     private int                 _populationSize;
     private int                 _generationNumber  = 1;
-    private List<NeatGenome>    _currentPopulation = new ArrayList<NeatGenome>();
+    private List<NeatGenome>    _currentPopulation = new ArrayList<>();
     private List<Species>       _currentSpecies    = new ArrayList<>();
     private double              _compatibilityThreshold = 10;
     private int                 c1 = 1, c2 = 1, c3 = 5;
@@ -24,17 +24,17 @@ public class Neat {
      ****************/
 
     public Neat(int numberOfInputs, int numberOfOutputs, int populationSize) {
-        _numberOfInputs = numberOfInputs;
+        _numberOfInputs  = numberOfInputs;
         _numberOfOutputs = numberOfOutputs;
-        _populationSize = populationSize;
+        _populationSize  = populationSize;
         setCurrentPopulation(createPopulation());
     }
 
     public Neat (int numberOfInputs, int numberOfOutputs, int populationSize, int generationNumber, List<NeatGenome> currentPopulation) {
-        _numberOfInputs = numberOfInputs;
-        _numberOfOutputs = numberOfOutputs;
-        _populationSize = populationSize;
-        _generationNumber = generationNumber;
+        _numberOfInputs    = numberOfInputs;
+        _numberOfOutputs   = numberOfOutputs;
+        _populationSize    = populationSize;
+        _generationNumber  = generationNumber;
         _currentPopulation = currentPopulation;
     }
 
@@ -209,9 +209,5 @@ public class Neat {
         double score = ((c1 * exessGenes / maxGenes) + (c2 * disjointGenes / maxGenes)
                 + (c3 * weightDifference / matchingGenes));
 
-        return score < _compatibilityThreshold ? true : false;
-
-
-
-    }
+        return score < _compatibilityThreshold;}
 }

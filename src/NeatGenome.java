@@ -143,7 +143,7 @@ public class NeatGenome implements Serializable{
     private void setFitness(double fitness) { _fitness = fitness; }
 
     public double getAdjustedFitness() { return _adjustedFitness; }
-    private void setAdjustedFitness(double adjustedFitness) { _adjustedFitness = adjustedFitness; }
+    public void setAdjustedFitness(double adjustedFitness) { _adjustedFitness = adjustedFitness; }
 
     public double getAmountToSpawn() { return _amountToSpawn; }
     private void setAmountToSpawn(double amountToSpawn) { _amountToSpawn = amountToSpawn; }
