@@ -154,12 +154,27 @@ public class Neat {
             }
         }
 
-        for(Species sp : _currentSpecies){
-            //TODO: implement sorter
+        for(Species sp : _currentSpecies) {
+            //TODO: implement better sorter than bubblesort... Check if bubblesort works at all...
+            int size = sp.getIndividuals().size()
+            boolean sort = true;
+            NeatGenome temp;
+            int i;
+
+            while(sort) {
+                sort = false;
+                for(i = 0; i < size - 1; ++i) {
+                    if(sp.getIndividuals().get(i).getFitness() < sp.getIndividuals().get(i+1).getFitness()) {
+                        temp = sp.getIndividuals().remove(i);
+                        sp.getIndividuals().add(i+1, temp);
+                        sort = true;
+                    }
+                }
+            }
+
+            sp.adjustFitness();
         }
-        for(Species sp : _currentSpecies){
-            //TODO: implement sorter
-        }
+
     }
 
 
