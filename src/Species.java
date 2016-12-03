@@ -18,7 +18,7 @@ public class Species {
     private double              _averageSpeciesFitness;
     private int                 _numberOfGenerationsWithNoImprovement;
     private int                 _ageOfSpecies = 0;
-    private double              _spawnsRequired;
+    private int                 _spawnsRequired;
     private double              _speciesFitness;
 
 
@@ -44,7 +44,7 @@ public class Species {
     public NeatGenome getRepresentative() {
         return _individuals.get(0);
     }
-    private void setIndividuals(List<NeatGenome> individuals) {
+    public void setIndividuals(List<NeatGenome> individuals) {
         _individuals = individuals;
     }
 
@@ -83,10 +83,10 @@ public class Species {
         _ageOfSpecies = ageOfSpecies;
     }
 
-    public double getSpawnsRequired() {
+    public int getSpawnsRequired() {
         return _spawnsRequired;
     }
-    private void setSpawnsRequired(double spawnsRequired) {
+    private void setSpawnsRequired(int spawnsRequired) {
         _spawnsRequired = spawnsRequired;
     }
 
@@ -176,8 +176,9 @@ public class Species {
             addBabyNeuron(selectedGene.getOutputNeuron(), babyNeurons);
         }
 
-        createPossibleListsForEachNeuron(babyNeurons, babyConnections);
-        return new NeatGenome(babyNeurons, babyConnections, parent1.getNumberOfInputs(), parent1.getNumberOfOutputs());
+        NeatGenome newGenome = new NeatGenome(babyNeurons, babyConnections, parent1.getNumberOfInputs(), parent1.getNumberOfOutputs());
+        newGenome.createPossibleListsForEachNeuron(newGenome.getNeurons(), newGenome.getConnections());
+        return newGenome;
     }
 
 
@@ -198,50 +199,10 @@ public class Species {
     }
 
 
-    private void createPossibleListsForEachNeuron(List<NeuronGene> neurons, List<ConnectionGene> connections) {
-        for(NeuronGene ng : neurons) {
-            if(ng.getType() == 3) {
-                for(NeuronGene ngTest : neurons) {
-                    if(ngTest.getType() != 3) {
-                        boolean add = true;
-                        for(ConnectionGene cg : connections)
-                            if(cg.getInputNeuron().getNeuronID()  == ng.getNeuronID() &&
-                                    cg.getOutputNeuron().getNeuronID() == ngTest.getNeuronID())
-                                add = false;
-                        if(add)
-                            ng.getPossibleOutgoing().add(ngTest);
-                    }
-                }
-            }
-            else {
-                for(NeuronGene ngTest : neurons) {
-                    boolean add = true;
-                    if (ngTest.getType() != 3) {
-                        for (ConnectionGene cg : connections)
-                            if (cg.getInputNeuron().getNeuronID() == ng.getNeuronID() &&
-                                    cg.getOutputNeuron().getNeuronID() == ngTest.getNeuronID())
-                                add = false;
-                        if (add)
-                            ng.getPossibleOutgoing().add(ngTest);
-                    }
 
-                    add = true;
-                    for (ConnectionGene cg : connections)
-                        if (cg.getInputNeuron().getNeuronID() == ngTest.getNeuronID() &&
-                                cg.getOutputNeuron().getNeuronID() == ng.getNeuronID())
-                            add = false;
-                    if (add)
-                        ng.getPossibleIncoming().add(ngTest);
-                }
-            }
-        }
-    }
-
-
-
-    /*********************
-     * Fitness Functions *
-     *********************/
+    /*****************************
+     * Fitness & Spawn Functions *
+     *****************************/
 
 
     public void adjustFitness() {
@@ -260,5 +221,14 @@ public class Species {
             ng.setAdjustedFitness(fitness/_individuals.size());
             _speciesFitness += ng.getAdjustedFitness();
         }
+    }
+
+
+    public void calculateSpawnsRequired() {
+        double totalSpawn = 0;
+        for(NeatGenome ng : _individuals)
+            totalSpawn += ng.getAmountToSpawn();
+
+        _spawnsRequired = (int)Math.round(totalSpawn);
     }
 }

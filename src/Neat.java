@@ -1,5 +1,7 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class Neat {
 
@@ -16,6 +18,8 @@ public class Neat {
     private List<Species>       _currentSpecies    = new ArrayList<>();
     private double              _compatibilityThreshold = 10;
     private int                 c1 = 1, c2 = 1, c3 = 5;
+    private static final double _likelihoodOfBestMating = 0.35;
+    private static final double _probabilityOfMating = 0.75;
 
 
 
@@ -24,13 +28,14 @@ public class Neat {
      ****************/
 
     public Neat(int numberOfInputs, int numberOfOutputs, int populationSize) {
-        _numberOfInputs  = numberOfInputs;
-        _numberOfOutputs = numberOfOutputs;
-        _populationSize  = populationSize;
-        setCurrentPopulation(createPopulation());
+        _numberOfInputs    = numberOfInputs;
+        _numberOfOutputs   = numberOfOutputs;
+        _populationSize    = populationSize;
+        createPopulation();
     }
 
-    public Neat (int numberOfInputs, int numberOfOutputs, int populationSize, int generationNumber, List<NeatGenome> currentPopulation) {
+    public Neat (int numberOfInputs, int numberOfOutputs, int populationSize, int generationNumber,
+                 List<NeatGenome> currentPopulation) {
         _numberOfInputs    = numberOfInputs;
         _numberOfOutputs   = numberOfOutputs;
         _populationSize    = populationSize;
@@ -86,6 +91,14 @@ public class Neat {
         _currentPopulation = currentPopulation;
     }
 
+    public double getLikelihoodOfBestMating() {
+        return _likelihoodOfBestMating;
+    }
+
+    public double getProbabilityOfMating() {
+        return _probabilityOfMating;
+    }
+
 
 
     /******************
@@ -93,17 +106,80 @@ public class Neat {
      ******************/
 
     public void createNewGeneration() {
-        System.out.println("Creating next generation. Generation number " + _generationNumber + 1 + ".");//Check +1 part
-        //TODO
         ++_generationNumber;
+        System.out.println("Creating next generation. Generation number " + _generationNumber + ".");
+
+        //TODO: What happens if the last species can't generate any descendants because maxPOP is already capped
+
+        int currentNumberOffspring = 0;
+        for(Species sp : _currentSpecies) {
+            List<NeatGenome> newSpeciesPop = new ArrayList<>();
+
+            newSpeciesPop.add(new NeatGenome(sp.getIndividuals().get(0)));
+
+            int amountToSpawn = sp.getSpawnsRequired();
+            int size = sp.getIndividuals().size();
+            int meanIndx = (int)(size*_likelihoodOfBestMating);     //TODO: check if this works properly
+            int maxIndx;
+            Random _rand = new Random();
+
+
+            for(int i = 1; i < amountToSpawn; ++i) {
+                if (currentNumberOffspring > _populationSize)
+                    break;
+
+                maxIndx = ThreadLocalRandom.current().nextInt(1, (int)_rand.nextGaussian()*meanIndx+(int)(size*0.2));
+                if(maxIndx > size-1)
+                    maxIndx = size-1;
+                if(maxIndx < size*_likelihoodOfBestMating)
+                    maxIndx = (int)Math.round(size*_likelihoodOfBestMating);
+
+                int parent1Indx = ThreadLocalRandom.current().nextInt(0, maxIndx);
+
+                if(_rand.nextDouble() > _probabilityOfMating || size == 1) {
+                    newSpeciesPop.add(new NeatGenome(sp.getIndividuals().get(parent1Indx)));
+                }
+                else {
+                    int parent2Indx = parent1Indx;
+                    while(parent1Indx == parent2Indx)
+                        parent2Indx = ThreadLocalRandom.current().nextInt(0, maxIndx);
+
+                    newSpeciesPop.add(sp.crossover(sp.getIndividuals().get(parent1Indx), sp.getIndividuals().get(parent2Indx)));
+                }
+                ++currentNumberOffspring;
+            }
+            sp.setIndividuals(newSpeciesPop);
+        }
+
+        List<NeatGenome> newPopulation = new ArrayList<>();
+
+        for(Species sp : _currentSpecies)
+            for(NeatGenome ng : sp.getIndividuals())
+                newPopulation.add(ng);
+
+        while(newPopulation.size() < _populationSize) {
+            NeatGenome temp1 = _currentPopulation.get(ThreadLocalRandom.current().nextInt(0, _currentPopulation.size()));
+            for(int i = 0; i < 5; ++i) {
+                NeatGenome temp2 = _currentPopulation.get(ThreadLocalRandom.current().nextInt(0, _currentPopulation.size()));
+
+                if(temp2.getAdjustedFitness() > temp1.getAdjustedFitness())
+                    temp1 = temp2;
+            }
+
+            newPopulation.add(new NeatGenome(temp1));
+        }
+
+
+        //TODO: MUTATE THIS LITTLE SHITS
         System.out.println("Generation number " + _generationNumber + " created.");
     }
 
-    public List<NeatGenome> createPopulation() {
+    public void createPopulation() {
         System.out.println("Creating initial population.");
-        //TODO
+
+        for(int i = 0; i < _populationSize; ++i)
+            _currentPopulation.add(new NeatGenome(_numberOfInputs, _numberOfOutputs));
         System.out.println("Initial population created.");
-        return null;    //TODO
     }
 
     public void defineSpecies() {
@@ -112,14 +188,16 @@ public class Neat {
             System.out.println("Defining population species.");
         else
             System.out.println("Redefining population species.");
-        //TODO
+
+        speciate();
+
         if (_generationNumber == 1)
             System.out.println("Population species defined.");
         else
             System.out.println("Population species redefined.");
     }
 
-    public void estimateFitness(List<NeuralNetwork> phenotypes) {
+    public void estimateFitness() {
         System.out.println("Starting fitness estimation.");
         //TODO
         System.out.println("Fitness estimation finished.");
@@ -176,6 +254,16 @@ public class Neat {
             sp.adjustFitness();
         }
 
+        double averagePopulationFitness = 0;
+        for(NeatGenome ng : _currentPopulation)
+            averagePopulationFitness += ng.getAdjustedFitness();
+        averagePopulationFitness = averagePopulationFitness/_currentPopulation.size();
+
+        for(NeatGenome ng : _currentPopulation)
+            ng.calculateSpawns(averagePopulationFitness);
+
+        for(Species sp : _currentSpecies)
+            sp.calculateSpawnsRequired();
     }
 
 
@@ -241,13 +329,14 @@ public class Neat {
         else
             createNewGeneration();
 
-        estimateFitness(generatePhenotypes());
+        generatePhenotypes();
+        estimateFitness();
 
-        speciate();
+        defineSpecies();
     }
 
 
-    public List<NeuralNetwork> generatePhenotypes() {
+    public void generatePhenotypes() {
 
     }
 }

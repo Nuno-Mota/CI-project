@@ -1,4 +1,5 @@
 import java.io.Serializable;
+import java.util.Random;
 
 public class ConnectionGene implements Serializable{
 
@@ -13,6 +14,10 @@ public class ConnectionGene implements Serializable{
     private boolean    _isRecurrent;
     private int        _innovationN;
     private int        _numberOfTimesDisabled = 0;
+
+    private Random _rand             = new Random();
+    private final int            _biasSTDEV        = 4;               //Check for good value?
+    private final int            _weightSTDEV      = 2;               //Check for good value?
 
 
 
@@ -52,14 +57,14 @@ public class ConnectionGene implements Serializable{
     public NeuronGene getInputNeuron() {
         return _inputNeuron;
     }
-    private void setInputNeuron(NeuronGene inputNeuron) {
+    public void setInputNeuron(NeuronGene inputNeuron) {
         _inputNeuron = inputNeuron;
     }
 
     public NeuronGene getOutputNeuron() {
         return _outputNeuron;
     }
-    private void setOutputNeuron(NeuronGene outputNeuron) {
+    public void setOutputNeuron(NeuronGene outputNeuron) {
         _outputNeuron = outputNeuron;
     }
 
@@ -106,5 +111,16 @@ public class ConnectionGene implements Serializable{
 
     public boolean hasSmallerInnovationNumber(ConnectionGene toCompare) {
         return _innovationN < toCompare.getInnovationN();
+    }
+
+
+    public void mutateWeight() {
+        //TODO: variable chance of mutation?
+        if(Math.random() > 0.8) {
+            if(Math.random() >0.2)
+                _weight = _rand.nextGaussian()*_weightSTDEV;
+            else
+                _weight += _rand.nextGaussian()*_weightSTDEV;
+        }
     }
 }

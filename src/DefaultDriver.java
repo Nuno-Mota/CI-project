@@ -14,7 +14,7 @@ public class DefaultDriver extends AbstractDriver {
 
     public DefaultDriver() {
         initialize();
-        neuralNetwork = new NeuralNetwork(12, 8, 2);
+        //neuralNetwork = new NeuralNetwork(12, 8, 2);
 //        neuralNetwork = neuralNetwork.loadGenome();
     }
 
@@ -75,26 +75,26 @@ public class DefaultDriver extends AbstractDriver {
         if (action == null) {
             action = new Action();
         }
-        action.steering = DriversUtils.alignToTrackAxis(sensors, 0.5);
-        if (sensors.getSpeed() > 60.0D) {
-            action.accelerate = 0.0D;
-            action.brake = 0.0D;
-        }
-
-        if (sensors.getSpeed() > 70.0D) {
-            action.accelerate = 0.0D;
-            action.brake = -1.0D;
-        }
-
-        if (sensors.getSpeed() <= 60.0D) {
-            action.accelerate = (80.0D - sensors.getSpeed()) / 80.0D;
-            action.brake = 0.0D;
-        }
-
-        if (sensors.getSpeed() < 30.0D) {
-            action.accelerate = 1.0D;
-            action.brake = 0.0D;
-        }
+//        action.steering = DriversUtils.alignToTrackAxis(sensors, 0.5);
+//        if (sensors.getSpeed() > 60.0D) {
+//            action.accelerate = 0.0D;
+//            action.brake = 0.0D;
+//        }
+//
+//        if (sensors.getSpeed() > 70.0D) {
+//            action.accelerate = 0.0D;
+//            action.brake = -1.0D;
+//        }
+//
+//        if (sensors.getSpeed() <= 60.0D) {
+//            action.accelerate = (80.0D - sensors.getSpeed()) / 80.0D;
+//            action.brake = 0.0D;
+//        }
+//
+//        if (sensors.getSpeed() < 30.0D) {
+//            action.accelerate = 1.0D;
+//            action.brake = 0.0D;
+//        }
         System.out.println("--------------" + getDriverName() + "--------------");
         System.out.println("Steering: " + action.steering);
         System.out.println("Acceleration: " + action.accelerate);

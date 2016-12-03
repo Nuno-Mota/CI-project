@@ -67,58 +67,29 @@ public class NeatGenome implements Serializable{
         _numberOfInputs  = numberOfInputs;
         _numberOfOutputs = numberOfOutputs;
     }
-//    public NeatGenome(int inputNeuronsNumber, int outputNeuronsNumber) { //For initialization
-//        for (int i = 0; i < inputNeuronsNumber; ++i) {
-//            _neurons.add(new NeuronGene(0, 0, _rand.nextGaussian()*_biasSTDEV, null, null));
-//        }
-//        for (int i = 0; i < outputNeuronsNumber; ++i) {
-//            _neurons.add(new NeuronGene(2, 0, _rand.nextGaussian()*_biasSTDEV, null, null));
-//        }
-//
-//        for (NeuronGene ng: _neurons) {
-//            if (ng.getType() == 0) {
-//                for (NeuronGene ngCheck: _neurons) {
-//                    if (ngCheck.getType() == 2) {
-//                        ng.addPossibleOutgoing(ngCheck);
-//                        _possibleConnections.add(new ConnectionGene(ng, ngCheck, _rand.nextGaussian()*_weightSTDEV, true, 0));
-//                    }
-//                }
-//            }
-//            else {
-//                for (NeuronGene ngCheck: _neurons) {
-//                    if (ngCheck.getType() == 0)
-//                        ng.addPossibleIncoming(ngCheck);
-//                }
-//            }
-//        }
-//
-//        //Enables any kind of recurrent connection.
-//        for (NeuronGene ng: _neurons)
-//            for (NeuronGene ngCheck: _neurons)
-//                _possibleRecurrentConnections.add(new ConnectionGene(ng, ngCheck, _rand.nextGaussian()*_weightSTDEV, true, 0));
-//
-//
-//
-//        int maxPossibleNumberOfConnections = _possibleConnections.size();
-//        int initialNumberOfConnections = ThreadLocalRandom.current().nextInt(1, maxPossibleNumberOfConnections + 1);
-//
-//        for (int i = 0; i < initialNumberOfConnections; ++i) {
-//            addConnection();
-//        }
-//
-//
-//        int maxPossibleNumberOfRecurrentConnections = _possibleRecurrentConnections.size();
-//        int initialNumberOfRecurrentConnections = ThreadLocalRandom.current().nextInt(0, maxPossibleNumberOfRecurrentConnections + 1);
-//
-//        for (int i = 0; i < initialNumberOfRecurrentConnections; ++i) {
-//            addConnection();
-//        }
-//    }
-//
-//    public NeatGenome(List<NeuronGene> Neurons, List<ConnectionGene> connections) { //To load from memory, or after mating?
-//        _neurons = Neurons;
-//        _connections = connections;
-//    }
+
+
+    public NeatGenome(NeatGenome genomeToBeCopied) {
+        _genomeID        = _globalGenomeID++;
+        _numberOfInputs  = genomeToBeCopied.getNumberOfInputs();
+        _numberOfOutputs = genomeToBeCopied.getNumberOfOutputs();
+
+        for(NeuronGene ng : genomeToBeCopied.getNeurons())
+            _neurons.add(new NeuronGene(ng));
+
+        for(ConnectionGene cg : genomeToBeCopied.getConnections()) {
+            ConnectionGene copiedConnection = new ConnectionGene(cg);
+            for(NeuronGene ng : _neurons) {
+                if (copiedConnection.getInputNeuron().getNeuronID() == ng.getNeuronID())
+                    copiedConnection.setInputNeuron(ng);
+                if (copiedConnection.getOutputNeuron().getNeuronID() == ng.getNeuronID())
+                    copiedConnection.setOutputNeuron(ng);
+            }
+            _connections.add(copiedConnection);
+        }
+
+        createPossibleListsForEachNeuron(_neurons, _connections);
+    }
 
 
 
@@ -237,7 +208,7 @@ public class NeatGenome implements Serializable{
         NeuronGene inputNeuron  = getNeuron(inputNeuronID);
         NeuronGene outputNeuron = getNeuron(outputNeuronID);
         //TODO: REMOVE FROM POSSIBLE INCOMING AND OUTGOING LISTS
-        double weight           = _rand.nextGaussian()*_weightSTDEV;
+        double weight           = Math.random()*3.0;
 
         if (inputNeuron.getPositionY() > outputNeuron.getPositionY())
             isRecurrent = true;
@@ -396,6 +367,87 @@ public class NeatGenome implements Serializable{
                 ng.getPossibleOutgoing().add(newNeuron);
             }
         }
+    }
+
+
+
+    /****************************
+     * Spawn Amount Calculation *
+     ****************************/
+
+    public void calculateSpawns(double averagePopulationFitness) {
+        _amountToSpawn = _adjustedFitness/averagePopulationFitness;
+    }
+
+
+    public void createPossibleListsForEachNeuron(List<NeuronGene> neurons, List<ConnectionGene> connections) {
+        for(NeuronGene ng : neurons) {
+            if(ng.getType() == 3) {
+                for(NeuronGene ngTest : neurons) {
+                    if(ngTest.getType() != 3) {
+                        boolean add = true;
+                        for(ConnectionGene cg : connections)
+                            if(cg.getInputNeuron().getNeuronID()  == ng.getNeuronID() &&
+                                    cg.getOutputNeuron().getNeuronID() == ngTest.getNeuronID())
+                                add = false;
+                        if(add)
+                            ng.getPossibleOutgoing().add(ngTest);
+                    }
+                }
+            }
+            else {
+                for(NeuronGene ngTest : neurons) {
+                    boolean add = true;
+                    if (ngTest.getType() != 3) {
+                        for (ConnectionGene cg : connections)
+                            if (cg.getInputNeuron().getNeuronID() == ng.getNeuronID() &&
+                                    cg.getOutputNeuron().getNeuronID() == ngTest.getNeuronID())
+                                add = false;
+                        if (add)
+                            ng.getPossibleOutgoing().add(ngTest);
+                    }
+
+                    add = true;
+                    for (ConnectionGene cg : connections)
+                        if (cg.getInputNeuron().getNeuronID() == ngTest.getNeuronID() &&
+                                cg.getOutputNeuron().getNeuronID() == ng.getNeuronID())
+                            add = false;
+                    if (add)
+                        ng.getPossibleIncoming().add(ngTest);
+                }
+            }
+        }
+    }
+
+
+    public void createPhenotype() {
+        List<NeuralNetworkNeuron> phenotypeNeurons = new ArrayList<>();
+
+        for(NeuronGene ng : _neurons)
+            phenotypeNeurons.add(new NeuralNetworkNeuron(ng));
+
+        for(ConnectionGene cg : _connections){
+            if (cg.getIsEnabled()){
+                NeuralNetworkNeuron inputNeuron = getNeuralNetworkNeuron(cg.getInputNeuron().getNeuronID(), phenotypeNeurons);
+                NeuralNetworkNeuron outputNeuron = getNeuralNetworkNeuron(cg.getOutputNeuron().getNeuronID(), phenotypeNeurons);
+                double weight = cg.getWeight();
+                boolean isRecurrent = cg.getIsRecurrent();
+                NeuralNetworkConnection newConnection = new NeuralNetworkConnection(inputNeuron, outputNeuron, weight, isRecurrent);
+
+                inputNeuron.addOutgoing(newConnection);
+                outputNeuron.addIncoming(newConnection);
+            }
+        }
+
+        _neuralNetwork = new NeuralNetwork(phenotypeNeurons);
+    }
+
+    private NeuralNetworkNeuron getNeuralNetworkNeuron(int neuronID, List<NeuralNetworkNeuron> phenotypeNeuros) {
+        for (NeuralNetworkNeuron nnn: phenotypeNeuros) {
+            if (nnn.getNeuronID() == neuronID)
+                return nnn;
+        }
+        return null;
     }
 }
 
