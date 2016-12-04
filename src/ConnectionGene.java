@@ -116,12 +116,9 @@ public class ConnectionGene implements Serializable{
 
 
     public void mutateWeight() {
-        //TODO: variable chance of mutation?
-        if(Math.random() > 0.8) {
-            if(Math.random() >0.2)
-                _weight = _rand.nextGaussian()*_weightSTDEV;
-            else
-                _weight += _rand.nextGaussian()*_weightSTDEV;
-        }
+        if(Math.random() <= 0.2)                                  //20% chance of getting an entire new value
+            _weight = _rand.nextGaussian()*_weightSTDEV;
+        else                                                    //80% chance of adding noise to the current weight value
+            _weight += 0.5*_rand.nextGaussian()*_weightSTDEV;
     }
 }

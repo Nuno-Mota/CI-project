@@ -86,7 +86,7 @@ public class Species {
     public int getSpawnsRequired() {
         return _spawnsRequired;
     }
-    private void setSpawnsRequired(int spawnsRequired) {
+    public void setSpawnsRequired(int spawnsRequired) {
         _spawnsRequired = spawnsRequired;
     }
 
@@ -95,107 +95,6 @@ public class Species {
     }
     private void setSpeciesFitness(double speciesFitness) {
         _speciesFitness = speciesFitness;
-    }
-
-
-
-    /********************
-     * Mating Functions *
-     ********************/
-
-
-    public NeatGenome crossover (NeatGenome parent1, NeatGenome parent2) {
-
-        int best;
-
-        if (parent1.getFitness() == parent2.getFitness()) {
-            if (parent1.getConnections().size() == parent2.getConnections().size())
-                best = ThreadLocalRandom.current().nextInt(1, 3);
-            else
-                best = (parent1.getConnections().size() > parent2.getConnections().size()) ? 1 : 2;
-        }
-        else
-            best = (parent1.getFitness() > parent2.getFitness()) ? 1 : 2;
-
-
-        List<NeuronGene>     babyNeurons     = new ArrayList<>();
-        List<ConnectionGene> babyConnections = new ArrayList<>();
-
-
-        int iterator1 = 0;
-        int iterator2 = 0;
-
-
-        ConnectionGene selectedGene = null;
-
-        while(!(iterator1 == parent1.getConnections().size() &&
-                iterator2 == parent2.getConnections().size())) {
-
-            if(iterator1 >= parent1.getConnections().size()) {     //TODO: check if problems arise. Check book
-                if(best == 2)
-                    selectedGene = new ConnectionGene(parent2.getConnections().get(iterator2));
-                ++iterator2;
-            }
-            else if(iterator2 >= parent2.getConnections().size()) {     //TODO: check if problems arise. Check book
-                if(best == 1)
-                    selectedGene = new ConnectionGene(parent1.getConnections().get(iterator1));
-                iterator1++;
-            }
-            else if(parent1.getConnections().get(iterator1).getInnovationN() <
-                    parent2.getConnections().get(iterator2).getInnovationN()) {
-                if(best == 1)
-                    selectedGene = new ConnectionGene(parent1.getConnections().get(iterator1));
-                ++iterator1;
-            }
-            else if(parent1.getConnections().get(iterator1).getInnovationN() >
-                    parent2.getConnections().get(iterator2).getInnovationN()) {
-                if(best == 2)
-                    selectedGene = new ConnectionGene(parent1.getConnections().get(iterator1));
-                iterator1++;
-            }
-            else if(iterator1 == iterator2) {
-                int choice = ThreadLocalRandom.current().nextInt(1, 3);
-
-                if(choice == 1)
-                    selectedGene = new ConnectionGene(parent1.getConnections().get(iterator1));
-                else
-                    selectedGene = new ConnectionGene(parent2.getConnections().get(iterator2));
-
-                ++iterator1;
-                ++iterator2;
-            }
-
-            if (babyConnections.size() == 0)
-                babyConnections.add(selectedGene);
-            else
-            if (babyConnections.get(babyConnections.size() - 1).getInnovationN() != selectedGene.getInnovationN())
-                babyConnections.add(selectedGene);
-
-
-            addBabyNeuron(selectedGene.getInputNeuron(), babyNeurons);
-            addBabyNeuron(selectedGene.getOutputNeuron(), babyNeurons);
-        }
-
-        NeatGenome newGenome = new NeatGenome(babyNeurons, babyConnections, parent1.getNumberOfInputs(), parent1.getNumberOfOutputs());
-        newGenome.createPossibleListsForEachNeuron(newGenome.getNeurons(), newGenome.getConnections());
-        return newGenome;
-    }
-
-
-    private void addBabyNeuron(NeuronGene babyNeuronGene, List<NeuronGene> babyNeurons) {
-        for(NeuronGene ng : babyNeurons)
-            if(ng.getNeuronID() == babyNeuronGene.getNeuronID())
-                return;
-
-        int i = 0;
-        for(NeuronGene ng : babyNeurons) {
-            if(ng.getNeuronID() > babyNeuronGene.getNeuronID()) {
-                babyNeurons.add(i, babyNeuronGene);
-                return;
-            }
-            ++i;
-        }
-        babyNeurons.add(babyNeuronGene);
     }
 
 

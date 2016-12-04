@@ -19,7 +19,7 @@ public class Neat {
     private double              _compatibilityThreshold = 10;
     private int                 c1 = 1, c2 = 1, c3 = 5;
     private static final double _likelihoodOfBestMating = 0.35;
-    private static final double _probabilityOfMating = 0.75;
+    private static final double _probabilityOfMating = 0.85;
 
 
 
@@ -110,24 +110,143 @@ public class Neat {
         ++_generationNumber;
         System.out.println("Creating next generation. This will be generation number " + _generationNumber + ".");
 
-        //TODO: What happens if the last species can't generate any descendants because maxPOP is already capped. Implement BFS instead of DFS
-
         //BFS alternative that automatically adds members from every species, without increasing population size.
         int currentNumberOfOffspring = 0;
         int speciesIterator = 0;
+        List<NeatGenome> newPopulation = new ArrayList<>();
         List<List<NeatGenome>> clearedSpecies = new ArrayList<>();   //Species with just the representative
 
+        int     amountToSpawn;
+        int     size;
+        int     meanIndx;
+        int     maxIndx;
+        int     max;
+        int     parent1Indx;
+        int     parent2Indx;
+        Random  rand = new Random();
+        boolean maybeMoreSpawnsRequired;
+
         while(currentNumberOfOffspring < _populationSize) {
+            maybeMoreSpawnsRequired = false;
             for(Species sp : _currentSpecies) {
-                if(speciesIterator == 0) {
-                    List<NeatGenome> newSpeciesPop = new ArrayList<>();
-                    newSpeciesPop.add(new NeatGenome(sp.getIndividuals().get(0)));
-                    clearedSpecies.add(newSpeciesPop);
+                if(currentNumberOfOffspring < _populationSize) {
+                    if(speciesIterator == 0) {
+                        List<NeatGenome> newSpeciesPop = new ArrayList<>();
+                        newSpeciesPop.add(new NeatGenome(sp.getIndividuals().get(0)));
+                        clearedSpecies.add(newSpeciesPop);
+                        ++currentNumberOfOffspring;
+                        maybeMoreSpawnsRequired = true;
+                    }
+                    else {
+                        amountToSpawn = sp.getSpawnsRequired();
+
+                        if(amountToSpawn > 0) {
+                            maybeMoreSpawnsRequired = true;
+                            size = sp.getIndividuals().size();
+
+                            if(size == 0) {         //Size should never be 0
+                                System.out.println("SOMETHING WENT WRONG. AT LEAST ONE SPECIES HAS SIZE 0!!! (function create newGeneration)");
+                                System.exit(0);
+                            }
+                            else if(size == 1) {
+                                newPopulation.add(sp.getIndividuals().get(0));
+                                ++currentNumberOfOffspring;
+                            }
+                            else {
+                                meanIndx = (int) (size * _likelihoodOfBestMating);     //TODO: check if this works properly
+                                max      = (int) rand.nextGaussian() * meanIndx + (int) (size * 0.5) + 1;
+                                if(max > 4)
+                                    maxIndx  = ThreadLocalRandom.current().nextInt(3, max);
+                                else
+                                    maxIndx = 2;        //maxIndx needs to be at least 2 to select different parents
+
+                                if(maxIndx < (int) Math.round(size * _likelihoodOfBestMating))
+                                    maxIndx = (int) Math.round(size * _likelihoodOfBestMating);
+                                if(maxIndx > size)      //size is always greater or equal to 2
+                                    maxIndx = size;
+
+                                parent1Indx = ThreadLocalRandom.current().nextInt(0, maxIndx);
+
+                                if(rand.nextDouble() > _probabilityOfMating)
+                                    newPopulation.add(new NeatGenome(sp.getIndividuals().get(parent1Indx)));
+                                else {
+                                    parent2Indx = parent1Indx;
+                                    while(parent1Indx == parent2Indx)
+                                        parent2Indx = ThreadLocalRandom.current().nextInt(0, maxIndx);
+
+                                    newPopulation.add(crossover(sp.getIndividuals().get(parent1Indx), sp.getIndividuals().get(parent2Indx)));
+                                    ++currentNumberOfOffspring;
+                                }
+                            }
+                            sp.setSpawnsRequired(sp.getSpawnsRequired() - 1);
+                        }
+                    }
+                }
+                else
+                    break;      //gets out of the foreach that goes over species
+            }
+
+            ++speciesIterator;
+
+            //If after each species generated all required spawns there is still a smaller population than
+            //required, use tournament method to select parents to generate new members
+            if(!maybeMoreSpawnsRequired) {
+                while(currentNumberOfOffspring < _populationSize) {
+                    NeatGenome temp1 = _currentPopulation.get(ThreadLocalRandom.current().nextInt(0, _currentPopulation.size()));
+                    NeatGenome lastTemp1 = _currentPopulation.get(ThreadLocalRandom.current().nextInt(0, _currentPopulation.size()));
+
+                    for (int i = 0; i < 5; ++i) {
+                        NeatGenome temp2 = _currentPopulation.get(ThreadLocalRandom.current().nextInt(0, _currentPopulation.size()));
+
+                        if (temp2.getAdjustedFitness() > temp1.getAdjustedFitness()) {
+                            lastTemp1 = temp1;
+                            temp1 = temp2;
+                        }
+                    }
+
+                    newPopulation.add(crossover(lastTemp1, temp1));
                     ++currentNumberOfOffspring;
                 }
-                //TODO: currently working on
             }
         }
+
+
+
+        //Mutate the new elements. The old bast elements of each species are left as they were, in case they were
+        //already the best choice of the population. This way the fitness of the best member of the population
+        //never decreases.
+        for(NeatGenome ng : newPopulation) {
+
+            //Function that randomly mutates weights
+            ng.mutateWeights();
+
+            //Function that randomly mutates ActivationResponses
+            ng.mutateActivationResponses();
+
+            //Function that has a chance of adding a new (possibly looped) connection.
+            double addConnectionChance          = 0.90;
+            double chanceOfLoopedConnection     = 0.15;
+            int    numberOfTriesToFindLoop      = ng.getNeurons().size() - _numberOfInputs -1;
+            int    numberOfTriesToAddConnection = ng.getNeurons().size()/3;
+            ng.addConnection(addConnectionChance, chanceOfLoopedConnection, numberOfTriesToFindLoop, numberOfTriesToAddConnection);
+
+            //Function that has a chance of adding a new neuron to an existing connection.
+            double addNeuronChance                  = 0.70;
+            int    numberOfTriesToFindOldConnection = _numberOfInputs*_numberOfOutputs;
+            ng.addNeuron(addNeuronChance, numberOfTriesToFindOldConnection);
+        }
+
+
+        //Finally, add the best genomes of the previous generation (which are unchanged) to the new population and
+        //set them as the species representatives for speciation after fitness estimation.
+        int currentSpeciesIndex = 0;
+        for(List<NeatGenome> lng : clearedSpecies) {
+            _currentSpecies.get(currentSpeciesIndex).setIndividuals(lng);
+            _currentPopulation.add(lng.get(0));
+        }
+
+
+
 
         //DFS alternative that might skip members of the last species and increase population size.
         /*int currentNumberOffspring = 0;
@@ -189,7 +308,7 @@ public class Neat {
         }*/
 
 
-        //TODO: MUTATE THIS LITTLE SHITS
+
         System.out.println("Generation number " + _generationNumber + " created.");
     }
 
@@ -365,5 +484,106 @@ public class Neat {
 
     public void generatePhenotypes() {
         //TODO
+    }
+
+
+
+    /********************
+     * Mating Functions *
+     ********************/
+
+
+    public NeatGenome crossover (NeatGenome parent1, NeatGenome parent2) {
+
+        int best;
+
+        if (parent1.getFitness() == parent2.getFitness()) {
+            if (parent1.getConnections().size() == parent2.getConnections().size())
+                best = ThreadLocalRandom.current().nextInt(1, 3);
+            else
+                best = (parent1.getConnections().size() > parent2.getConnections().size()) ? 1 : 2;
+        }
+        else
+            best = (parent1.getFitness() > parent2.getFitness()) ? 1 : 2;
+
+
+        List<NeuronGene>     babyNeurons     = new ArrayList<>();
+        List<ConnectionGene> babyConnections = new ArrayList<>();
+
+
+        int iterator1 = 0;
+        int iterator2 = 0;
+
+
+        ConnectionGene selectedGene = null;
+
+        while(!(iterator1 == parent1.getConnections().size() &&
+                iterator2 == parent2.getConnections().size())) {
+
+            if(iterator1 >= parent1.getConnections().size()) {     //TODO: check if problems arise. Check book
+                if(best == 2)
+                    selectedGene = new ConnectionGene(parent2.getConnections().get(iterator2));
+                ++iterator2;
+            }
+            else if(iterator2 >= parent2.getConnections().size()) {     //TODO: check if problems arise. Check book
+                if(best == 1)
+                    selectedGene = new ConnectionGene(parent1.getConnections().get(iterator1));
+                iterator1++;
+            }
+            else if(parent1.getConnections().get(iterator1).getInnovationN() <
+                    parent2.getConnections().get(iterator2).getInnovationN()) {
+                if(best == 1)
+                    selectedGene = new ConnectionGene(parent1.getConnections().get(iterator1));
+                ++iterator1;
+            }
+            else if(parent1.getConnections().get(iterator1).getInnovationN() >
+                    parent2.getConnections().get(iterator2).getInnovationN()) {
+                if(best == 2)
+                    selectedGene = new ConnectionGene(parent1.getConnections().get(iterator1));
+                iterator1++;
+            }
+            else if(iterator1 == iterator2) {
+                int choice = ThreadLocalRandom.current().nextInt(1, 3);
+
+                if(choice == 1)
+                    selectedGene = new ConnectionGene(parent1.getConnections().get(iterator1));
+                else
+                    selectedGene = new ConnectionGene(parent2.getConnections().get(iterator2));
+
+                ++iterator1;
+                ++iterator2;
+            }
+
+            if (babyConnections.size() == 0)
+                babyConnections.add(selectedGene);
+            else
+            if (babyConnections.get(babyConnections.size() - 1).getInnovationN() != selectedGene.getInnovationN())
+                babyConnections.add(selectedGene);
+
+
+            addBabyNeuron(selectedGene.getInputNeuron(), babyNeurons);
+            addBabyNeuron(selectedGene.getOutputNeuron(), babyNeurons);
+        }
+
+        NeatGenome newGenome = new NeatGenome(babyNeurons, babyConnections, parent1.getNumberOfInputs(), parent1.getNumberOfOutputs());
+        newGenome.createPossibleListsForEachNeuron(newGenome.getNeurons(), newGenome.getConnections());
+        return newGenome;
+    }
+
+
+    private void addBabyNeuron(NeuronGene babyNeuronGene, List<NeuronGene> babyNeurons) {
+        for(NeuronGene ng : babyNeurons)
+            if(ng.getNeuronID() == babyNeuronGene.getNeuronID())
+                return;
+
+        int i = 0;
+        for(NeuronGene ng : babyNeurons) {
+            if(ng.getNeuronID() > babyNeuronGene.getNeuronID()) {
+                babyNeurons.add(i, babyNeuronGene);
+                return;
+            }
+            ++i;
+        }
+        babyNeurons.add(babyNeuronGene);
     }
 }

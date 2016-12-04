@@ -145,7 +145,7 @@ public class NeatGenome implements Serializable{
     public void addConnection(double mutationRate, double chanceOfLooped,
                               int numberOfTriesToFindLoop, int numberOfTriesToAddConnection) {
 
-        if (Math.random() > mutationRate)
+        if (Math.random() <= mutationRate)
             return;
 
 
@@ -155,7 +155,7 @@ public class NeatGenome implements Serializable{
 
 
 
-        if (Math.random() > chanceOfLooped) {
+        if (Math.random() <= chanceOfLooped) {
             while (numberOfTriesToFindLoop-- != 0){
 
 
@@ -497,6 +497,30 @@ public class NeatGenome implements Serializable{
                 return nnn;
         }
         return null;
+    }
+
+
+
+    public void mutateWeights() {
+
+        double lower = 0.1;     //Lowest value of chance of mutation occurring
+        double upper = 0.75;    //Highest value of chance of mutation occurring
+
+        for(ConnectionGene cg : _connections)
+            if(Math.random() <= Math.random() * (upper - lower) + lower)
+                cg.mutateWeight();
+    }
+
+
+
+    public void mutateActivationResponses() {
+
+        double lower = 0.1;     //Lowest value of chance of mutation occurring
+        double upper = 0.3;     //Highest value of chance of mutation occurring
+
+        for(NeuronGene ng : _neurons)
+            if(Math.random() <= Math.random() * (upper - lower) + lower)
+                ng.mutateActivationResponse();
     }
 }
 

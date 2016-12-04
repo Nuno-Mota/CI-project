@@ -1,6 +1,7 @@
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class NeuronGene implements Serializable{
 
@@ -15,6 +16,10 @@ public class NeuronGene implements Serializable{
     private double           _positionX, _positionY;
     private List<NeuronGene> _possibleIncoming = new ArrayList<>();
     private List<NeuronGene> _possibleOutgoing = new ArrayList<>();
+
+    private Random           _rand                        = new Random();
+    private double           _activationResponseMeanValue = 3;
+    private final double     _activationResponseSTDEV     = 1;  //TODO: check what a proper value is;
 
 
 
@@ -119,5 +124,15 @@ public class NeuronGene implements Serializable{
     public void addPossibleOutgoing(NeuronGene newPossibleOutgoing) { _possibleOutgoing.add(newPossibleOutgoing); }
     public void setPossibleOutgoing(List<NeuronGene> possibleOutgoing) {
         _possibleOutgoing = possibleOutgoing;
+    }
+
+
+
+
+    public void mutateActivationResponse() {
+        if(Math.random() <= 0.1)                                  //10% chance of getting an entire new value
+            _activationResponse = _rand.nextGaussian()*_activationResponseSTDEV + _activationResponseMeanValue;
+        else                                                    //80% chance of adding noise to the current weight value
+            _activationResponse += 0.5*_rand.nextGaussian()*_activationResponseSTDEV;
     }
 }
