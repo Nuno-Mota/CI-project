@@ -66,14 +66,28 @@ public class NeatGenome implements Serializable{
     //TODO: Add constructor that randomizes initial connections
 
 
-
+    //Checked by crossover. Seems to be fine
     public NeatGenome(List<NeuronGene> neurons, List<ConnectionGene> connections,
                       int numberOfInputs, int numberOfOutputs) {
         _genomeID        = _globalGenomeID++;
-        _neurons         = neurons;
-        _connections     = connections;
         _numberOfInputs  = numberOfInputs;
         _numberOfOutputs = numberOfOutputs;
+
+        //Neurons are already unique when generated in crossover
+        _neurons = neurons;
+
+
+        //Make sure the connections point to the correct neurons in _neurons
+        for(ConnectionGene cg : connections) {
+            for(NeuronGene ng : _neurons) {
+                if (cg.getInputNeuron().getNeuronID() == ng.getNeuronID())
+                    cg.setInputNeuron(ng);
+                if (cg.getOutputNeuron().getNeuronID() == ng.getNeuronID())
+                    cg.setOutputNeuron(ng);
+            }
+        }
+
+        createPossibleListsForEachNeuron(_neurons, _connections);
     }
 
     //Checked. Seems to be fine
@@ -82,10 +96,13 @@ public class NeatGenome implements Serializable{
         _numberOfInputs  = genomeToBeCopied.getNumberOfInputs();
         _numberOfOutputs = genomeToBeCopied.getNumberOfOutputs();
 
+        //Create new instances of the neurons of the genomeToBeCopied
         for(NeuronGene ng : genomeToBeCopied.getNeurons())
             _neurons.add(new NeuronGene(ng));
 
 
+        //Create new instances of the connections of the genomeToBeCopied and make sure they point to the
+        //correct neurons in _neurons
         for(ConnectionGene cg : genomeToBeCopied.getConnections()) {
             ConnectionGene copiedConnection = new ConnectionGene(cg);
             for(NeuronGene ng : _neurons) {
@@ -142,6 +159,8 @@ public class NeatGenome implements Serializable{
      * Mutation methods *
      ********************/
 
+
+    //TODO: CHECKING ZONE 0
     public void addConnection(double mutationRate, double chanceOfLooped,
                               int numberOfTriesToFindLoop, int numberOfTriesToAddConnection) {
 
@@ -159,11 +178,12 @@ public class NeatGenome implements Serializable{
             while (numberOfTriesToFindLoop-- != 0){
 
 
+                //ignores input and bias neurons, which shouldn't be recurrently looped
                 int neuronNumber = ThreadLocalRandom.current().nextInt(_numberOfInputs + 1, _neurons.size() - 1);
 
-                if (!_neurons.get(neuronNumber).getIsRecurrent() &&
+                if (!_neurons.get(neuronNumber).getIsRecurrent()/* &&
                      _neurons.get(neuronNumber).getType() != 0   &&
-                     _neurons.get(neuronNumber).getType() != 3) {
+                     _neurons.get(neuronNumber).getType() != 3*/) {
 
                     inputNeuronID = outputNeuronID = _neurons.get(neuronNumber).getNeuronID();
                     _neurons.get(neuronNumber).setIsRecurrent(true);
@@ -177,14 +197,17 @@ public class NeatGenome implements Serializable{
 
 
                 int inputNeuronNumber = ThreadLocalRandom.current().nextInt(0, _neurons.size() - 1);
+                //ignores input and bias neurons, which shouldn't have incoming connections
                 int outputNeuronNumber = ThreadLocalRandom.current().nextInt(_numberOfInputs + 1, _neurons.size() - 1);
                 inputNeuronID = _neurons.get(inputNeuronNumber).getNeuronID();
                 outputNeuronID = _neurons.get(outputNeuronNumber).getNeuronID();
 
-                if (_neurons.get(outputNeuronNumber).getType() == 3)
-                    continue;
+                /*if (_neurons.get(outputNeuronNumber).getType() == 3)
+                    continue;*/
 
-                if (!(isDuplicateConnection(inputNeuronID, outputNeuronID) && inputNeuronID == outputNeuronID))
+                //Makes sure the neurons selected don't have already a connection between them
+                //Also makes sure that they aren't the same neuron, in order to avoid a looped connection
+                if (!(isDuplicateConnection(inputNeuronID, outputNeuronID) || inputNeuronID == outputNeuronID))
                     numberOfTriesToAddConnection = 0;
 
                 else
@@ -195,7 +218,7 @@ public class NeatGenome implements Serializable{
         if (inputNeuronID == -1 || outputNeuronID == -1)
             return;
 
-
+//TODO: CHECKING ZONE 1
         addNewConnection(inputNeuronID, outputNeuronID, isRecurrent);
     }
 
@@ -213,7 +236,7 @@ public class NeatGenome implements Serializable{
 
 
 
-
+    //TODO: CHECKING ZONE 2
     //Checked by first neatGenome constructor. Seems to be fine
     public void addNewConnection(int inputNeuronID, int outputNeuronID, boolean isRecurrent) {
 
