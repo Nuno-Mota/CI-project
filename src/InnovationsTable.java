@@ -43,17 +43,17 @@ public class InnovationsTable implements Serializable {
     private void setGlobalNeuronNumber(int globalNeuronNumber) { _globalNeuronNumber = globalNeuronNumber; }
 
     public List<Innovation> getInnovations() { return _innovations; }
+    //Checked. Seems to be fine
     public int getInnovationID(Innovation innovation) {
         for (Innovation i: _innovations) {
             if (i.getInnovationType()        == innovation.getInnovationType() &&
-                i.getOutputNeuronID()        == innovation.getOutputNeuronID() &&
                 i.getInputNeuronID()         == innovation.getInputNeuronID()  &&
+                i.getOutputNeuronID()        == innovation.getOutputNeuronID() &&
                 i.getNumberOfTimesDisabled() == innovation.getNumberOfTimesDisabled())
                 return i.getInnovationID();
         }
         return -1;  //Return -1 if innovation does not exist
     }
-    public int getNeuronID(int innovationID) { return _innovations.get(innovationID).getNeuronID(); }
     public void addInnovation(Innovation innovation) {
         innovation.setInnovationID(++_globalInnovationNumber);
         if(innovation.getInnovationType() == 0)
@@ -61,4 +61,6 @@ public class InnovationsTable implements Serializable {
         _innovations.add(innovation);
     }
     private void setInnovations(List<Innovation> innovations) { _innovations = innovations; }
+
+    public int getNeuronID(int innovationID) { return _innovations.get(innovationID).getNeuronID(); }
 }

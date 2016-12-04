@@ -21,8 +21,7 @@ public class Innovation implements Serializable {
      * Constructors *
      ****************/
 
-    public Innovation() {}
-
+    //Checked. Seems to be fine
     public Innovation(int innovationType, int innovationID, int inputNeuronID,
                       int outputNeuronID, int neuronID, int neuronType,
                       int numberOfTimesDisabled) {

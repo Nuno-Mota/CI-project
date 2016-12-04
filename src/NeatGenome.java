@@ -27,36 +27,50 @@ public class NeatGenome implements Serializable{
     private final int            _biasSTDEV        = 4;               //Check for good value?
     private final int            _weightSTDEV      = 2;               //Check for good value?
 
-//    private List<ConnectionGene> _possibleConnections          = new ArrayList<ConnectionGene>();
-//    private List<ConnectionGene> _possibleRecurrentConnections = new ArrayList<ConnectionGene>();
-
 
 
     /****************
      * Constructors *
      ****************/
 
+    //Checked. Seems to be fine
     public NeatGenome(int numberOfInputs, int numberOfOutputs) {
         _genomeID        = _globalGenomeID++;
         _numberOfInputs  = numberOfInputs;
         _numberOfOutputs = numberOfOutputs;
 
+
+        //Create Input neurons
         for(int i = 0; i < _numberOfInputs; ++i)
             _neurons.add(new NeuronGene(i, 0, false, 4.9, i/1.0, 0));
-        for(int i = 0; i < _numberOfInputs; ++i)
-            _neurons.add(new NeuronGene(i + _numberOfInputs, 1, false, 4.9, i/1.0, 1));
 
+        //Create Bias Neuron (one neuron is enough for all. Just add connections as needed)
+        _neurons.add(new NeuronGene(_numberOfInputs, 0, false, 4.9, 1.3, 0));
+
+        //Create Output neurons
+        for(int i = 0; i < _numberOfOutputs; ++i)
+            _neurons.add(new NeuronGene(i + _numberOfInputs + 1, 1, false, 4.9, i/1.0, 1));
+
+
+        //Create possible Incoming and Outgoing connections for all Neurons
         for(NeuronGene ng : _neurons) {
-            for(NeuronGene ngCheck : _neurons){
-                ng.getPossibleIncoming().add(ngCheck);
-                ng.getPossibleOutgoing().add(ngCheck);
+            for(NeuronGene ngCheck : _neurons) {
+                if(!(ng.getType() == 0 || ng.getType() ==3))              //Input and Bias neurons can't have incoming connections
+                    ng.getPossibleIncoming().add(ngCheck);
+                if(!(ngCheck.getType() == 0 || ngCheck.getType() ==3))    //Neurons can't have outgoing connections toInput or Bias neurons
+                    ng.getPossibleOutgoing().add(ngCheck);
             }
         }
 
+        //For each input neuron create connections with every output neuron
         for(int i = 0; i < _numberOfInputs; ++i)
             for(int j = _numberOfInputs; j < _numberOfInputs + _numberOfOutputs; ++j)
                 addNewConnection(_neurons.get(i).getNeuronID(), _neurons.get(j).getNeuronID(), false);
     }
+
+
+    //TODO: Add constructor that randomizes initial connections
+
 
 
     public NeatGenome(List<NeuronGene> neurons, List<ConnectionGene> connections,
@@ -191,6 +205,8 @@ public class NeatGenome implements Serializable{
     }
 
 
+
+
     private boolean isDuplicateConnection(int inputNeuronID, int outputNeuronID) {
         for (ConnectionGene cg: _connections) {
             if (cg.getInputNeuron().getNeuronID() == inputNeuronID &&
@@ -201,18 +217,31 @@ public class NeatGenome implements Serializable{
     }
 
 
+
+
+    //Checked by first neatGenome constructor. Seems to be fine
     public void addNewConnection(int inputNeuronID, int outputNeuronID, boolean isRecurrent) {
+
+        //Create a possibly new innovation. Useful for determining previous existence
         Innovation newInnovation = new Innovation(1, -1, inputNeuronID, outputNeuronID, -1, 4, 0);
         int innovationID = _innovationsTable.getInnovationID(newInnovation);
 
+        //Corrects possible incoming and outgoing lists for each referenced neuron
         NeuronGene inputNeuron  = getNeuron(inputNeuronID);
         NeuronGene outputNeuron = getNeuron(outputNeuronID);
-        //TODO: REMOVE FROM POSSIBLE INCOMING AND OUTGOING LISTS
-        double weight           = Math.random()*3.0;
+        inputNeuron.getPossibleOutgoing().remove(outputNeuron);//TODO: Check null pointer exception validity
+        outputNeuron.getPossibleIncoming().remove(inputNeuron);
 
+        //Assigns weight of the connection
+        double weight = _rand.nextGaussian()*_weightSTDEV;  //TODO: Check if it shouldn't keep weight from previous connection when consequence of adding new neuron
+
+        //Determines if the connection is recurrent by determining if the connection is not "pointing" in the output's direction
         if (inputNeuron.getPositionY() > outputNeuron.getPositionY())
             isRecurrent = true;
 
+        //If it is indeed a new innovation (which it is if "-1" is returned by "_innovationsTable.getInnovationID(newInnovation);")
+        //it must be registered in the innovations table, and the new connectionGene added to the current connections of this genome.
+        //Else just add the new connection to the current connections of this genome
         if (innovationID < 0) {
             _innovationsTable.addInnovation(newInnovation); //addInnovation corrects innovation number automatically
             int innovationNumber = _innovationsTable.getGlobalInnovationNumber();
@@ -220,7 +249,7 @@ public class NeatGenome implements Serializable{
         }
         else
             _connections.add(new ConnectionGene(inputNeuron, outputNeuron, weight, true, isRecurrent, innovationID, 0));
-}
+    }
 
 
     public void addNeuron(double mutationRate, int numberOfTriesToFindOldLink) {
@@ -337,11 +366,12 @@ public class NeatGenome implements Serializable{
     }
 
 
+    //Checked. Seems to be fine
     private NeuronGene getNeuron(int neuronID) {
-        for (NeuronGene ng: _neurons) {
+        for (NeuronGene ng: _neurons)
             if (ng.getNeuronID() == neuronID)
                 return ng;
-        }
+
         return null;
     }
 

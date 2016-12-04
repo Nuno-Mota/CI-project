@@ -15,9 +15,9 @@ public class ConnectionGene implements Serializable{
     private int        _innovationN;
     private int        _numberOfTimesDisabled = 0;
 
-    private Random _rand             = new Random();
-    private final int            _biasSTDEV        = 4;               //Check for good value?
-    private final int            _weightSTDEV      = 2;               //Check for good value?
+    private Random     _rand        = new Random();
+    private final int  _biasSTDEV   = 4;               //Check for good value?
+    private final int  _weightSTDEV = 2;               //Check for good value?
 
 
 

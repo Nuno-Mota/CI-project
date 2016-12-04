@@ -105,12 +105,14 @@ public class Neat {
      * NEAT's methods *
      ******************/
 
+    //Checking
     public void createNewGeneration() {
         ++_generationNumber;
-        System.out.println("Creating next generation. Generation number " + _generationNumber + ".");
+        System.out.println("Creating next generation. This will be generation number " + _generationNumber + ".");
 
-        //TODO: What happens if the last species can't generate any descendants because maxPOP is already capped
+        //TODO: What happens if the last species can't generate any descendants because maxPOP is already capped. Implement BFS instead of DFS
 
+        //TODO: CHECKING ZONE 1
         int currentNumberOffspring = 0;
         for(Species sp : _currentSpecies) {
             List<NeatGenome> newSpeciesPop = new ArrayList<>();
@@ -174,13 +176,22 @@ public class Neat {
         System.out.println("Generation number " + _generationNumber + " created.");
     }
 
+
+
+
+    //Checked. Seems to be fine
     public void createPopulation() {
         System.out.println("Creating initial population.");
 
         for(int i = 0; i < _populationSize; ++i)
             _currentPopulation.add(new NeatGenome(_numberOfInputs, _numberOfOutputs));
+
         System.out.println("Initial population created.");
     }
+
+
+
+
 
     public void defineSpecies() {
 
@@ -324,9 +335,8 @@ public class Neat {
 
     public void epoch() {
 
-        if(getCurrentPopulation().size() == 0)
-            createPopulation();
-        else
+        if(_generationNumber > 1)
+            //TODO: CHECKING ZONE 0
             createNewGeneration();
 
         generatePhenotypes();
@@ -337,6 +347,6 @@ public class Neat {
 
 
     public void generatePhenotypes() {
-
+        //TODO
     }
 }
