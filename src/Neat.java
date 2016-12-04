@@ -110,11 +110,14 @@ public class Neat {
         ++_generationNumber;
         System.out.println("Creating next generation. This will be generation number " + _generationNumber + ".");
 
+
         //BFS alternative that automatically adds members from every species, without increasing population size.
         int currentNumberOfOffspring = 0;
         int speciesIterator = 0;
         List<NeatGenome> newPopulation = new ArrayList<>();
         List<List<NeatGenome>> clearedSpecies = new ArrayList<>();   //Species with just the representative
+
+        //TODO: Completely remove species that have not improved for a few generations
 
         int     amountToSpawn;
         int     size;
@@ -130,6 +133,8 @@ public class Neat {
             maybeMoreSpawnsRequired = false;
             for(Species sp : _currentSpecies) {
                 if(currentNumberOfOffspring < _populationSize) {
+                    //Just serves the purpose of re-adding the best element of each species
+                    //to the next generation, without having them suffer mutations
                     if(speciesIterator == 0) {
                         List<NeatGenome> newSpeciesPop = new ArrayList<>();
                         newSpeciesPop.add(new NeatGenome(sp.getIndividuals().get(0)));
@@ -137,40 +142,59 @@ public class Neat {
                         ++currentNumberOfOffspring;
                         maybeMoreSpawnsRequired = true;
                     }
+                    //Selects parents, within the species, to generate one new offspring,
+                    // if species still requires new spawns
                     else {
                         amountToSpawn = sp.getSpawnsRequired();
 
-                        if(amountToSpawn > 0) {
+                        if(amountToSpawn > 0) {//Check whether new spawns are required
                             maybeMoreSpawnsRequired = true;
                             size = sp.getIndividuals().size();
 
-                            if(size == 0) {         //Size should never be 0
+                            if(size == 0) {//Size should never be 0. I'M NOT EXPECTING THE PROGRAM TO GO INTO THIS IF(), EVER
                                 System.out.println("SOMETHING WENT WRONG. AT LEAST ONE SPECIES HAS SIZE 0!!! (function create newGeneration)");
                                 System.exit(0);
                             }
-                            else if(size == 1) {
-                                newPopulation.add(sp.getIndividuals().get(0));
+                            else if(size == 1) {//adds (again) the best and only element of the species, but this will be mutated
+                                newPopulation.add(new NeatGenome(sp.getIndividuals().get(0)));
                                 ++currentNumberOfOffspring;
                             }
                             else {
+                                //get's the index (approx) of the element corresponding to _likelihoodOfBestMating% of the species
+                                //so that better performing elements have a higher chance of mating
                                 meanIndx = (int) (size * _likelihoodOfBestMating);     //TODO: check if this works properly
+
+                                //adds gaussian noise, so that lower performing members have a chance of mating with better performing ones
                                 max      = (int) rand.nextGaussian() * meanIndx + (int) (size * 0.5) + 1;
+
+                                //attributes a value to the maxIndx, effectively determining which elements of
+                                //the species have a chance of mating
                                 if(max > 4)
                                     maxIndx  = ThreadLocalRandom.current().nextInt(3, max);
                                 else
                                     maxIndx = 2;        //maxIndx needs to be at least 2 to select different parents
 
+                                //makes sure that the added gaussian noise doesn't exclude any of the
+                                //_likelihoodOfBestMating% best performing members of the species
                                 if(maxIndx < (int) Math.round(size * _likelihoodOfBestMating))
                                     maxIndx = (int) Math.round(size * _likelihoodOfBestMating);
+
+                                //makes sure that the gaussian noise add doesn't create a maxIndx out
+                                //of range of the population arrayList
                                 if(maxIndx > size)      //size is always greater or equal to 2
                                     maxIndx = size;
 
+                                //Selects first potential parent
                                 parent1Indx = ThreadLocalRandom.current().nextInt(0, maxIndx);
 
+                                //There's a chance that the first potential parent doesn't ate at all nd
+                                //just gets added to the new population (with future possible mutations)
                                 if(rand.nextDouble() > _probabilityOfMating)
                                     newPopulation.add(new NeatGenome(sp.getIndividuals().get(parent1Indx)));
                                 else {
                                     parent2Indx = parent1Indx;
+
+                                    //selects the second parent, making sure that it is not the same
                                     while(parent1Indx == parent2Indx)
                                         parent2Indx = ThreadLocalRandom.current().nextInt(0, maxIndx);
 
@@ -189,7 +213,7 @@ public class Neat {
             ++speciesIterator;
 
             //If after each species generated all required spawns there is still a smaller population than
-            //required, use tournament method to select parents to generate new members
+            //required, use tournament method to select parents to generate new members. Allows for any genome to mate
             if(!maybeMoreSpawnsRequired) {
                 while(currentNumberOfOffspring < _populationSize) {
                     NeatGenome temp1 = _currentPopulation.get(ThreadLocalRandom.current().nextInt(0, _currentPopulation.size()));
@@ -212,7 +236,7 @@ public class Neat {
 
 
 
-        //Mutate the new elements. The old bast elements of each species are left as they were, in case they were
+        //Mutate the new elements. The old best elements of each species are left as they were, in case they were
         //already the best choice of the population. This way the fitness of the best member of the population
         //never decreases.
         for(NeatGenome ng : newPopulation) {
@@ -223,11 +247,15 @@ public class Neat {
             //Function that randomly mutates ActivationResponses
             ng.mutateActivationResponses();
 
+            //TODO: Randomly enable/disable existing connections
+
             //Function that has a chance of adding a new (possibly looped) connection.
             double addConnectionChance          = 0.90;
             double chanceOfLoopedConnection     = 0.15;
+            //input and bias neurons shouldn't have looped connections
             int    numberOfTriesToFindLoop      = ng.getNeurons().size() - _numberOfInputs -1;
-            int    numberOfTriesToAddConnection = ng.getNeurons().size()/3;
+            int    numberOfTriesToAddConnection = ng.getNeurons().size()/3; //parameter 3 was sort of random... Change as required
+            //TODO: CHECKING ZONE 1
             ng.addConnection(addConnectionChance, chanceOfLoopedConnection, numberOfTriesToFindLoop, numberOfTriesToAddConnection);
 
             //Function that has a chance of adding a new neuron to an existing connection.
@@ -493,55 +521,72 @@ public class Neat {
      ********************/
 
 
+    //Checked. Seems to be fine
     public NeatGenome crossover (NeatGenome parent1, NeatGenome parent2) {
 
         int best;
 
+        //If parents have the same fitness select the longest one.
+        //If they also have the same length select randomly
         if (parent1.getFitness() == parent2.getFitness()) {
             if (parent1.getConnections().size() == parent2.getConnections().size())
                 best = ThreadLocalRandom.current().nextInt(1, 3);
             else
                 best = (parent1.getConnections().size() > parent2.getConnections().size()) ? 1 : 2;
         }
+        //Else select the most fit parent
         else
             best = (parent1.getFitness() > parent2.getFitness()) ? 1 : 2;
 
 
+        //Neurons and connections arrayLists for the offspring
         List<NeuronGene>     babyNeurons     = new ArrayList<>();
         List<ConnectionGene> babyConnections = new ArrayList<>();
 
 
+        //Iterators that go over the corresponding parent genes
         int iterator1 = 0;
         int iterator2 = 0;
 
 
         ConnectionGene selectedGene = null;
 
+        //While there are still genes to be parsed in at least one of the parents"
         while(!(iterator1 == parent1.getConnections().size() &&
                 iterator2 == parent2.getConnections().size())) {
 
+            //If we have gone over all genes of parent1, but there are still genes of parent 2 left we
+            //can add them if parent 2 has the best fitness between both parents
             if(iterator1 >= parent1.getConnections().size()) {     //TODO: check if problems arise. Check book
                 if(best == 2)
                     selectedGene = new ConnectionGene(parent2.getConnections().get(iterator2));
                 ++iterator2;
             }
+            //If we have gone over all genes of parent2, but there are still genes of parent 1 left we
+            //can add them if parent 1 has the best fitness between both parents
             else if(iterator2 >= parent2.getConnections().size()) {     //TODO: check if problems arise. Check book
                 if(best == 1)
                     selectedGene = new ConnectionGene(parent1.getConnections().get(iterator1));
-                iterator1++;
+                ++iterator1;
             }
+            //If parent 1 has disjoint genes with a lower innovation number than the next gene of parent 2 go
+            //over the next disjoint gene of parent 1 and add it if parent 1 has the best fitness between both parents
             else if(parent1.getConnections().get(iterator1).getInnovationN() <
                     parent2.getConnections().get(iterator2).getInnovationN()) {
                 if(best == 1)
                     selectedGene = new ConnectionGene(parent1.getConnections().get(iterator1));
                 ++iterator1;
             }
+            //If parent2 has disjoint genes with a lower innovation number than the next gene of parent 1 go
+            //over the next disjoint gene of parent 2 and add it if parent 2 has the best fitness between both parents
             else if(parent1.getConnections().get(iterator1).getInnovationN() >
                     parent2.getConnections().get(iterator2).getInnovationN()) {
                 if(best == 2)
                     selectedGene = new ConnectionGene(parent1.getConnections().get(iterator1));
-                iterator1++;
+                ++iterator1;
             }
+            //If parent 1's gene has the same innovation number of parent 2's gene, select one of them randomly
+            //TODO: maybe implment a weighted average between the parents gene's values?
             else if(iterator1 == iterator2) {
                 int choice = ThreadLocalRandom.current().nextInt(1, 3);
 
@@ -554,23 +599,23 @@ public class Neat {
                 ++iterator2;
             }
 
-            if (babyConnections.size() == 0)
+            //Add selected gene, if it wasn't already added before
+            if(babyConnections.size() == 0)
                 babyConnections.add(selectedGene);
             else
-            if (babyConnections.get(babyConnections.size() - 1).getInnovationN() != selectedGene.getInnovationN())
-                babyConnections.add(selectedGene);
+                if(babyConnections.get(babyConnections.size() - 1).getInnovationN() != selectedGene.getInnovationN())
+                    babyConnections.add(selectedGene);
 
 
             addBabyNeuron(selectedGene.getInputNeuron(), babyNeurons);
             addBabyNeuron(selectedGene.getOutputNeuron(), babyNeurons);
         }
 
-        NeatGenome newGenome = new NeatGenome(babyNeurons, babyConnections, parent1.getNumberOfInputs(), parent1.getNumberOfOutputs());
-        newGenome.createPossibleListsForEachNeuron(newGenome.getNeurons(), newGenome.getConnections());
-        return newGenome;
+        return new NeatGenome(babyNeurons, babyConnections, parent1.getNumberOfInputs(), parent1.getNumberOfOutputs());
     }
 
 
+    //Checked. Seems to be fine
     private void addBabyNeuron(NeuronGene babyNeuronGene, List<NeuronGene> babyNeurons) {
         for(NeuronGene ng : babyNeurons)
             if(ng.getNeuronID() == babyNeuronGene.getNeuronID())
