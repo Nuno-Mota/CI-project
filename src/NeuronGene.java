@@ -47,6 +47,7 @@ public class NeuronGene implements Serializable{
     }
 
 
+    //Checked. Seems to be fine
     public NeuronGene(NeuronGene neuronToBeCopied) {
         _neuronID           = neuronToBeCopied.getNeuronID();
         _type               = neuronToBeCopied.getType();

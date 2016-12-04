@@ -53,14 +53,8 @@ public class NeatGenome implements Serializable{
 
 
         //Create possible Incoming and Outgoing connections for all Neurons
-        for(NeuronGene ng : _neurons) {
-            for(NeuronGene ngCheck : _neurons) {
-                if(!(ng.getType() == 0 || ng.getType() ==3))              //Input and Bias neurons can't have incoming connections
-                    ng.getPossibleIncoming().add(ngCheck);
-                if(!(ngCheck.getType() == 0 || ngCheck.getType() ==3))    //Neurons can't have outgoing connections toInput or Bias neurons
-                    ng.getPossibleOutgoing().add(ngCheck);
-            }
-        }
+        createPossibleListsForEachNeuron(_neurons, _connections);
+
 
         //For each input neuron create connections with every output neuron
         for(int i = 0; i < _numberOfInputs; ++i)
@@ -82,7 +76,7 @@ public class NeatGenome implements Serializable{
         _numberOfOutputs = numberOfOutputs;
     }
 
-
+    //Checked. Seems to be fine
     public NeatGenome(NeatGenome genomeToBeCopied) {
         _genomeID        = _globalGenomeID++;
         _numberOfInputs  = genomeToBeCopied.getNumberOfInputs();
@@ -90,6 +84,7 @@ public class NeatGenome implements Serializable{
 
         for(NeuronGene ng : genomeToBeCopied.getNeurons())
             _neurons.add(new NeuronGene(ng));
+
 
         for(ConnectionGene cg : genomeToBeCopied.getConnections()) {
             ConnectionGene copiedConnection = new ConnectionGene(cg);
@@ -410,43 +405,67 @@ public class NeatGenome implements Serializable{
     }
 
 
+
+    //Checked. Seems to be fine
     public void createPossibleListsForEachNeuron(List<NeuronGene> neurons, List<ConnectionGene> connections) {
         for(NeuronGene ng : neurons) {
-            if(ng.getType() == 3) {
-                for(NeuronGene ngTest : neurons) {
-                    if(ngTest.getType() != 3) {
-                        boolean add = true;
-                        for(ConnectionGene cg : connections)
-                            if(cg.getInputNeuron().getNeuronID()  == ng.getNeuronID() &&
-                                    cg.getOutputNeuron().getNeuronID() == ngTest.getNeuronID())
-                                add = false;
-                        if(add)
-                            ng.getPossibleOutgoing().add(ngTest);
-                    }
-                }
-            }
-            else {
-                for(NeuronGene ngTest : neurons) {
+            for(NeuronGene ngCheck : neurons) {
+                if(!(ng.getType() == 0 || ng.getType() ==3)) {             //Input and Bias neurons can't have incoming connections
                     boolean add = true;
-                    if (ngTest.getType() != 3) {
-                        for (ConnectionGene cg : connections)
-                            if (cg.getInputNeuron().getNeuronID() == ng.getNeuronID() &&
-                                    cg.getOutputNeuron().getNeuronID() == ngTest.getNeuronID())
-                                add = false;
-                        if (add)
-                            ng.getPossibleOutgoing().add(ngTest);
-                    }
-
-                    add = true;
-                    for (ConnectionGene cg : connections)
-                        if (cg.getInputNeuron().getNeuronID() == ngTest.getNeuronID() &&
-                                cg.getOutputNeuron().getNeuronID() == ng.getNeuronID())
+                    for(ConnectionGene cg : connections)
+                        if(cg.getInputNeuron().getNeuronID()  == ngCheck.getNeuronID() &&   //If connection exists, don't add
+                           cg.getOutputNeuron().getNeuronID() == ng.getNeuronID())
                             add = false;
-                    if (add)
-                        ng.getPossibleIncoming().add(ngTest);
+                    if(add)
+                        ng.getPossibleIncoming().add(ngCheck);
+                }
+                if(!(ngCheck.getType() == 0 || ngCheck.getType() ==3)) {   //Neurons can't have outgoing connections toInput or Bias neurons
+                    boolean add = true;
+                    for(ConnectionGene cg : connections)
+                        if(cg.getInputNeuron().getNeuronID() == ng.getNeuronID() &&    //If connection exists, don't add
+                           cg.getOutputNeuron().getNeuronID() == ngCheck.getNeuronID())
+                            add = false;
+                    if(add)
+                        ng.getPossibleOutgoing().add(ngCheck);
                 }
             }
         }
+//        for(NeuronGene ng : neurons) {
+//            if(ng.getType() == 3) {
+//                for(NeuronGene ngTest : neurons) {
+//                    if(ngTest.getType() != 3) {
+//                        boolean add = true;
+//                        for(ConnectionGene cg : connections)
+//                            if(cg.getInputNeuron().getNeuronID()  == ng.getNeuronID() &&
+//                                    cg.getOutputNeuron().getNeuronID() == ngTest.getNeuronID())
+//                                add = false;
+//                        if(add)
+//                            ng.getPossibleOutgoing().add(ngTest);
+//                    }
+//                }
+//            }
+//            else {
+//                for(NeuronGene ngTest : neurons) {
+//                    boolean add = true;
+//                    if (ngTest.getType() != 3) {
+//                        for (ConnectionGene cg : connections)
+//                            if (cg.getInputNeuron().getNeuronID() == ng.getNeuronID() &&
+//                                    cg.getOutputNeuron().getNeuronID() == ngTest.getNeuronID())
+//                                add = false;
+//                        if (add)
+//                            ng.getPossibleOutgoing().add(ngTest);
+//                    }
+//
+//                    add = true;
+//                    for (ConnectionGene cg : connections)
+//                        if (cg.getInputNeuron().getNeuronID() == ngTest.getNeuronID() &&
+//                                cg.getOutputNeuron().getNeuronID() == ng.getNeuronID())
+//                            add = false;
+//                    if (add)
+//                        ng.getPossibleIncoming().add(ngTest);
+//                }
+//            }
+//        }
     }
 
 

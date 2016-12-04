@@ -38,6 +38,7 @@ public class ConnectionGene implements Serializable{
     }
 
 
+    //Checked. Seems to be fine. There actually isn't a need to create new NeuronGenes. We could just store their ID?
     public ConnectionGene(ConnectionGene connectionToBeCopied) {
         _inputNeuron           = new NeuronGene(connectionToBeCopied.getInputNeuron());     //TODO: incoming and outgoing connections missing
         _outputNeuron          = new NeuronGene(connectionToBeCopied.getOutputNeuron());    //TODO: incoming and outgoing connections missing

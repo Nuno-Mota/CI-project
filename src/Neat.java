@@ -112,8 +112,25 @@ public class Neat {
 
         //TODO: What happens if the last species can't generate any descendants because maxPOP is already capped. Implement BFS instead of DFS
 
-        //TODO: CHECKING ZONE 1
-        int currentNumberOffspring = 0;
+        //BFS alternative that automatically adds members from every species, without increasing population size.
+        int currentNumberOfOffspring = 0;
+        int speciesIterator = 0;
+        List<List<NeatGenome>> clearedSpecies = new ArrayList<>();   //Species with just the representative
+
+        while(currentNumberOfOffspring < _populationSize) {
+            for(Species sp : _currentSpecies) {
+                if(speciesIterator == 0) {
+                    List<NeatGenome> newSpeciesPop = new ArrayList<>();
+                    newSpeciesPop.add(new NeatGenome(sp.getIndividuals().get(0)));
+                    clearedSpecies.add(newSpeciesPop);
+                    ++currentNumberOfOffspring;
+                }
+                //TODO: currently working on
+            }
+        }
+
+        //DFS alternative that might skip members of the last species and increase population size.
+        /*int currentNumberOffspring = 0;
         for(Species sp : _currentSpecies) {
             List<NeatGenome> newSpeciesPop = new ArrayList<>();
 
@@ -169,7 +186,7 @@ public class Neat {
             }
 
             newPopulation.add(new NeatGenome(temp1));
-        }
+        }*/
 
 
         //TODO: MUTATE THIS LITTLE SHITS
