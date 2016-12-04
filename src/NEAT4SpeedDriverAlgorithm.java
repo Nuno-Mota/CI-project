@@ -54,7 +54,7 @@ public class NEAT4SpeedDriverAlgorithm extends AbstractAlgorithm {
 		 * Start with -human to race against the best found
 		 *
 		 */
-        DefaultDriverAlgorithm algorithm = new DefaultDriverAlgorithm();
+        NEAT4SpeedDriverAlgorithm algorithm = new NEAT4SpeedDriverAlgorithm();
         DriversUtils.registerMemory(algorithm.getDriverClass());
         if (args.length > 0 && args[0].equals("-show")) {
             new DefaultRace().showBest();
