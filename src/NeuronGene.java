@@ -27,6 +27,8 @@ public class NeuronGene implements Serializable{
      * Constructor *
      ***************/
 
+
+    //Checked. Seems to be fine
     public NeuronGene(int neuronID, int type, boolean isRecurrent,
                       double activationResponse, double positionX, double positionY) {
         _neuronID           = neuronID;
@@ -35,20 +37,6 @@ public class NeuronGene implements Serializable{
         _activationResponse = activationResponse;
         _positionX          = positionX;
         _positionY          = positionY;
-    }
-
-
-    public NeuronGene(int neuronID, int type, boolean isRecurrent,
-                      double activationResponse, double positionX, double positionY,
-                      List<NeuronGene> possibleIncoming, List<NeuronGene> possibleOutgoing) {
-        _neuronID           = neuronID;
-        _type               = type;
-        _isRecurrent        = isRecurrent;
-        _activationResponse = activationResponse;
-        _positionX          = positionX;
-        _positionY          = positionY;
-        _possibleIncoming   = possibleIncoming;
-        _possibleOutgoing   = possibleOutgoing;
     }
 
 

@@ -105,7 +105,7 @@ public class Neat {
      * NEAT's methods *
      ******************/
 
-    //Checking
+    //Checked. Seems to be fine
     public void createNewGeneration() {
         ++_generationNumber;
         System.out.println("Creating next generation. This will be generation number " + _generationNumber + ".");
@@ -117,7 +117,8 @@ public class Neat {
         List<NeatGenome> newPopulation = new ArrayList<>();
         List<List<NeatGenome>> clearedSpecies = new ArrayList<>();   //Species with just the representative
 
-        //TODO: Completely remove species that have not improved for a few generations
+        //TODO: Completely remove species that have not improved for a few generations. Right now their elements might still be
+        //TODO: selected in tournament mode, though the chance of that happening is small
 
         int     amountToSpawn;
         int     size;
@@ -132,7 +133,7 @@ public class Neat {
         while(currentNumberOfOffspring < _populationSize) {
             maybeMoreSpawnsRequired = false;
             for(Species sp : _currentSpecies) {
-                if(currentNumberOfOffspring < _populationSize) {
+                if(currentNumberOfOffspring < _populationSize && sp.getNumberOfGenerationsWithNoImprovement() < 25) {
                     //Just serves the purpose of re-adding the best element of each species
                     //to the next generation, without having them suffer mutations
                     if(speciesIterator == 0) {
@@ -247,7 +248,13 @@ public class Neat {
             //Function that randomly mutates ActivationResponses
             ng.mutateActivationResponses();
 
-            //TODO: Randomly enable/disable existing connections
+            //Function that has a chance of disabling a random enabled connection
+            int numberOfTriesToDisableConnection = ng.getConnections().size()/(_numberOfInputs+1+_numberOfOutputs) + 1;
+            ng.disableConnection(numberOfTriesToDisableConnection);
+
+            //Function that has a chance of enabling a random disabled connection
+            int numberOfTriesToEnableConnection = ng.getConnections().size()/(_numberOfInputs+1) + 1;
+            ng.enableConnection(numberOfTriesToEnableConnection);
 
             //Function that has a chance of adding a new (possibly looped) connection.
             double addConnectionChance          = 0.90;
@@ -255,12 +262,11 @@ public class Neat {
             //input and bias neurons shouldn't have looped connections
             int    numberOfTriesToFindLoop      = ng.getNeurons().size() - _numberOfInputs -1;
             int    numberOfTriesToAddConnection = ng.getNeurons().size()/3; //parameter 3 was sort of random... Change as required
-            //TODO: CHECKING ZONE 1
             ng.addConnection(addConnectionChance, chanceOfLoopedConnection, numberOfTriesToFindLoop, numberOfTriesToAddConnection);
 
             //Function that has a chance of adding a new neuron to an existing connection.
             double addNeuronChance                  = 0.70;
-            int    numberOfTriesToFindOldConnection = _numberOfInputs*_numberOfOutputs;
+            int    numberOfTriesToFindOldConnection = ng.getConnections().size()/2;//_numberOfInputs*_numberOfOutputs;?
             ng.addNeuron(addNeuronChance, numberOfTriesToFindOldConnection);
         }
 
@@ -269,7 +275,7 @@ public class Neat {
         //set them as the species representatives for speciation after fitness estimation.
         int currentSpeciesIndex = 0;
         for(List<NeatGenome> lng : clearedSpecies) {
-            _currentSpecies.get(currentSpeciesIndex).setIndividuals(lng);
+            _currentSpecies.get(currentSpeciesIndex++).setIndividuals(lng);
             _currentPopulation.add(lng.get(0));
         }
 
@@ -500,9 +506,9 @@ public class Neat {
     public void epoch() {
 
         if(_generationNumber > 1)
-            //TODO: CHECKING ZONE 0
             createNewGeneration();
 
+        //TODO: CHECKING ZONE 0
         generatePhenotypes();
         estimateFitness();
 

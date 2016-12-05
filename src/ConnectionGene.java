@@ -100,7 +100,7 @@ public class ConnectionGene implements Serializable{
     public int getNumberOfTimesDisabled() {
         return _numberOfTimesDisabled;
     }
-    private void setNumberOfTimesDisabled(int numberOfTimesDisabled) {
+    public void setNumberOfTimesDisabled(int numberOfTimesDisabled) {
         _numberOfTimesDisabled = numberOfTimesDisabled;
     }
 

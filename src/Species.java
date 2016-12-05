@@ -14,9 +14,9 @@ public class Species {
     private static final double _olderFitnessPenalty = 0.9;    //TODO: variable penalty
     private List<NeatGenome>    _individuals = new ArrayList<NeatGenome>();
     private int                 _speciesID;
-    private double              _bestFitness;
+    private double              _bestFitness = 0;
     private double              _averageSpeciesFitness;
-    private int                 _numberOfGenerationsWithNoImprovement;
+    private int                 _numberOfGenerationsWithNoImprovement = 0;
     private int                 _ageOfSpecies = 0;
     private int                 _spawnsRequired;
     private double              _speciesFitness;

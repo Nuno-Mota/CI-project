@@ -33,7 +33,7 @@ public class NeatGenome implements Serializable{
      * Constructors *
      ****************/
 
-    //Checked. Seems to be fine
+    //Checked. Seems to be fine     //TODO:Missing adding connections and neurons to innovation's table
     public NeatGenome(int numberOfInputs, int numberOfOutputs) {
         _genomeID        = _globalGenomeID++;
         _numberOfInputs  = numberOfInputs;
@@ -160,11 +160,11 @@ public class NeatGenome implements Serializable{
      ********************/
 
 
-    //TODO: CHECKING ZONE 0
+    //Checked by addConnection from adding new connection in the mutation process. Seems to be fine
     public void addConnection(double mutationRate, double chanceOfLooped,
                               int numberOfTriesToFindLoop, int numberOfTriesToAddConnection) {
 
-        if (Math.random() <= mutationRate)
+        if (Math.random() > mutationRate)
             return;
 
 
@@ -218,13 +218,12 @@ public class NeatGenome implements Serializable{
         if (inputNeuronID == -1 || outputNeuronID == -1)
             return;
 
-//TODO: CHECKING ZONE 1
         addNewConnection(inputNeuronID, outputNeuronID, isRecurrent);
     }
 
 
 
-
+    //Checked. Seems to be fine
     private boolean isDuplicateConnection(int inputNeuronID, int outputNeuronID) {
         for (ConnectionGene cg: _connections) {
             if (cg.getInputNeuron().getNeuronID() == inputNeuronID &&
@@ -236,8 +235,8 @@ public class NeatGenome implements Serializable{
 
 
 
-    //TODO: CHECKING ZONE 2
-    //Checked by first neatGenome constructor. Seems to be fine
+
+    //Checked by first neatGenome constructor and addConnection(from the mutation process of adding new connections). Seems to be fine
     public void addNewConnection(int inputNeuronID, int outputNeuronID, boolean isRecurrent) {
 
         //Create a possibly new innovation. Useful for determining previous existence
@@ -270,6 +269,7 @@ public class NeatGenome implements Serializable{
     }
 
 
+    //Checked. seems to be fine
     public void addNeuron(double mutationRate, int numberOfTriesToFindOldLink) {
 
         if (Math.random() > mutationRate)
@@ -278,18 +278,23 @@ public class NeatGenome implements Serializable{
 
         int chosenConnectionNumber      = 0;
         boolean connectionFound         = false;
-        final int hiddenNeuronThreshold = _numberOfInputs + _numberOfOutputs + 5;   //should change with network size?
+        final int hiddenNeuronThreshold = _numberOfInputs + 1 + _numberOfOutputs + 5;   //should change with network size?
 
 
 
         if(_connections.size() <= hiddenNeuronThreshold) {      //Bias towards older connections for small networks
             while(numberOfTriesToFindOldLink-- != 0) {
-                int maxConnectionNumber = _connections.size() - 1 - (int)Math.sqrt(_connections.size());
-                chosenConnectionNumber  = ThreadLocalRandom.current().nextInt(0, maxConnectionNumber);
+                if(_connections.size() > 2) {
+                    int maxConnectionIndexNumber = _connections.size() - 1 - (int)Math.sqrt(_connections.size());
+                    chosenConnectionNumber  = ThreadLocalRandom.current().nextInt(0, maxConnectionIndexNumber);
+                }
+                else
+                    chosenConnectionNumber  = ThreadLocalRandom.current().nextInt(0, _connections.size());
+
                 int inputNeuronType     = _connections.get(chosenConnectionNumber).getInputNeuron().getType();
 
                 if(_connections.get(chosenConnectionNumber).getIsEnabled() &&
-                   _connections.get(chosenConnectionNumber).getIsRecurrent() &&
+                   _connections.get(chosenConnectionNumber).getIsRecurrent() &&   //Why not add neurons to recurrent connections?
                    inputNeuronType != 3) {
 
                     connectionFound = true;
@@ -301,20 +306,21 @@ public class NeatGenome implements Serializable{
                 return;
         }
         else {
-            while (!connectionFound) {
+            while(!connectionFound) {
                 int maxConnectionNumber = _connections.size() - 1;
                 chosenConnectionNumber = ThreadLocalRandom.current().nextInt(0, maxConnectionNumber);
                 int inputNeuronType = _connections.get(chosenConnectionNumber).getInputNeuron().getType();
 
-                if (_connections.get(chosenConnectionNumber).getIsEnabled() &&
-                        _connections.get(chosenConnectionNumber).getIsRecurrent() &&
-                        inputNeuronType != 3)
+                if(_connections.get(chosenConnectionNumber).getIsEnabled() &&
+                   _connections.get(chosenConnectionNumber).getIsRecurrent() &&
+                   inputNeuronType != 3)
                     connectionFound = true;
             }
         }
 
         int numberOfTimesDisabled = _connections.get(chosenConnectionNumber).getNumberOfTimesDisabled();
         _connections.get(chosenConnectionNumber).setIsEnabled(false);
+        _connections.get(chosenConnectionNumber).setNumberOfTimesDisabled(numberOfTimesDisabled + 1);
         double originalWeight     = _connections.get(chosenConnectionNumber).getWeight();
         int inputNeuronID         = _connections.get(chosenConnectionNumber).getInputNeuron().getNeuronID();
         int outputNeuronID        = _connections.get(chosenConnectionNumber).getOutputNeuron().getNeuronID();
@@ -329,8 +335,8 @@ public class NeatGenome implements Serializable{
 
         //TODO: make sure that this part works properly! Not according to the book!!!!
         double activationResponse = 3;  //TODO: check what a proper value is
-        List<NeuronGene> possibleIncoming = checkPossibleNeurons(inputNeuronID);
-        List<NeuronGene> possibleOutgoing = checkPossibleNeurons(outputNeuronID);
+
+
         int neuronID;
 
         if(innovationID < 0) {
@@ -342,8 +348,9 @@ public class NeatGenome implements Serializable{
 
 
         NeuronGene newNeuron = new NeuronGene(neuronID, 2, false, activationResponse, newWidth,
-                                              newDepth, possibleIncoming, possibleOutgoing);
+                                              newDepth);
         _neurons.add(newNeuron);
+        createPossibleLists(newNeuron, _neurons, _connections);
 
 
         pushToPossibleLists(inputNeuronID, newNeuron, outputNeuronID);
@@ -357,7 +364,7 @@ public class NeatGenome implements Serializable{
         newInnovation = new Innovation(1, -1, inputNeuronID, neuronID, -1, 4, 0);
         innovationID = _innovationsTable.getInnovationID(newInnovation);
 
-        weight           = 1;
+        weight = 1;
 
         if (innovationID < 0) {
             _innovationsTable.addInnovation(newInnovation); //addInnovation corrects innovation number automatically
@@ -371,7 +378,7 @@ public class NeatGenome implements Serializable{
         newInnovation = new Innovation(1, -1, neuronID, outputNeuronID, -1, 4, 0);
         innovationID = _innovationsTable.getInnovationID(newInnovation);
 
-        weight           = originalWeight;
+        weight = originalWeight;
 
         if (innovationID < 0) {
             _innovationsTable.addInnovation(newInnovation); //addInnovation corrects innovation number automatically
@@ -393,27 +400,37 @@ public class NeatGenome implements Serializable{
         return null;
     }
 
-
-    private List<NeuronGene> checkPossibleNeurons(int NeuronID) {
-        List<NeuronGene> possibleIncoming = new ArrayList<>();
-        for (NeuronGene ng : _neurons) {
-            if (ng.getNeuronID() != NeuronID)
-                possibleIncoming.add(ng);
+    //Checked. Seems to be fine
+    private void createPossibleLists(NeuronGene ng, List<NeuronGene> neurons, List<ConnectionGene> connections) {
+        for(NeuronGene ngCheck : neurons) {
+            if(!(ng.getType() == 0 || ng.getType() ==3)) {             //Input and Bias neurons can't have incoming connections
+                boolean add = true;
+                for(ConnectionGene cg : connections)
+                    if(cg.getInputNeuron().getNeuronID()  == ngCheck.getNeuronID() &&   //If connection exists, don't add
+                            cg.getOutputNeuron().getNeuronID() == ng.getNeuronID())
+                        add = false;
+                if(add)
+                    ng.getPossibleIncoming().add(ngCheck);
+            }
+            if(!(ngCheck.getType() == 0 || ngCheck.getType() ==3)) {   //Neurons can't have outgoing connections toInput or Bias neurons
+                boolean add = true;
+                for(ConnectionGene cg : connections)
+                    if(cg.getInputNeuron().getNeuronID() == ng.getNeuronID() &&    //If connection exists, don't add
+                            cg.getOutputNeuron().getNeuronID() == ngCheck.getNeuronID())
+                        add = false;
+                if(add)
+                    ng.getPossibleOutgoing().add(ngCheck);
+            }
         }
-        return possibleIncoming;
     }
 
-
+    //Checked. Seems to be fine
     private void pushToPossibleLists(int inputNeuronID, NeuronGene newNeuron, int outputNeuronID) {
-        for (NeuronGene ng: _neurons) {
-            if (ng.getNeuronID() == inputNeuronID)
-                ng.getPossibleIncoming().add(newNeuron);
-            else if (ng.getNeuronID() == outputNeuronID)
+        for(NeuronGene ng: _neurons) {
+            if(ng.getNeuronID() != inputNeuronID)
                 ng.getPossibleOutgoing().add(newNeuron);
-            else {
+            if(ng.getNeuronID() != outputNeuronID && ng.getType() != 0 && ng.getType() != 3)
                 ng.getPossibleIncoming().add(newNeuron);
-                ng.getPossibleOutgoing().add(newNeuron);
-            }
         }
     }
 
@@ -431,28 +448,8 @@ public class NeatGenome implements Serializable{
 
     //Checked. Seems to be fine
     public void createPossibleListsForEachNeuron(List<NeuronGene> neurons, List<ConnectionGene> connections) {
-        for(NeuronGene ng : neurons) {
-            for(NeuronGene ngCheck : neurons) {
-                if(!(ng.getType() == 0 || ng.getType() ==3)) {             //Input and Bias neurons can't have incoming connections
-                    boolean add = true;
-                    for(ConnectionGene cg : connections)
-                        if(cg.getInputNeuron().getNeuronID()  == ngCheck.getNeuronID() &&   //If connection exists, don't add
-                           cg.getOutputNeuron().getNeuronID() == ng.getNeuronID())
-                            add = false;
-                    if(add)
-                        ng.getPossibleIncoming().add(ngCheck);
-                }
-                if(!(ngCheck.getType() == 0 || ngCheck.getType() ==3)) {   //Neurons can't have outgoing connections toInput or Bias neurons
-                    boolean add = true;
-                    for(ConnectionGene cg : connections)
-                        if(cg.getInputNeuron().getNeuronID() == ng.getNeuronID() &&    //If connection exists, don't add
-                           cg.getOutputNeuron().getNeuronID() == ngCheck.getNeuronID())
-                            add = false;
-                    if(add)
-                        ng.getPossibleOutgoing().add(ngCheck);
-                }
-            }
-        }
+        for(NeuronGene ng : neurons)
+            createPossibleLists(ng, neurons, connections);
 //        for(NeuronGene ng : neurons) {
 //            if(ng.getType() == 3) {
 //                for(NeuronGene ngTest : neurons) {
@@ -544,6 +541,44 @@ public class NeatGenome implements Serializable{
         for(NeuronGene ng : _neurons)
             if(Math.random() <= Math.random() * (upper - lower) + lower)
                 ng.mutateActivationResponse();
+    }
+
+
+
+    public void disableConnection(int numberOfTriesToDisableConnection) {
+
+        double lower = 0.05;    //Lowest value of chance of a random connection being disabled
+        double upper = 0.10;    //Highest value of chance of a random connection being disabled
+        int connectionIndex;
+
+        if(Math.random() <= Math.random() * (upper - lower) + lower) {
+            while(numberOfTriesToDisableConnection-- != 0) {
+                connectionIndex = ThreadLocalRandom.current().nextInt(0, _connections.size());
+                if(_connections.get(connectionIndex).getIsEnabled()) {
+                    _connections.get(connectionIndex).setIsEnabled(false);
+                    numberOfTriesToDisableConnection = 0;
+                }
+            }
+        }
+    }
+
+
+
+    public void enableConnection(int numberOfTriesToEnableConnection) {
+
+        double lower = 0.3;    //Lowest value of chance of a random connection being disabled
+        double upper = 0.4;    //Highest value of chance of a random connection being disabled
+        int connectionIndex;
+
+        if(Math.random() <= Math.random() * (upper - lower) + lower) {
+            while(numberOfTriesToEnableConnection-- != 0) {
+                connectionIndex = ThreadLocalRandom.current().nextInt(0, _connections.size());
+                if(!_connections.get(connectionIndex).getIsEnabled()) {
+                    _connections.get(connectionIndex).setIsEnabled(true);
+                    numberOfTriesToEnableConnection = 0;
+                }
+            }
+        }
     }
 }
 
