@@ -13,12 +13,28 @@ public class NeuralNetwork implements Serializable {
     private static final long serialVersionUID = -88L;
     private List<NeuralNetworkNeuron> _phenotypeNeurons = new ArrayList<>();
 
+    private double _acceleration = 0;
+    private double _breaking     = 0;
+    private double _steering     = 0;
+
     NeuralNetwork(List<NeuralNetworkNeuron> phenotypeNeurons) {
         _phenotypeNeurons = phenotypeNeurons;
     }
 
     public double getOutput(SensorModel a) {
         return 0.5;
+    }
+
+    public double getAcceleration() {
+        return _acceleration;
+    }
+
+    public double getBreaking() {
+        return _breaking;
+    }
+
+    public double getSteering() {
+        return _steering;
     }
 
     //Store the state of this neural network
@@ -107,7 +123,9 @@ public class NeuralNetwork implements Serializable {
 
             ++currentNeuron;
         }
-
+        _steering      = outputs[0];
+        _acceleration  = outputs[1];
+        _breaking      = outputs[2];
         return outputs;
     }
 
