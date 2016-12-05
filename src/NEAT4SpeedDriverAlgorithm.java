@@ -25,7 +25,7 @@ public class NEAT4SpeedDriverAlgorithm extends AbstractAlgorithm {
             race.laps = 1;
 
             //for speedup set withGUI to false
-            results = race.runRace(drivers, true);
+            //results = race.runRace(drivers, true);
 
             // Save genome/nn
             DriversUtils.storeGenome(drivers[0]);

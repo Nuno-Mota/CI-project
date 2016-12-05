@@ -15,13 +15,11 @@ public class Neat4SpeedRace extends AbstractRace {
     }
 
 
-    public int[] runRace(DefaultDriverGenome[] drivers, boolean withGUI){
+    public int[] runRace(Neat4SpeedDriver[] drivers, boolean withGUI){
         int size = Math.min(10, drivers.length);
         Neat4SpeedDriver[] driversList = new Neat4SpeedDriver[size];
-        for(int i=0; i<size; i++){
-            driversList[i] = new Neat4SpeedDriver(null); //TODO: creat NeuralNetwork to pass to driver
-            driversList[i].loadGenome(drivers[i]);
-        }
+        for(int i=0; i<size; i++)
+            driversList[i] = drivers[i];
         return runRace(driversList, withGUI, true);
     }
 

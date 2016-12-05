@@ -100,9 +100,14 @@ public class NeuralNetwork implements Serializable {
         int currentNeuron = 0;
         int currentOutput = 0;
 
+        System.out.println(inputs.length);
 
-        while(_phenotypeNeurons.get(currentNeuron).getType() == 0)
+        while(_phenotypeNeurons.get(currentNeuron).getType() == 0) {
+            //System.out.println("Type = " + _phenotypeNeurons.get(currentNeuron).getType());
+            //System.out.println(currentNeuron);
             _phenotypeNeurons.get(currentNeuron).setOutput(inputs[currentNeuron++]);
+            //++currentNeuron;
+        }
 
         _phenotypeNeurons.get(currentNeuron).setOutput(1);
         ++currentNeuron;

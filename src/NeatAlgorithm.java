@@ -1,3 +1,5 @@
+import race.TorcsConfiguration;
+
 import java.io.*;
 import java.util.List;
 
@@ -15,6 +17,8 @@ public class NeatAlgorithm {
         int _populationSize  = 50;
         Neat neat;
 
+        //Set path to torcs.properties
+        TorcsConfiguration.getInstance().initialize(new File("torcs.properties"));
 
         File savedGeneration = new File("src/memory/lastGeneration.mem");
 
@@ -55,7 +59,7 @@ public class NeatAlgorithm {
         while (true) {
             //TODO: CHECKING ZONE 0
             neat.epoch();
-            neat.saveRelevantData();
+            //neat.saveRelevantData();
         }
     }
 }

@@ -409,11 +409,14 @@ public class Neat {
 
     public void estimateFitness() {
         System.out.println("Starting fitness estimation.");
+        Neat4SpeedDriver[] drivers = new Neat4SpeedDriver[1];
         for(NeatGenome ng : _currentPopulation){
             //Start a race
             Neat4SpeedRace race = new Neat4SpeedRace();
             race.setTrack("aalborg", "road");
             race.laps = 1;
+            drivers[0] = new Neat4SpeedDriver(ng.getNeuralNetwork());
+
 
             //for speedup set withGUI to false
             race.runRace(drivers, true);

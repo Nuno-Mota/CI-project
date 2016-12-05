@@ -45,7 +45,7 @@ public class NeatGenome implements Serializable{
             _neurons.add(new NeuronGene(i, 0, false, 4.9, i/1.0, 0));
 
         //Create Bias Neuron (one neuron is enough for all. Just add connections as needed)
-        _neurons.add(new NeuronGene(_numberOfInputs, 0, false, 4.9, 1.3, 0));
+        _neurons.add(new NeuronGene(_numberOfInputs, 3, false, 4.9, 1.3, 0));
 
         //Create Output neurons
         for(int i = 0; i < _numberOfOutputs; ++i)
