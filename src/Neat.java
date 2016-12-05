@@ -22,6 +22,7 @@ public class Neat {
     private static final double _probabilityOfMating = 0.85;
     private double              _averagePopulationFitness;
     private NeatGenome          _bestPerformingMember;
+    private int                 _maxGenWithoutImprovment = 25;
 
 
 
@@ -179,10 +180,10 @@ public class Neat {
         while(currentNumberOfOffspring < _populationSize) {
             maybeMoreSpawnsRequired = false;
             for(Species sp : _currentSpecies) {
-                if(currentNumberOfOffspring < _populationSize && sp.getNumberOfGenerationsWithNoImprovement() < 25) {
+                if(currentNumberOfOffspring < _populationSize && sp.getNumberOfGenerationsWithNoImprovement() < _maxGenWithoutImprovment) {
                     //Just serves the purpose of re-adding the best element of each species
                     //to the next generation, without having them suffer mutations
-                    if(speciesIterator == 0) {
+                    if(speciesIterator == 0) { //TODO: only the first member of the first species is added, but shouldn't it be the first member of every species?
                         List<NeatGenome> newSpeciesPop = new ArrayList<>();
                         newSpeciesPop.add(new NeatGenome(sp.getIndividuals().get(0)));
                         clearedSpecies.add(newSpeciesPop);

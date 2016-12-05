@@ -20,12 +20,12 @@ public class NEAT4SpeedDriverAlgorithm extends AbstractAlgorithm {
             drivers[0] = genome;
 
             //Start a race
-            DefaultRace race = new DefaultRace();
+            Neat4SpeedRace race = new Neat4SpeedRace();
             race.setTrack("aalborg", "road");
             race.laps = 1;
 
             //for speedup set withGUI to false
-            results = race.runRace(drivers, false);
+            results = race.runRace(drivers, true);
 
             // Save genome/nn
             DriversUtils.storeGenome(drivers[0]);
@@ -57,11 +57,11 @@ public class NEAT4SpeedDriverAlgorithm extends AbstractAlgorithm {
         NEAT4SpeedDriverAlgorithm algorithm = new NEAT4SpeedDriverAlgorithm();
         DriversUtils.registerMemory(algorithm.getDriverClass());
         if (args.length > 0 && args[0].equals("-show")) {
-            new DefaultRace().showBest();
+            new Neat4SpeedRace().showBest();
         } else if (args.length > 0 && args[0].equals("-show-race")) {
-            new DefaultRace().showBestRace();
+            new Neat4SpeedRace().showBestRace();
         } else if (args.length > 0 && args[0].equals("-human")) {
-            new DefaultRace().raceBest();
+            new Neat4SpeedRace().raceBest();
         } else if (args.length > 0 && args[0].equals("-continue")) {
             if (DriversUtils.hasCheckpoint()) {
                 DriversUtils.loadCheckpoint().run(true);
