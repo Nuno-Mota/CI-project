@@ -11,6 +11,7 @@ public class InnovationsTable implements Serializable {
     private int                     _globalInnovationNumber = -1;
     private int                     _globalNeuronNumber     = -1;
     private List<Innovation>        _innovations            = new ArrayList<>();
+
     private static InnovationsTable _instance               = null;
 
 
@@ -22,6 +23,7 @@ public class InnovationsTable implements Serializable {
     private InnovationsTable() {
         // Exists only to defeat instantiation.
     }
+
 
     public static InnovationsTable getInstance() {
         if(_instance == null) {

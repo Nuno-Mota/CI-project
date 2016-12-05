@@ -23,7 +23,17 @@ public class NeuralNetworkNeuron {
      * Constructor *
      ***************/
 
-    public NeuralNetworkNeuron(int neuronID, int type, boolean isRecurrent, double sumActivation,
+    public NeuralNetworkNeuron(NeuronGene genotype) {
+        _neuronID           = genotype.getNeuronID();
+        _type               = genotype.getType();
+        _isRecurrent        = genotype.getIsRecurrent();
+        _activationResponse = genotype.getActivationResponse();
+        _positionX          = genotype.getPositionX();
+        _positionY          = genotype.getPositionY();
+    }
+
+
+    /*public NeuralNetworkNeuron(int neuronID, int type, boolean isRecurrent, double sumActivation,
                                double activationResponse, double positionX, double positionY,
                                List<NeuralNetworkConnection> incoming, List<NeuralNetworkConnection> outgoing) {
         _neuronID           = neuronID;
@@ -35,17 +45,7 @@ public class NeuralNetworkNeuron {
         _positionY          = positionY;
         _incoming           = incoming;
         _outgoing           = outgoing;
-    }
-
-
-    public NeuralNetworkNeuron(NeuronGene genotype) {
-        _neuronID           = genotype.getNeuronID();
-        _type               = genotype.getType();
-        _isRecurrent        = genotype.getIsRecurrent();
-        _activationResponse = genotype.getActivationResponse();
-        _positionX          = genotype.getPositionX();
-        _positionY          = genotype.getPositionY();
-    }
+    }*/
 
 
 

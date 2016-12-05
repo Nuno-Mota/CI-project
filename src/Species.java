@@ -8,18 +8,19 @@ public class Species {
      * Internal Variables *
      **********************/
 
-    private static final int    _youngSpeciesThreshold = 30;
-    private static final int    _oldSpeciesThreshold = 400;
-    private static final double _youngFitnessBonus = 1.4;
-    private static final double _olderFitnessPenalty = 0.9;    //TODO: variable penalty
     private List<NeatGenome>    _individuals = new ArrayList<NeatGenome>();
     private int                 _speciesID;
     private double              _bestFitness = 0;
     private double              _averageSpeciesFitness;
-    private int                 _numberOfGenerationsWithNoImprovement = 0;
-    private int                 _ageOfSpecies = 0;
+    private int                 _numberOfGenerationsWithNoImprovement = -1;
+    private int                 _ageOfSpecies = -1;
     private int                 _spawnsRequired;
     private double              _speciesFitness;
+
+    private static final int    _youngSpeciesThreshold = 30;
+    private static final int    _oldSpeciesThreshold   = 400;
+    private static final double _youngFitnessBonus     = 1.4;
+    private static final double _olderFitnessPenalty   = 0.9;    //TODO: variable penalty
 
 
 
@@ -58,7 +59,7 @@ public class Species {
     public double getBestFitness() {
         return _bestFitness;
     }
-    private void setBestFitness(double bestFitness) {
+    public void setBestFitness(double bestFitness) {
         _bestFitness = bestFitness;
     }
 
@@ -72,14 +73,16 @@ public class Species {
     public int getNumberOfGenerationsWithNoImprovement() {
         return _numberOfGenerationsWithNoImprovement;
     }
-    private void setNumberOfGenerationsWithNoImprovement(int numberOfGenerationsWithNoImprovement) {
+    public void increaseNumberOfGenerationsWithNoImprovement() { ++_numberOfGenerationsWithNoImprovement; }
+    public void setNumberOfGenerationsWithNoImprovement(int numberOfGenerationsWithNoImprovement) {
         _numberOfGenerationsWithNoImprovement = numberOfGenerationsWithNoImprovement;
     }
 
     public int getAgeOfSpecies() {
         return _ageOfSpecies;
     }
-    private void setAgeOfSpecies(int ageOfSpecies) {
+    public void increaseAgeOfSpecies() { ++_ageOfSpecies; }
+    public void setAgeOfSpecies(int ageOfSpecies) {
         _ageOfSpecies = ageOfSpecies;
     }
 
@@ -103,7 +106,7 @@ public class Species {
      * Fitness & Spawn Functions *
      *****************************/
 
-
+    //Checked. Seems to be fine
     public void adjustFitness() {
         _speciesFitness = 0;
 
@@ -123,6 +126,9 @@ public class Species {
     }
 
 
+
+
+    //Checked. Seems to be fine
     public void calculateSpawnsRequired() {
         double totalSpawn = 0;
         for(NeatGenome ng : _individuals)

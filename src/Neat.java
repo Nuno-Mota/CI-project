@@ -9,17 +9,19 @@ public class Neat {
      * Internal Variables *
      **********************/
 
-    private int                 _globalInnovationNumber = 0;
     private int                 _numberOfInputs;
     private int                 _numberOfOutputs;
     private int                 _populationSize;
     private int                 _generationNumber  = 1;
     private List<NeatGenome>    _currentPopulation = new ArrayList<>();
     private List<Species>       _currentSpecies    = new ArrayList<>();
+
     private double              _compatibilityThreshold = 10;
     private int                 c1 = 1, c2 = 1, c3 = 5;
     private static final double _likelihoodOfBestMating = 0.35;
     private static final double _probabilityOfMating = 0.85;
+    private double              _averagePopulationFitness;
+    private NeatGenome          _bestPerformingMember;
 
 
 
@@ -33,6 +35,9 @@ public class Neat {
         _populationSize    = populationSize;
         createPopulation();
     }
+
+
+
 
     public Neat (int numberOfInputs, int numberOfOutputs, int populationSize, int generationNumber,
                  List<NeatGenome> currentPopulation) {
@@ -48,13 +53,6 @@ public class Neat {
     /***********************
      * Getters and Setters *
      ***********************/
-
-    public int getGlobalInnovationNumber() {
-        return _globalInnovationNumber;
-    }
-    private void setGlobalInnovationNumber(int globalInnovationNumber) {
-        _globalInnovationNumber = globalInnovationNumber;
-    }
 
     public int getNumberOfInputs() {
         return _numberOfInputs;
@@ -91,6 +89,13 @@ public class Neat {
         _currentPopulation = currentPopulation;
     }
 
+    public List<Species> getCurrentSpecies() {
+        return _currentSpecies;
+    }
+    private void setCurrentSpecies(List<Species> currentSpecies) {
+        _currentSpecies = currentSpecies;
+    }
+
     public double getLikelihoodOfBestMating() {
         return _likelihoodOfBestMating;
     }
@@ -99,11 +104,52 @@ public class Neat {
         return _probabilityOfMating;
     }
 
+    public double getAveragePopulationFitness() {
+        return _averagePopulationFitness;
+    }
+    private void setAveragePopulationFitness(double averagePopulationFitness) {
+        _averagePopulationFitness = averagePopulationFitness;
+    }
+
+    public NeatGenome getBestPerformingMember() {
+        return _bestPerformingMember;
+    }
+    private void setBestPerformingMember(NeatGenome bestPerformingMember) {
+        _bestPerformingMember = bestPerformingMember;
+    }
+
 
 
     /******************
      * NEAT's methods *
      ******************/
+
+    public void epoch() {
+
+        if(_generationNumber > 1)
+            createNewGeneration();
+
+        generatePhenotypes();
+        estimateFitness();//TODO: MISSING IMPLEMENTATION
+        //TODO: CHECKING ZONE 0
+        defineSpecies();
+    }
+
+
+
+
+    //Checked. Seems to be fine
+    public void createPopulation() {
+        System.out.println("Creating initial population.");
+
+        for(int i = 0; i < _populationSize; ++i)
+            _currentPopulation.add(new NeatGenome(_numberOfInputs, _numberOfOutputs));
+
+        System.out.println("Initial population created.");
+    }
+
+
+
 
     //Checked. Seems to be fine
     public void createNewGeneration() {
@@ -163,15 +209,15 @@ public class Neat {
                             else {
                                 //get's the index (approx) of the element corresponding to _likelihoodOfBestMating% of the species
                                 //so that better performing elements have a higher chance of mating
-                                meanIndx = (int) (size * _likelihoodOfBestMating);     //TODO: check if this works properly
+                                meanIndx = (int)(size * _likelihoodOfBestMating);     //TODO: check if this works properly
 
                                 //adds gaussian noise, so that lower performing members have a chance of mating with better performing ones
-                                max      = (int) rand.nextGaussian() * meanIndx + (int) (size * 0.5) + 1;
+                                max      = (int)rand.nextGaussian() * meanIndx + (int)(size * 0.5) + 1;
 
                                 //attributes a value to the maxIndx, effectively determining which elements of
                                 //the species have a chance of mating
                                 if(max > 4)
-                                    maxIndx  = ThreadLocalRandom.current().nextInt(3, max);
+                                    maxIndx = ThreadLocalRandom.current().nextInt(3, max);
                                 else
                                     maxIndx = 2;        //maxIndx needs to be at least 2 to select different parents
 
@@ -342,7 +388,6 @@ public class Neat {
         }*/
 
 
-
         System.out.println("Generation number " + _generationNumber + " created.");
     }
 
@@ -350,21 +395,25 @@ public class Neat {
 
 
     //Checked. Seems to be fine
-    public void createPopulation() {
-        System.out.println("Creating initial population.");
-
-        for(int i = 0; i < _populationSize; ++i)
-            _currentPopulation.add(new NeatGenome(_numberOfInputs, _numberOfOutputs));
-
-        System.out.println("Initial population created.");
+    public void generatePhenotypes() {
+        for(NeatGenome ng : _currentPopulation)
+            ng.createPhenotype();
     }
 
 
 
 
+    public void estimateFitness() {
+        System.out.println("Starting fitness estimation.");
+        //TODO
+        System.out.println("Fitness estimation finished.");
+    }
 
+
+
+
+    //Checked. Seems to be fine
     public void defineSpecies() {
-
         if (_generationNumber == 1)
             System.out.println("Defining population species.");
         else
@@ -378,154 +427,11 @@ public class Neat {
             System.out.println("Population species redefined.");
     }
 
-    public void estimateFitness() {
-        System.out.println("Starting fitness estimation.");
-        //TODO
-        System.out.println("Fitness estimation finished.");
-    }
-
-    public void saveRelevantData() {
-        System.out.println("DO NOT STOP PROGRAM NOW!");
-        System.out.println("Saving relevant data.");
-        //TODO
-        System.out.println("Relevant data saved.");
-        System.out.println("PROGRAM CAN NOW BE STOPPED!");
-    }
 
 
-    private void speciate() {
-        for(NeatGenome ng: _currentPopulation) {
-            if(_currentSpecies.size() == 0) {
-                List<NeatGenome> membersOfSpecies = new ArrayList<>();
-                membersOfSpecies.add(ng);
-                _currentSpecies.add(new Species(membersOfSpecies));
-            }
-            else {
-                for(Species species : _currentSpecies) {
-                    if(compatible(ng, species.getRepresentative())) {
-                        species.getIndividuals().add(ng);
-                        break;
-                    }
-                }
-                List<NeatGenome> membersOfSpecies = new ArrayList<>();
-                membersOfSpecies.add(ng);
-                _currentSpecies.add(new Species(membersOfSpecies));
-            }
-        }
-
-        for(Species sp : _currentSpecies) {
-            //TODO: implement better sorter than bubblesort... Check if bubblesort works at all...
-            int size = sp.getIndividuals().size();
-            boolean sort = true;
-            NeatGenome temp;
-            int i, j=1;
-
-            while(sort) {
-                sort = false;
-                for(i = 0; i < size - j; ++i) {
-                    if(sp.getIndividuals().get(i).getFitness() < sp.getIndividuals().get(i+1).getFitness()) {
-                        temp = sp.getIndividuals().remove(i);
-                        sp.getIndividuals().add(i+1, temp);
-                        sort = true;
-                    }
-                }
-                ++j;
-            }
-
-            sp.adjustFitness();
-        }
-
-        double averagePopulationFitness = 0;
-        for(NeatGenome ng : _currentPopulation)
-            averagePopulationFitness += ng.getAdjustedFitness();
-        averagePopulationFitness = averagePopulationFitness/_currentPopulation.size();
-
-        for(NeatGenome ng : _currentPopulation)
-            ng.calculateSpawns(averagePopulationFitness);
-
-        for(Species sp : _currentSpecies)
-            sp.calculateSpawnsRequired();
-    }
-
-
-    private boolean compatible(NeatGenome elementToCompare, NeatGenome representative) {
-        int i1 = 0;
-        int i2 = 0;
-        int disjointGenes = 0;
-        int excessGenes = 0;
-        double matchingGenes = 0;
-        double weightDifference = 0.0;
-        int i1InnovN;
-        int i2InnovN;
-        double maxGenes = 1;
-
-        while (elementToCompare.getConnections().size() > i1
-                || representative.getConnections().size() > i2) {
-
-            if (i1 == elementToCompare.getConnections().size()) {
-                ++i2;
-                ++excessGenes;
-                continue;
-            }
-
-            if (i2 == elementToCompare.getConnections().size()) {
-                ++i1;
-                ++excessGenes;
-                continue;
-            }
-
-
-            i1InnovN = elementToCompare.getConnections().get(i1).getInnovationN();
-            i2InnovN = representative.getConnections().get(i2).getInnovationN();
-
-            if (i1InnovN == i2InnovN) {
-                ++i1;
-                ++i2;
-                ++matchingGenes;
-                weightDifference += Math.abs(elementToCompare.getConnections().get(i1).getWeight()
-                        - representative.getConnections().get(i2).getWeight());
-                continue;
-            } else if (i1 < i2) {
-                ++i1;
-                ++disjointGenes;
-            } else {
-                ++i2;
-                ++disjointGenes;
-            }
-            maxGenes = elementToCompare.getConnections().size() > representative.getConnections().size()
-                     ? elementToCompare.getConnections().size() : representative.getConnections().size();
-        }
-
-        double score = ((c1 * excessGenes / maxGenes) + (c2 * disjointGenes / maxGenes)
-                + (c3 * weightDifference / matchingGenes));
-
-        return score < _compatibilityThreshold;
-    }
-
-
-    public void epoch() {
-
-        if(_generationNumber > 1)
-            createNewGeneration();
-
-        //TODO: CHECKING ZONE 0
-        generatePhenotypes();
-        estimateFitness();
-
-        defineSpecies();
-    }
-
-
-    public void generatePhenotypes() {
-        //TODO
-    }
-
-
-
-    /********************
-     * Mating Functions *
-     ********************/
-
+    /*******************************************
+     * Create New Generation Auxiliary Methods *
+     *******************************************/
 
     //Checked. Seems to be fine
     public NeatGenome crossover (NeatGenome parent1, NeatGenome parent2) {
@@ -609,8 +515,8 @@ public class Neat {
             if(babyConnections.size() == 0)
                 babyConnections.add(selectedGene);
             else
-                if(babyConnections.get(babyConnections.size() - 1).getInnovationN() != selectedGene.getInnovationN())
-                    babyConnections.add(selectedGene);
+            if(babyConnections.get(babyConnections.size() - 1).getInnovationN() != selectedGene.getInnovationN())
+                babyConnections.add(selectedGene);
 
 
             addBabyNeuron(selectedGene.getInputNeuron(), babyNeurons);
@@ -619,6 +525,8 @@ public class Neat {
 
         return new NeatGenome(babyNeurons, babyConnections, parent1.getNumberOfInputs(), parent1.getNumberOfOutputs());
     }
+
+
 
 
     //Checked. Seems to be fine
@@ -636,5 +544,163 @@ public class Neat {
             ++i;
         }
         babyNeurons.add(babyNeuronGene);
+    }
+
+
+
+    /********************************
+     * Speciation Auxiliary Methods *
+     ********************************/
+
+    //Checked. Seems to be fine
+    private void speciate() {
+
+        boolean createNewSpecies;
+
+        for(NeatGenome ng: _currentPopulation) {
+            if(_currentSpecies.size() == 0) {
+                List<NeatGenome> membersOfSpecies = new ArrayList<>();
+                membersOfSpecies.add(ng);
+                Species newSpecies = new Species(membersOfSpecies);
+                newSpecies.setBestFitness(ng.getFitness());
+                _currentSpecies.add(newSpecies);
+            }
+            else {
+                createNewSpecies = true;
+                for(Species species : _currentSpecies) {
+                    if(compatible(ng, species.getRepresentative())) {
+                        species.getIndividuals().add(ng);
+                        createNewSpecies = false;
+                        break;
+                    }
+                }
+
+                if(createNewSpecies) {
+                    List<NeatGenome> membersOfSpecies = new ArrayList<>();
+                    membersOfSpecies.add(ng);
+                    Species newSpecies = new Species(membersOfSpecies);
+                    newSpecies.setBestFitness(ng.getFitness());
+                    _currentSpecies.add(newSpecies);
+                }
+            }
+        }
+
+        for(Species sp : _currentSpecies) {
+            //TODO: implement better sorter than bubblesort... Check if bubblesort works at all...
+            int size = sp.getIndividuals().size();
+            boolean sort = true;
+            NeatGenome temp;
+            int i, j=1;
+
+            while(sort) {
+                sort = false;
+                for(i = 0; i < size - j; ++i) {
+                    if(sp.getIndividuals().get(i).getFitness() < sp.getIndividuals().get(i+1).getFitness()) {
+                        temp = sp.getIndividuals().remove(i);
+                        sp.getIndividuals().add(i+1, temp);
+                        sort = true;
+                    }
+                }
+                ++j;
+            }
+
+
+            if(sp.getBestFitness() >= sp.getIndividuals().get(0).getFitness())
+                sp.increaseNumberOfGenerationsWithNoImprovement();
+            else {
+                sp.setNumberOfGenerationsWithNoImprovement(0);
+                sp.setBestFitness(sp.getIndividuals().get(0).getFitness());
+            }
+            sp.increaseAgeOfSpecies();
+            sp.adjustFitness();
+        }
+
+        _averagePopulationFitness = 0;
+        for(NeatGenome ng : _currentPopulation)
+            _averagePopulationFitness += ng.getAdjustedFitness();
+        _averagePopulationFitness = _averagePopulationFitness/_currentPopulation.size();
+
+        for(NeatGenome ng : _currentPopulation)
+            ng.calculateSpawns(_averagePopulationFitness);
+
+        for(Species sp : _currentSpecies)
+            sp.calculateSpawnsRequired();
+
+        _bestPerformingMember = _currentPopulation.get(0);
+        for(NeatGenome ng : _currentPopulation)
+            if(ng.getFitness() > _bestPerformingMember.getFitness())
+                _bestPerformingMember = ng;
+    }
+
+
+
+
+    //Checked. Seems to be fine
+    private boolean compatible(NeatGenome elementToCompare, NeatGenome representative) {
+        int i1 = 0;
+        int i2 = 0;
+        int disjointGenes = 0;
+        int excessGenes = 0;
+        double matchingGenes = 0;
+        double weightDifference = 0.0;
+        int i1InnovN;
+        int i2InnovN;
+        double maxGenes = 1;
+
+        while (elementToCompare.getConnections().size() > i1
+                || representative.getConnections().size() > i2) {
+
+            if (i1 == elementToCompare.getConnections().size()) {
+                ++i2;
+                ++excessGenes;
+                continue;
+            }
+
+            if (i2 == elementToCompare.getConnections().size()) {
+                ++i1;
+                ++excessGenes;
+                continue;
+            }
+
+
+            i1InnovN = elementToCompare.getConnections().get(i1).getInnovationN();
+            i2InnovN = representative.getConnections().get(i2).getInnovationN();
+
+            if (i1InnovN == i2InnovN) {
+                ++i1;
+                ++i2;
+                ++matchingGenes;
+                weightDifference += Math.abs(elementToCompare.getConnections().get(i1).getWeight()
+                        - representative.getConnections().get(i2).getWeight());
+                continue;
+            } else if (i1 < i2) {
+                ++i1;
+                ++disjointGenes;
+            } else {
+                ++i2;
+                ++disjointGenes;
+            }
+            maxGenes = elementToCompare.getConnections().size() > representative.getConnections().size()
+                    ? elementToCompare.getConnections().size() : representative.getConnections().size();
+        }
+
+        double score = ((c1 * excessGenes / maxGenes) + (c2 * disjointGenes / maxGenes)
+                + (c3 * weightDifference / matchingGenes));
+
+        return score < _compatibilityThreshold;
+    }
+
+
+
+    /*********************
+     * Save Data Methods *
+     *********************/
+
+    public void saveRelevantData() {
+        System.out.println("DO NOT STOP PROGRAM NOW!");
+        System.out.println("Saving relevant data.");
+        //TODO
+        System.out.println("Relevant data saved.");
+        System.out.println("PROGRAM CAN NOW BE STOPPED!");
     }
 }

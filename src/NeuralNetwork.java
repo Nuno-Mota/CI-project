@@ -88,7 +88,7 @@ public class NeuralNetwork implements Serializable {
     public double[] update(SensorModel sensorData) {
 
         //12 Inputs
-        //TODO: add opponents to input, add lateral speed?, add zspeed?, wheelspinvel
+        //TODO: add opponents to input, add lateralSpeed?, add zSpeed?, wheelSpinVel?
         double[] inputs  = {sensorData.getAngleToTrackAxis(), sensorData.getSpeed(),
                             sensorData.getTrackEdgeSensors()[2], sensorData.getTrackEdgeSensors()[4],
                             sensorData.getTrackEdgeSensors()[6], sensorData.getTrackEdgeSensors()[8],
@@ -104,8 +104,8 @@ public class NeuralNetwork implements Serializable {
         while(_phenotypeNeurons.get(currentNeuron).getType() == 0)
             _phenotypeNeurons.get(currentNeuron).setOutput(inputs[currentNeuron++]);
 
-        //TODO: Set the bias nerons output to 1
-        //_phenotypeNeurons.get(currentNeuron).setOutput(inputs[currentNeuron++]);
+        _phenotypeNeurons.get(currentNeuron).setOutput(1);
+        ++currentNeuron;
 
         while(currentNeuron < _phenotypeNeurons.size()) {
             double sum = 0;

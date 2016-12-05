@@ -7,8 +7,8 @@ public class NeuralNetworkConnection {
 
     private NeuralNetworkNeuron _inputNeuron;
     private NeuralNetworkNeuron _outputNeuron;
-    private double            _weight;
-    private boolean           _isRecurrent;
+    private double              _weight;
+    private boolean             _isRecurrent;
 
 
 

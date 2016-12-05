@@ -18,15 +18,14 @@ public class NeuronGene implements Serializable{
     private List<NeuronGene> _possibleOutgoing = new ArrayList<>();
 
     private Random           _rand                        = new Random();
-    private double           _activationResponseMeanValue = 3;
-    private final double     _activationResponseSTDEV     = 1;  //TODO: check what a proper value is;
+    private double           _activationResponseMeanValue = 3;  //TODO: check what is a proper value
+    private final double     _activationResponseSTDEV     = 1;  //TODO: check what is a proper value
 
 
 
     /***************
      * Constructor *
      ***************/
-
 
     //Checked. Seems to be fine
     public NeuronGene(int neuronID, int type, boolean isRecurrent,
@@ -38,6 +37,8 @@ public class NeuronGene implements Serializable{
         _positionX          = positionX;
         _positionY          = positionY;
     }
+
+
 
 
     //Checked. Seems to be fine
@@ -116,7 +117,11 @@ public class NeuronGene implements Serializable{
 
 
 
+    /********************************
+     * Activation Response Mutation *
+     ********************************/
 
+    //Checked. Seems to be fine
     public void mutateActivationResponse() {
         if(Math.random() <= 0.1)                                //10% chance of getting an entirely new value
             _activationResponse = _rand.nextGaussian()*_activationResponseSTDEV + _activationResponseMeanValue;

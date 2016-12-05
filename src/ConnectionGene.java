@@ -16,14 +16,13 @@ public class ConnectionGene implements Serializable{
     private int        _numberOfTimesDisabled = 0;
 
     private Random     _rand        = new Random();
-    private final int  _biasSTDEV   = 4;               //Check for good value?
     private final int  _weightSTDEV = 2;               //Check for good value?
 
 
 
-    /***************
-     * Constructor *
-     ***************/
+    /****************
+     * Constructors *
+     ****************/
 
     public ConnectionGene(NeuronGene inputNeuron, NeuronGene outputNeuron, double weight,
                           boolean isEnabled, boolean isRecurrent, int innovationN,
@@ -38,10 +37,12 @@ public class ConnectionGene implements Serializable{
     }
 
 
-    //Checked. Seems to be fine. There actually isn't a need to create new NeuronGenes. We could just store their ID?
+
+
+    //Checked. Seems to be fine.
     public ConnectionGene(ConnectionGene connectionToBeCopied) {
-        _inputNeuron           = new NeuronGene(connectionToBeCopied.getInputNeuron());     //TODO: incoming and outgoing connections missing
-        _outputNeuron          = new NeuronGene(connectionToBeCopied.getOutputNeuron());    //TODO: incoming and outgoing connections missing
+        _inputNeuron           = new NeuronGene(connectionToBeCopied.getInputNeuron());
+        _outputNeuron          = new NeuronGene(connectionToBeCopied.getOutputNeuron());
         _weight                = connectionToBeCopied.getWeight();
         _isEnabled             = connectionToBeCopied.getIsEnabled();
         _isRecurrent           = connectionToBeCopied.getIsRecurrent();
@@ -106,19 +107,26 @@ public class ConnectionGene implements Serializable{
 
 
 
-    /********************************
-     * Innovation Number Comparison *
-     ********************************/
+    /*******************
+     * Weight Mutation *
+     *******************/
 
-    public boolean hasSmallerInnovationNumber(ConnectionGene toCompare) {
-        return _innovationN < toCompare.getInnovationN();
-    }
-
-
+    //Checked. Seems to be fine
     public void mutateWeight() {
         if(Math.random() <= 0.2)                                //20% chance of getting an entirely new value
             _weight = _rand.nextGaussian()*_weightSTDEV;
         else                                                    //80% chance of adding noise to the current weight value
             _weight += 0.5*_rand.nextGaussian()*_weightSTDEV;
+    }
+
+
+
+    /********************************
+     * Innovation Number Comparison *
+     ********************************/
+
+    //This function is not used. Check if it would yield any improvement
+    public boolean hasSmallerInnovationNumber(ConnectionGene toCompare) {
+        return _innovationN < toCompare.getInnovationN();
     }
 }

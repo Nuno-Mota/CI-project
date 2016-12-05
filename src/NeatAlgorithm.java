@@ -2,6 +2,7 @@ import java.io.*;
 import java.util.List;
 
 public class NeatAlgorithm {
+
     /**********************
      * NEAT's main method *     //This is the one to be run when training the optimal RNN. Otherwise comment
      **********************/
@@ -11,7 +12,7 @@ public class NeatAlgorithm {
 
         int _numberOfInputs  = 12;
         int _numberOfOutputs = 3;
-        int _populationSize  = 200;
+        int _populationSize  = 50;
         Neat neat;
 
 
@@ -45,7 +46,6 @@ public class NeatAlgorithm {
                 return;
             }
         }
-
         else
             neat = new Neat(_numberOfInputs, _numberOfOutputs, _populationSize);
             //neat = new Neat(Integer.parseInt(args[0]), Integer.parseInt(args[1]), Integer.parseInt(args[2]));
