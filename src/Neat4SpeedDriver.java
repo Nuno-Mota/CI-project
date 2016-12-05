@@ -85,7 +85,7 @@ public class Neat4SpeedDriver extends AbstractDriver {
 
         //System.out.println("Distance raced = " + sensors.getDistanceRaced());
         if(sensors.getLastLapTime() != 0) {
-            _fitness = 100 + sensors.getDistanceRaced()/sensors.getLastLapTime();
+            _fitness = 100 + sensors.getDistanceRaced()*(1 + 1/sensors.getLastLapTime());
             action.restartRace = true;
         }
         if(_previousMaxDistRaced >= sensors.getDistanceRaced())
@@ -100,7 +100,7 @@ public class Neat4SpeedDriver extends AbstractDriver {
             _cyclesGoingBack = 0;
 
         if(_cyclesWithoutMovingForward > 500 || sensors.getTrackEdgeSensors()[0] == -1 || _cyclesGoingBack > 500){
-            _fitness = sensors.getDistanceRaced()/sensors.getCurrentLapTime();
+            _fitness = sensors.getDistanceRaced();
             action.restartRace = true;
         }
 

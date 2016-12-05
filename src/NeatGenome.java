@@ -96,6 +96,7 @@ public class NeatGenome implements Serializable{
             }
         }
 
+        _connections = connections;
         createPossibleListsForEachNeuron(_neurons, _connections);
     }
 
@@ -227,6 +228,8 @@ public class NeatGenome implements Serializable{
         double upper = 0.4;    //Highest value of chance of a random connection being disabled
         int connectionIndex;
 
+        System.out.println("ConnectionSize = " + _connections.size());
+
         if(Math.random() <= Math.random() * (upper - lower) + lower) {
             while(numberOfTriesToEnableConnection-- != 0) {
                 connectionIndex = ThreadLocalRandom.current().nextInt(0, _connections.size());
@@ -348,7 +351,7 @@ public class NeatGenome implements Serializable{
                 int inputNeuronType = _connections.get(chosenConnectionNumber).getInputNeuron().getType();
 
                 if(_connections.get(chosenConnectionNumber).getIsEnabled() &&
-                        _connections.get(chosenConnectionNumber).getIsRecurrent() &&
+                        !_connections.get(chosenConnectionNumber).getIsRecurrent() &&
                         inputNeuronType != 3)
                     connectionFound = true;
             }

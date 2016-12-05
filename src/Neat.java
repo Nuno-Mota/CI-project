@@ -16,8 +16,8 @@ public class Neat {
     private List<NeatGenome>    _currentPopulation = new ArrayList<>();
     private List<Species>       _currentSpecies    = new ArrayList<>();
 
-    private double              _compatibilityThreshold = 10;
-    private int                 c1 = 1, c2 = 1, c3 = 5;
+    private double              _compatibilityThreshold = 300;
+    private int                 c1 = 1, c2 = 1, c3 = 3;
     private static final double _likelihoodOfBestMating = 0.35;
     private static final double _probabilityOfMating = 0.85;
     private double              _averagePopulationFitness;
@@ -130,6 +130,7 @@ public class Neat {
         if(_generationNumber > 1)
             createNewGeneration();
 
+        ++_generationNumber;
         generatePhenotypes();
         estimateFitness();//TODO: MISSING IMPLEMENTATION
         //TODO: CHECKING ZONE 0
@@ -154,7 +155,6 @@ public class Neat {
 
     //Checked. Seems to be fine
     public void createNewGeneration() {
-        ++_generationNumber;
         System.out.println("Creating next generation. This will be generation number " + _generationNumber + ".");
 
 
@@ -216,15 +216,15 @@ public class Neat {
                                 max      = (int)rand.nextGaussian() * (int)(size * 0.5) + meanIndx + 1;
 
                                 //attributes a value to the maxIndx, effectively determining which elements of
-                                //the species have a chance of mating //TODO: I don't get this
-                                if(max > 4)
+                                //the species have a chance of mating
+                                if(max >= 4)
                                     maxIndx = ThreadLocalRandom.current().nextInt(3, max);
                                 else
                                     maxIndx = 2;        //maxIndx needs to be at least 2 to select different parents
 
                                 //makes sure that the added gaussian noise doesn't exclude any of the
                                 //_likelihoodOfBestMating% best performing members of the species
-                                if(maxIndx < (int) Math.round(size * _likelihoodOfBestMating)) //TODO: Can meanIndx be used instead?
+                                if(maxIndx < (int) Math.round(size * _likelihoodOfBestMating))
                                     maxIndx = (int) Math.round(size * _likelihoodOfBestMating);
 
                                 //makes sure that the gaussian noise add doesn't create a maxIndx out
@@ -243,11 +243,8 @@ public class Neat {
                                     parent2Indx = parent1Indx;
 
                                     //selects the second parent, making sure that it is not the same
-                                    int maxtries = 5;
-                                    while(parent1Indx == parent2Indx && maxtries != 0) {
+                                    while(parent1Indx == parent2Indx)
                                         parent2Indx = ThreadLocalRandom.current().nextInt(0, maxIndx);
-                                        --maxtries;
-                                    }
 
                                     newPopulation.add(crossover(sp.getIndividuals().get(parent1Indx), sp.getIndividuals().get(parent2Indx)));
                                     ++currentNumberOfOffspring;
@@ -292,6 +289,7 @@ public class Neat {
         //never decreases.
         for(NeatGenome ng : newPopulation) {
 
+
             //Function that randomly mutates weights
             ng.mutateWeights();
 
@@ -320,6 +318,8 @@ public class Neat {
             ng.addNeuron(addNeuronChance, numberOfTriesToFindOldConnection);
         }
 
+
+        _currentPopulation = newPopulation;
 
         //Finally, add the best genomes of the previous generation (which are unchanged) to the new population and
         //set them as the species representatives for speciation after fitness estimation.
@@ -409,6 +409,9 @@ public class Neat {
 
     public void estimateFitness() {
         System.out.println("Starting fitness estimation.");
+
+        System.out.println("NUMBER OF SPECIES = " + _currentSpecies.size());
+
         Neat4SpeedDriver[] drivers = new Neat4SpeedDriver[1];
         for(NeatGenome ng : _currentPopulation){
             //Start a race
@@ -421,8 +424,11 @@ public class Neat {
 
             //for speedup set withGUI to false
             race.runRace(drivers, true);
+            System.out.println("FITNESS = " + drivers[0].getFitness());
             ng.setFitness(drivers[0].getFitness());
         }
+
+
         System.out.println("Fitness estimation finished.");
     }
 
@@ -437,6 +443,8 @@ public class Neat {
             System.out.println("Redefining population species.");
 
         speciate();
+
+        System.out.println("BEST FITNESS = " + getBestPerformingMember().getFitness());
 
         if (_generationNumber == 1)
             System.out.println("Population species defined.");
