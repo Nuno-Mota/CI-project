@@ -18,8 +18,8 @@ public class NeuronGene implements Serializable{
     private List<NeuronGene> _possibleOutgoing = new ArrayList<>();
 
     private Random           _rand                        = new Random();
-    private double           _activationResponseMeanValue = 200;  //TODO: check what is a proper value
-    private final double     _activationResponseSTDEV     = 10;  //TODO: check what is a proper value
+    private double           _activationResponseMeanValue = 3.5;  //TODO: check what is a proper value
+    private final double     _activationResponseSTDEV     = 0.5;  //TODO: check what is a proper value
 
 
 

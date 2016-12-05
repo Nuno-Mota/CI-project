@@ -89,18 +89,19 @@ public class NeuralNetwork implements Serializable {
 
         //12 Inputs
         //TODO: add opponents to input, add lateralSpeed?, add zSpeed?, wheelSpinVel?
-        double[] inputs  = {sensorData.getAngleToTrackAxis(), sensorData.getSpeed(),
-                            sensorData.getTrackEdgeSensors()[2], sensorData.getTrackEdgeSensors()[4],
-                            sensorData.getTrackEdgeSensors()[6], sensorData.getTrackEdgeSensors()[8],
-                            sensorData.getTrackEdgeSensors()[9], sensorData.getTrackEdgeSensors()[10],
-                            sensorData.getTrackEdgeSensors()[12], sensorData.getTrackEdgeSensors()[14],
-                            sensorData.getTrackEdgeSensors()[16], sensorData.getTrackPosition()};
+        //TODO: add gears
+        double[] inputs  = {sensorData.getAngleToTrackAxis()/Math.PI, sensorData.getSpeed()/350,
+                            sensorData.getTrackEdgeSensors()[2]/200, sensorData.getTrackEdgeSensors()[4]/200,
+                            sensorData.getTrackEdgeSensors()[6]/200, sensorData.getTrackEdgeSensors()[8]/200,
+                            sensorData.getTrackEdgeSensors()[9]/200, sensorData.getTrackEdgeSensors()[10]/200,
+                            sensorData.getTrackEdgeSensors()[12]/200, sensorData.getTrackEdgeSensors()[14]/200,
+                            sensorData.getTrackEdgeSensors()[16]/200, sensorData.getTrackPosition()};
         double[] outputs = {0.0, 0.0, 0.0};
 
         int currentNeuron = 0;
         int currentOutput = 0;
 
-        System.out.println(inputs.length);
+        //System.out.println(inputs.length);
 
         while(_phenotypeNeurons.get(currentNeuron).getType() == 0) {
             //System.out.println("Type = " + _phenotypeNeurons.get(currentNeuron).getType());
@@ -131,16 +132,19 @@ public class NeuralNetwork implements Serializable {
 
             if(_phenotypeNeurons.get(currentNeuron).getType() == 1) {
                 outputs[currentOutput++] = _phenotypeNeurons.get(currentNeuron).getOutput();
-                System.out.println("Sigmoind: " + sigmoid(sum, _phenotypeNeurons.get(currentNeuron).getActivationResponse()));
-                System.out.println("Sum" + sum);
-                System.out.println("ActivationResponse:" + _phenotypeNeurons.get(currentNeuron).getActivationResponse());
+//                System.out.println("Sigmoind: " + sigmoid(sum, _phenotypeNeurons.get(currentNeuron).getActivationResponse()));
+//                System.out.println("Sum" + sum);
+//                System.out.println("ActivationResponse:" + _phenotypeNeurons.get(currentNeuron).getActivationResponse());
             }
 
             ++currentNeuron;
         }
         _steering      = outputs[0];
-        _acceleration  = outputs[1];
-        _breaking      = outputs[2];
+        _acceleration  = Math.abs(outputs[1]);
+        _breaking      = Math.abs(outputs[2]);
+
+        outputs[1]     = Math.abs(outputs[1]);
+        outputs[2]     = Math.abs(outputs[2]);
         return outputs;
     }
 

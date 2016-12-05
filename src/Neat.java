@@ -417,9 +417,11 @@ public class Neat {
             race.laps = 1;
             drivers[0] = new Neat4SpeedDriver(ng.getNeuralNetwork());
 
+            System.out.println("GenomeID = " + ng.getGenomeID());
 
             //for speedup set withGUI to false
             race.runRace(drivers, true);
+            ng.setFitness(drivers[0].getFitness());
         }
         System.out.println("Fitness estimation finished.");
     }
@@ -671,7 +673,7 @@ public class Neat {
                 continue;
             }
 
-            if (i2 == elementToCompare.getConnections().size()) {
+            if (i2 == representative.getConnections().size()) {
                 ++i1;
                 ++excessGenes;
                 continue;
@@ -682,11 +684,11 @@ public class Neat {
             i2InnovN = representative.getConnections().get(i2).getInnovationN();
 
             if (i1InnovN == i2InnovN) {
-                ++i1;
-                ++i2;
                 ++matchingGenes;
                 weightDifference += Math.abs(elementToCompare.getConnections().get(i1).getWeight()
                         - representative.getConnections().get(i2).getWeight());
+                ++i1;
+                ++i2;
                 continue;
             } else if (i1 < i2) {
                 ++i1;

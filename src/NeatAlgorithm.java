@@ -14,7 +14,7 @@ public class NeatAlgorithm {
 
         int _numberOfInputs  = 12;
         int _numberOfOutputs = 3;
-        int _populationSize  = 50;
+        int _populationSize  = 5;
         Neat neat;
 
         //Set path to torcs.properties

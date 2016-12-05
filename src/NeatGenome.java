@@ -27,8 +27,8 @@ public class NeatGenome implements Serializable{
     private Random               _rand             = new Random();
     private final int            _weightSTDEV      = 2;               //Check for good value?
 
-    private double           _activationResponseMeanValue = 200;  //TODO: check what is a proper value
-    private final double     _activationResponseSTDEV     = 10;  //TODO: check what is a proper value
+    private double           _activationResponseMeanValue = 3.5;  //TODO: check what is a proper value
+    private final double     _activationResponseSTDEV     = 0.5;  //TODO: check what is a proper value
 
 
 
@@ -45,14 +45,16 @@ public class NeatGenome implements Serializable{
 
         //Create Input neurons
         for(int i = 0; i < _numberOfInputs; ++i)
-            _neurons.add(new NeuronGene(i, 0, false, _rand.nextGaussian()*_activationResponseSTDEV + _activationResponseMeanValue, i/1.0, 0));
+            _neurons.add(new NeuronGene(i, 0, false, _activationResponseMeanValue, i/1.0, 0));
 
         //Create Bias Neuron (one neuron is enough for all. Just add connections as needed)
-        _neurons.add(new NeuronGene(_numberOfInputs, 3, false, 4.9, 1.3, 0));
+        _neurons.add(new NeuronGene(_numberOfInputs, 3, false, _activationResponseMeanValue, 1.3, 0));
 
         //Create Output neurons
-        for(int i = 0; i < _numberOfOutputs; ++i)
-            _neurons.add(new NeuronGene(i + _numberOfInputs + 1, 1, false, _rand.nextGaussian()*_activationResponseSTDEV + _activationResponseMeanValue, i/1.0, 1));
+        for(int i = 0; i < _numberOfOutputs; ++i) {
+            double act = _rand.nextGaussian()*_activationResponseSTDEV + _activationResponseMeanValue;
+            _neurons.add(new NeuronGene(i + _numberOfInputs + 1, 1, false, act, i/1.0, 1));
+        }
 
 
         //Create possible Incoming and Outgoing connections for all Neurons
@@ -133,7 +135,7 @@ public class NeatGenome implements Serializable{
      * Getters and Setters *
      ***********************/
 
-    private int getGenomeID() { return _genomeID; }
+    public int getGenomeID() { return _genomeID; }
     private void setGenomeID(int genomeID) { _genomeID = genomeID; }
 
     public List<NeuronGene> getNeurons() { return _neurons; }
@@ -146,7 +148,7 @@ public class NeatGenome implements Serializable{
     private void setNeuralNetwork(NeuralNetwork neuralNetwork) { _neuralNetwork = neuralNetwork; }
 
     public double getFitness() { return _fitness; }
-    private void setFitness(double fitness) { _fitness = fitness; }
+    public void setFitness(double fitness) { _fitness = fitness; }
 
     public double getAdjustedFitness() { return _adjustedFitness; }
     public void setAdjustedFitness(double adjustedFitness) { _adjustedFitness = adjustedFitness; }

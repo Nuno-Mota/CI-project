@@ -9,12 +9,21 @@ import scr.SensorModel;
 public class Neat4SpeedDriver extends AbstractDriver {
 
     private NeuralNetwork _neuralNetwork;
+    private double        _fitness;
+    private double        _previousMaxDistRaced = 0;
+    private int           _cyclesWithoutMovingForward = 0;
+    private int           _cyclesGoingBack = 0;
+
 
     public Neat4SpeedDriver(NeuralNetwork neuralNetwork) {
         initialize();
         _neuralNetwork = neuralNetwork;
 //        neuralNetwork = neuralNetwork.loadGenome();
     }
+
+
+    public double getFitness() { return _fitness; }
+
 
     private void initialize() {
         this.enableExtras(new AutomatedClutch());
@@ -74,17 +83,38 @@ public class Neat4SpeedDriver extends AbstractDriver {
             action = new Action();
         }
 
+        //System.out.println("Distance raced = " + sensors.getDistanceRaced());
+        if(sensors.getLastLapTime() != 0) {
+            _fitness = 100 + sensors.getDistanceRaced()/sensors.getLastLapTime();
+            action.restartRace = true;
+        }
+        if(_previousMaxDistRaced >= sensors.getDistanceRaced())
+            ++_cyclesWithoutMovingForward;
+        else {
+            _previousMaxDistRaced = sensors.getDistanceRaced();
+            _cyclesWithoutMovingForward = 0;
+        }
+        if(Math.abs(sensors.getAngleToTrackAxis()) >= Math.PI/2)
+            ++_cyclesGoingBack;
+        else
+            _cyclesGoingBack = 0;
+
+        if(_cyclesWithoutMovingForward > 500 || sensors.getTrackEdgeSensors()[0] == -1 || _cyclesGoingBack > 500){
+            _fitness = sensors.getDistanceRaced()/sensors.getCurrentLapTime();
+            action.restartRace = true;
+        }
+
         double[] outputs  = _neuralNetwork.update(sensors);
         action.steering   = outputs[0];
         action.accelerate = outputs[1];
         action.brake      = outputs[2];
 
 
-        System.out.println("--------------" + getDriverName() + "--------------");
-        System.out.println("Steering: " + action.steering);
-        System.out.println("Acceleration: " + action.accelerate);
-        System.out.println("Brake: " + action.brake);
-        System.out.println("-----------------------------------------------");
+//        System.out.println("--------------" + getDriverName() + "--------------");
+//        System.out.println("Steering: " + action.steering);
+//        System.out.println("Acceleration: " + action.accelerate);
+//        System.out.println("Brake: " + action.brake);
+//        System.out.println("-----------------------------------------------");
         return action;
     }
 }
