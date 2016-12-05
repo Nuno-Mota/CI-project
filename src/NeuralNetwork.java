@@ -116,6 +116,11 @@ public class NeuralNetwork implements Serializable {
             double sum = 0;
 
             for(NeuralNetworkConnection nnc : _phenotypeNeurons.get(currentNeuron).getIncoming()) {
+//                if(_phenotypeNeurons.get(currentNeuron).getType() == 1){
+////                    for(NeuralNetworkConnection n :_phenotypeNeurons.get(currentNeuron).getIncoming()){
+////                        System.out.println(n.getWeight());
+////                    }
+//                }
                 double weight = nnc.getWeight();
                 double output = nnc.getInputNeuron().getOutput();
                 sum += weight*output;
@@ -123,8 +128,13 @@ public class NeuralNetwork implements Serializable {
 
             _phenotypeNeurons.get(currentNeuron).setOutput(sigmoid(sum, _phenotypeNeurons.get(currentNeuron).getActivationResponse()));
 
-            if(_phenotypeNeurons.get(currentNeuron).getType() == 1)
+
+            if(_phenotypeNeurons.get(currentNeuron).getType() == 1) {
                 outputs[currentOutput++] = _phenotypeNeurons.get(currentNeuron).getOutput();
+                System.out.println("Sigmoind: " + sigmoid(sum, _phenotypeNeurons.get(currentNeuron).getActivationResponse()));
+                System.out.println("Sum" + sum);
+                System.out.println("ActivationResponse:" + _phenotypeNeurons.get(currentNeuron).getActivationResponse());
+            }
 
             ++currentNeuron;
         }
@@ -136,6 +146,6 @@ public class NeuralNetwork implements Serializable {
 
 
     private double sigmoid(double netInput, double activationResponse) {
-        return 1/(1+Math.exp(-netInput/activationResponse));
+        return 2/(1+Math.exp(-netInput/activationResponse))-1;
     }
 }
