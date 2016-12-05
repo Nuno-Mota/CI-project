@@ -183,7 +183,7 @@ public class Neat {
                 if(currentNumberOfOffspring < _populationSize && sp.getNumberOfGenerationsWithNoImprovement() < _maxGenWithoutImprovment) {
                     //Just serves the purpose of re-adding the best element of each species
                     //to the next generation, without having them suffer mutations
-                    if(speciesIterator == 0) { //TODO: only the first member of the first species is added, but shouldn't it be the first member of every species?
+                    if(speciesIterator == 0) {
                         List<NeatGenome> newSpeciesPop = new ArrayList<>();
                         newSpeciesPop.add(new NeatGenome(sp.getIndividuals().get(0)));
                         clearedSpecies.add(newSpeciesPop);
@@ -213,10 +213,10 @@ public class Neat {
                                 meanIndx = (int)(size * _likelihoodOfBestMating);     //TODO: check if this works properly
 
                                 //adds gaussian noise, so that lower performing members have a chance of mating with better performing ones
-                                max      = (int)rand.nextGaussian() * meanIndx + (int)(size * 0.5) + 1;
+                                max      = (int)rand.nextGaussian() * (int)(size * 0.5) + meanIndx + 1;
 
                                 //attributes a value to the maxIndx, effectively determining which elements of
-                                //the species have a chance of mating
+                                //the species have a chance of mating //TODO: I don't get this
                                 if(max > 4)
                                     maxIndx = ThreadLocalRandom.current().nextInt(3, max);
                                 else
@@ -224,7 +224,7 @@ public class Neat {
 
                                 //makes sure that the added gaussian noise doesn't exclude any of the
                                 //_likelihoodOfBestMating% best performing members of the species
-                                if(maxIndx < (int) Math.round(size * _likelihoodOfBestMating))
+                                if(maxIndx < (int) Math.round(size * _likelihoodOfBestMating)) //TODO: Can meanIndx be used instead?
                                     maxIndx = (int) Math.round(size * _likelihoodOfBestMating);
 
                                 //makes sure that the gaussian noise add doesn't create a maxIndx out
@@ -235,7 +235,7 @@ public class Neat {
                                 //Selects first potential parent
                                 parent1Indx = ThreadLocalRandom.current().nextInt(0, maxIndx);
 
-                                //There's a chance that the first potential parent doesn't ate at all nd
+                                //There's a chance that the first potential parent doesn't mate at all and
                                 //just gets added to the new population (with future possible mutations)
                                 if(rand.nextDouble() > _probabilityOfMating)
                                     newPopulation.add(new NeatGenome(sp.getIndividuals().get(parent1Indx)));
@@ -243,8 +243,11 @@ public class Neat {
                                     parent2Indx = parent1Indx;
 
                                     //selects the second parent, making sure that it is not the same
-                                    while(parent1Indx == parent2Indx)
+                                    int maxtries = 5;
+                                    while(parent1Indx == parent2Indx && maxtries != 0) {
                                         parent2Indx = ThreadLocalRandom.current().nextInt(0, maxIndx);
+                                        --maxtries;
+                                    }
 
                                     newPopulation.add(crossover(sp.getIndividuals().get(parent1Indx), sp.getIndividuals().get(parent2Indx)));
                                     ++currentNumberOfOffspring;
@@ -406,7 +409,15 @@ public class Neat {
 
     public void estimateFitness() {
         System.out.println("Starting fitness estimation.");
-        //TODO
+        for(NeatGenome ng : _currentPopulation){
+            //Start a race
+            Neat4SpeedRace race = new Neat4SpeedRace();
+            race.setTrack("aalborg", "road");
+            race.laps = 1;
+
+            //for speedup set withGUI to false
+            race.runRace(drivers, true);
+        }
         System.out.println("Fitness estimation finished.");
     }
 
