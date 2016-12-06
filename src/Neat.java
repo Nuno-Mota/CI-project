@@ -1,5 +1,4 @@
-import java.io.PrintStream;
-import java.io.Serializable;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -138,6 +137,7 @@ public class Neat implements Serializable {
         generatePhenotypes();
         estimateFitness();//TODO: MISSING IMPLEMENTATION
         defineSpecies();
+        saveRelevantData();
     }
 
 
@@ -750,10 +750,24 @@ public class Neat implements Serializable {
      *********************/
 
     public void saveRelevantData() {
-        System.out.println("DO NOT STOP PROGRAM NOW!");
-        System.out.println("Saving relevant data.");
-        //TODO
-        System.out.println("Relevant data saved.");
-        System.out.println("PROGRAM CAN NOW BE STOPPED!");
+        System.out.println("Saving data.");
+
+        //Store the state of this neural network
+        ObjectOutputStream out = null;
+        try {
+            //create the memory folder manually
+            out = new ObjectOutputStream(new FileOutputStream("memory/mydriver.mem"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            if (out != null) {
+                out.writeObject(this);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        System.out.println("Data saved.");
     }
 }

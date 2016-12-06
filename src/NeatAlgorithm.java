@@ -14,27 +14,26 @@ public class NeatAlgorithm {
 
         int _numberOfInputs  = 12;
         int _numberOfOutputs = 3;
-        int _populationSize  = 5;
+        int _populationSize  = 6;
         Neat neat;
-
-        String _pathnameSingleDriver = "src/memory/Single_Driver/lastGeneration.mem";
-        String _pathnameSingleDriverAndOpponents = "src/memory/Single_Driver_and_Opponents/lastGeneration.mem";
-        String _pathnameTeamsAndOpponents = "src/memory/Teams_and_Opponents/lastGeneration.mem";
 
         //Set path to torcs.properties
         TorcsConfiguration.getInstance().initialize(new File("torcs.properties"));
+        //Set path to memory
+        String _pathnameSingleDriver = "memory/mydriver.mem";
+//        String _pathnameSingleDriverAndOpponents = "src/memory/Single_Driver_and_Opponents/lastGeneration.mem";
+//        String _pathnameTeamsAndOpponents = "src/memory/Teams_and_Opponents/lastGeneration.mem";
 
         File savedGeneration = new File(_pathnameSingleDriver);
-
         if (savedGeneration.exists() && !savedGeneration.isDirectory()) {   //If there is a population in memory load it
             try {
                 FileInputStream fis   = new FileInputStream(savedGeneration);
                 ObjectInputStream ois = new ObjectInputStream(fis);
-
-                neat = (Neat)ois.readObject();
-
+                neat = (Neat) ois.readObject();
+                System.out.println("Loaded population from file.");
                 ois.close();
                 fis.close();
+                
 
             } catch (FileNotFoundException e) {
                 System.out.println("Error opening generation file: File does not exist.");
