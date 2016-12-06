@@ -19,6 +19,7 @@ public class NeuralNetwork implements Serializable {
     private double _breaking     = 0;
     private double _steering     = 0;
 
+    NeuralNetwork() {}
     NeuralNetwork(List<NeuralNetworkNeuron> phenotypeNeurons) {
         _phenotypeNeurons = phenotypeNeurons;
     }
@@ -58,12 +59,12 @@ public class NeuralNetwork implements Serializable {
     }
 
     // Load a neural network from memory
-    public NeuralNetwork loadGenome() {
+    public NeuralNetwork loadGenome(String path) {
 
         // Read from disk using FileInputStream
         FileInputStream f_in = null;
         try {
-            f_in = new FileInputStream("memory/mydriver.mem");
+            f_in = new FileInputStream(path);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }

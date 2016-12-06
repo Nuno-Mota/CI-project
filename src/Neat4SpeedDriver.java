@@ -12,7 +12,7 @@ public class Neat4SpeedDriver extends AbstractDriver implements Serializable {
 
     private boolean             _DEBUG = false;
 
-    private NeuralNetwork _neuralNetwork;
+    private NeuralNetwork _neuralNetwork = new NeuralNetwork();
     private double        _fitness;
     private double        _previousMaxDistRaced = 0;
     private int           _cyclesWithoutMovingForward = 0;
@@ -24,6 +24,12 @@ public class Neat4SpeedDriver extends AbstractDriver implements Serializable {
         _neuralNetwork = neuralNetwork;
 //        neuralNetwork = neuralNetwork.loadGenome();
     }
+
+    public Neat4SpeedDriver(String path){
+        initialize();
+        _neuralNetwork = _neuralNetwork.loadGenome(path);
+    }
+
 
 
     public double getFitness() { return _fitness; }

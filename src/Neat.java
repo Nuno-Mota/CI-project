@@ -26,6 +26,8 @@ public class Neat implements Serializable {
     private double              _averagePopulationFitness;
     private NeatGenome          _bestPerformingMember;
     private int                 _maxGenWithoutImprovment = 10;
+    private boolean             _file1 = true;
+
 
 
 
@@ -120,6 +122,10 @@ public class Neat implements Serializable {
     }
     private void setBestPerformingMember(NeatGenome bestPerformingMember) {
         _bestPerformingMember = bestPerformingMember;
+    }
+
+    public void toggleFile() {
+        _file1 = !_file1;
     }
 
 
@@ -396,7 +402,7 @@ public class Neat implements Serializable {
             //Start a race
             System.setOut(new NullPrintStream());
             Neat4SpeedRace race = new Neat4SpeedRace();
-            race.setTrack("alpine-1", "road");
+            race.setTrack("aalborg", "road");
             race.laps = 1;
             drivers[0] = new Neat4SpeedDriver(ng.getNeuralNetwork());
             System.setOut(original);
@@ -409,7 +415,7 @@ public class Neat implements Serializable {
             if(_DEBUG)
                 System.out.println("NEAT: starting race");
             System.setOut(new NullPrintStream());
-            race.runRace(drivers, true);
+            race.runRace(drivers, false);
             System.setOut(original);
 
             System.out.println("FITNESS = " + drivers[0].getFitness());
@@ -797,18 +803,45 @@ public class Neat implements Serializable {
 
     public void saveRelevantData() {
         System.out.println("Saving data.");
+        String filename;
+        if (_file1)
+            filename = "memory/mydriver1.mem";
+        else
+            filename = "memory/mydriver2.mem";
+        toggleFile();
+
+        NeatGenome best = _currentPopulation.get(0);
+        for(NeatGenome ng : _currentPopulation)
+            if(ng.getFitness() > best.getFitness())
+                best = ng;
 
         //Store the state of this neural network
         ObjectOutputStream out = null;
         try {
             //create the memory folder manually
-            out = new ObjectOutputStream(new FileOutputStream("memory/mydriver.mem"));
+            out = new ObjectOutputStream(new FileOutputStream(filename));
         } catch (IOException e) {
             e.printStackTrace();
         }
         try {
             if (out != null) {
                 out.writeObject(this);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        filename = "bestOfGen" + _generationNumber;
+        out = null;
+        try {
+            //create the memory folder manually
+            out = new ObjectOutputStream(new FileOutputStream(filename));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            if (out != null) {
+                out.writeObject(best.getNeuralNetwork());
             }
         } catch (IOException e) {
             e.printStackTrace();
