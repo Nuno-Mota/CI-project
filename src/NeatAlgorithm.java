@@ -17,24 +17,21 @@ public class NeatAlgorithm {
         int _populationSize  = 5;
         Neat neat;
 
+        String _pathnameSingleDriver = "src/memory/Single_Driver/lastGeneration.mem";
+        String _pathnameSingleDriverAndOpponents = "src/memory/Single_Driver_and_Opponents/lastGeneration.mem";
+        String _pathnameTeamsAndOpponents = "src/memory/Teams_and_Opponents/lastGeneration.mem";
+
         //Set path to torcs.properties
         TorcsConfiguration.getInstance().initialize(new File("torcs.properties"));
 
-        File savedGeneration = new File("src/memory/lastGeneration.mem");
+        File savedGeneration = new File(_pathnameSingleDriver);
 
         if (savedGeneration.exists() && !savedGeneration.isDirectory()) {   //If there is a population in memory load it
             try {
                 FileInputStream fis   = new FileInputStream(savedGeneration);
                 ObjectInputStream ois = new ObjectInputStream(fis);
 
-                int numberOfInputs   = (int)ois.readObject();
-                int numberOfOutputs  = (int)ois.readObject();
-                int populationSize   = (int)ois.readObject();
-                int generationNumber = (int)ois.readObject();
-                List<NeatGenome> currentPopulation = (List<NeatGenome>)ois.readObject();
-                //TODO: Needs checking!!
-                neat = new Neat(numberOfInputs, numberOfOutputs, populationSize, generationNumber, currentPopulation);
-
+                neat = (Neat)ois.readObject();
 
                 ois.close();
                 fis.close();

@@ -1,13 +1,17 @@
+import java.io.PrintStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class Neat {
+public class Neat implements Serializable {
 
     /**********************
      * Internal Variables *
      **********************/
+
+    private boolean             _DEBUG = false;
 
     private int                 _numberOfInputs;
     private int                 _numberOfOutputs;
@@ -16,13 +20,13 @@ public class Neat {
     private List<NeatGenome>    _currentPopulation = new ArrayList<>();
     private List<Species>       _currentSpecies    = new ArrayList<>();
 
-    private double              _compatibilityThreshold = 300;
+    private double              _compatibilityThreshold = 7.15;
     private int                 c1 = 1, c2 = 1, c3 = 3;
-    private static final double _likelihoodOfBestMating = 0.35;
+    private static final double _likelihoodOfBestMating = 0.2;
     private static final double _probabilityOfMating = 0.85;
     private double              _averagePopulationFitness;
     private NeatGenome          _bestPerformingMember;
-    private int                 _maxGenWithoutImprovment = 25;
+    private int                 _maxGenWithoutImprovment = 10;
 
 
 
@@ -133,7 +137,6 @@ public class Neat {
         ++_generationNumber;
         generatePhenotypes();
         estimateFitness();//TODO: MISSING IMPLEMENTATION
-        //TODO: CHECKING ZONE 0
         defineSpecies();
     }
 
@@ -155,7 +158,7 @@ public class Neat {
 
     //Checked. Seems to be fine
     public void createNewGeneration() {
-        System.out.println("Creating next generation. This will be generation number " + _generationNumber + ".");
+        //System.out.println("Creating next generation. This will be generation number " + _generationNumber + ".");
 
 
         //BFS alternative that automatically adds members from every species, without increasing population size.
@@ -184,6 +187,8 @@ public class Neat {
                     //Just serves the purpose of re-adding the best element of each species
                     //to the next generation, without having them suffer mutations
                     if(speciesIterator == 0) {
+                        if(_DEBUG)
+                            System.out.println("Select Best of Species");
                         List<NeatGenome> newSpeciesPop = new ArrayList<>();
                         newSpeciesPop.add(new NeatGenome(sp.getIndividuals().get(0)));
                         clearedSpecies.add(newSpeciesPop);
@@ -196,6 +201,8 @@ public class Neat {
                         amountToSpawn = sp.getSpawnsRequired();
 
                         if(amountToSpawn > 0) {//Check whether new spawns are required
+                            if(_DEBUG)
+                                System.out.println("Spawn New Individuals");
                             maybeMoreSpawnsRequired = true;
                             size = sp.getIndividuals().size();
 
@@ -208,6 +215,9 @@ public class Neat {
                                 ++currentNumberOfOffspring;
                             }
                             else {
+                                if(_DEBUG)
+                                    System.out.println("Selecting max index for parent selection");
+
                                 //get's the index (approx) of the element corresponding to _likelihoodOfBestMating% of the species
                                 //so that better performing elements have a higher chance of mating
                                 meanIndx = (int)(size * _likelihoodOfBestMating);     //TODO: check if this works properly
@@ -242,9 +252,19 @@ public class Neat {
                                 else {
                                     parent2Indx = parent1Indx;
 
+                                    if(_DEBUG)
+                                        System.out.println("Selecting 2nd parent");
+                                    if(_DEBUG)
+                                        System.out.println("MaxIndx = " + maxIndx);
+                                    if(_DEBUG)
+                                        System.out.println("Number Of Individuals = " + sp.getIndividuals().size());
+
                                     //selects the second parent, making sure that it is not the same
                                     while(parent1Indx == parent2Indx)
                                         parent2Indx = ThreadLocalRandom.current().nextInt(0, maxIndx);
+
+                                    if(_DEBUG)
+                                        System.out.println("Going to crossover selected parents");
 
                                     newPopulation.add(crossover(sp.getIndividuals().get(parent1Indx), sp.getIndividuals().get(parent2Indx)));
                                     ++currentNumberOfOffspring;
@@ -263,9 +283,14 @@ public class Neat {
             //If after each species generated all required spawns there is still a smaller population than
             //required, use tournament method to select parents to generate new members. Allows for any genome to mate
             if(!maybeMoreSpawnsRequired) {
+                if(_DEBUG)
+                    System.out.println("TOURNAMENT");
                 while(currentNumberOfOffspring < _populationSize) {
                     NeatGenome temp1 = _currentPopulation.get(ThreadLocalRandom.current().nextInt(0, _currentPopulation.size()));
                     NeatGenome lastTemp1 = _currentPopulation.get(ThreadLocalRandom.current().nextInt(0, _currentPopulation.size()));
+
+                    if(_DEBUG)
+                        System.out.println("Selecting parents for tournament");
 
                     for (int i = 0; i < 5; ++i) {
                         NeatGenome temp2 = _currentPopulation.get(ThreadLocalRandom.current().nextInt(0, _currentPopulation.size()));
@@ -275,6 +300,9 @@ public class Neat {
                             temp1 = temp2;
                         }
                     }
+
+                    if(_DEBUG)
+                        System.out.println("Crossover for tournament");
 
                     newPopulation.add(crossover(lastTemp1, temp1));
                     ++currentNumberOfOffspring;
@@ -289,20 +317,34 @@ public class Neat {
         //never decreases.
         for(NeatGenome ng : newPopulation) {
 
+            if(_DEBUG)
+                System.out.println("Mutate Weights");
 
             //Function that randomly mutates weights
             ng.mutateWeights();
 
+            if(_DEBUG)
+                System.out.println("Mutate Activation Response");
+
             //Function that randomly mutates ActivationResponses
             ng.mutateActivationResponses();
+
+            if(_DEBUG)
+                System.out.println("Disable Random Connection");
 
             //Function that has a chance of disabling a random enabled connection
             int numberOfTriesToDisableConnection = ng.getConnections().size()/(_numberOfInputs+1+_numberOfOutputs) + 1;
             ng.disableConnection(numberOfTriesToDisableConnection);
 
+            if(_DEBUG)
+                System.out.println("Enable Random Disconnected Connection");
+
             //Function that has a chance of enabling a random disabled connection
             int numberOfTriesToEnableConnection = ng.getConnections().size()/(_numberOfInputs+1) + 1;
             ng.enableConnection(numberOfTriesToEnableConnection);
+
+            if(_DEBUG)
+                System.out.println("Add Connection Mutation");
 
             //Function that has a chance of adding a new (possibly looped) connection.
             double addConnectionChance          = 0.90;
@@ -311,6 +353,9 @@ public class Neat {
             int    numberOfTriesToFindLoop      = ng.getNeurons().size() - _numberOfInputs -1;
             int    numberOfTriesToAddConnection = ng.getNeurons().size()/3; //parameter 3 was sort of random... Change as required
             ng.addConnection(addConnectionChance, chanceOfLoopedConnection, numberOfTriesToFindLoop, numberOfTriesToAddConnection);
+
+            if(_DEBUG)
+                System.out.println("Add Neuron Mutation");
 
             //Function that has a chance of adding a new neuron to an existing connection.
             double addNeuronChance                  = 0.70;
@@ -327,72 +372,7 @@ public class Neat {
         for(List<NeatGenome> lng : clearedSpecies) {
             _currentSpecies.get(currentSpeciesIndex++).setIndividuals(lng);
             _currentPopulation.add(lng.get(0));
-        }
-
-
-
-
-        //DFS alternative that might skip members of the last species and increase population size.
-        /*int currentNumberOffspring = 0;
-        for(Species sp : _currentSpecies) {
-            List<NeatGenome> newSpeciesPop = new ArrayList<>();
-
-            newSpeciesPop.add(new NeatGenome(sp.getIndividuals().get(0)));
-
-            int amountToSpawn = sp.getSpawnsRequired();
-            int size = sp.getIndividuals().size();
-            int meanIndx = (int)(size*_likelihoodOfBestMating);     //TODO: check if this works properly
-            int maxIndx;
-            Random _rand = new Random();
-
-
-            for(int i = 1; i < amountToSpawn; ++i) {
-                if (currentNumberOffspring > _populationSize)
-                    break;
-
-                maxIndx = ThreadLocalRandom.current().nextInt(1, (int)_rand.nextGaussian()*meanIndx+(int)(size*0.2));
-                if(maxIndx > size-1)
-                    maxIndx = size-1;
-                if(maxIndx < size*_likelihoodOfBestMating)
-                    maxIndx = (int)Math.round(size*_likelihoodOfBestMating);
-
-                int parent1Indx = ThreadLocalRandom.current().nextInt(0, maxIndx);
-
-                if(_rand.nextDouble() > _probabilityOfMating || size == 1) {
-                    newSpeciesPop.add(new NeatGenome(sp.getIndividuals().get(parent1Indx)));
-                }
-                else {
-                    int parent2Indx = parent1Indx;
-                    while(parent1Indx == parent2Indx)
-                        parent2Indx = ThreadLocalRandom.current().nextInt(0, maxIndx);
-
-                    newSpeciesPop.add(sp.crossover(sp.getIndividuals().get(parent1Indx), sp.getIndividuals().get(parent2Indx)));
-                }
-                ++currentNumberOffspring;
-            }
-            sp.setIndividuals(newSpeciesPop);
-        }
-
-        List<NeatGenome> newPopulation = new ArrayList<>();
-
-        for(Species sp : _currentSpecies)
-            for(NeatGenome ng : sp.getIndividuals())
-                newPopulation.add(ng);
-
-        while(newPopulation.size() < _populationSize) {
-            NeatGenome temp1 = _currentPopulation.get(ThreadLocalRandom.current().nextInt(0, _currentPopulation.size()));
-            for(int i = 0; i < 5; ++i) {
-                NeatGenome temp2 = _currentPopulation.get(ThreadLocalRandom.current().nextInt(0, _currentPopulation.size()));
-
-                if(temp2.getAdjustedFitness() > temp1.getAdjustedFitness())
-                    temp1 = temp2;
-            }
-
-            newPopulation.add(new NeatGenome(temp1));
-        }*/
-
-
-        System.out.println("Generation number " + _generationNumber + " created.");
+        } System.out.println("Generation number " + _generationNumber + " created.");
     }
 
 
@@ -408,28 +388,38 @@ public class Neat {
 
 
     public void estimateFitness() {
-        System.out.println("Starting fitness estimation.");
+        //System.out.println("Starting fitness estimation.");
+        PrintStream original = System.out;
 
         System.out.println("NUMBER OF SPECIES = " + _currentSpecies.size());
 
         Neat4SpeedDriver[] drivers = new Neat4SpeedDriver[1];
         for(NeatGenome ng : _currentPopulation){
             //Start a race
+            System.setOut(new NullPrintStream());
             Neat4SpeedRace race = new Neat4SpeedRace();
             race.setTrack("aalborg", "road");
             race.laps = 1;
             drivers[0] = new Neat4SpeedDriver(ng.getNeuralNetwork());
+            System.setOut(original);
 
-            System.out.println("GenomeID = " + ng.getGenomeID());
+            System.out.println("\nGenomeID = " + ng.getGenomeID());
+            if(_DEBUG)
+                System.out.println("Genome size = " + ng.getConnections().size());
 
             //for speedup set withGUI to false
-            race.runRace(drivers, true);
+            if(_DEBUG)
+                System.out.println("NEAT: starting race");
+            System.setOut(new NullPrintStream());
+            race.runRace(drivers, false);
+            System.setOut(original);
+
             System.out.println("FITNESS = " + drivers[0].getFitness());
             ng.setFitness(drivers[0].getFitness());
         }
 
 
-        System.out.println("Fitness estimation finished.");
+        //System.out.println("Fitness estimation finished.");
     }
 
 
@@ -437,19 +427,20 @@ public class Neat {
 
     //Checked. Seems to be fine
     public void defineSpecies() {
-        if (_generationNumber == 1)
-            System.out.println("Defining population species.");
-        else
-            System.out.println("Redefining population species.");
+//        if (_generationNumber == 1)
+//            System.out.println("Defining population species.");
+//        else
+//            System.out.println("Redefining population species.");
 
         speciate();
 
-        System.out.println("BEST FITNESS = " + getBestPerformingMember().getFitness());
+        System.out.println("\nBEST FITNESS = " + getBestPerformingMember().getFitness());
+        System.out.println("BEST GENOME = " + getBestPerformingMember().getGenomeID());
 
-        if (_generationNumber == 1)
-            System.out.println("Population species defined.");
-        else
-            System.out.println("Population species redefined.");
+//        if (_generationNumber == 1)
+//            System.out.println("Population species defined.");
+//        else
+//            System.out.println("Population species redefined.");
     }
 
 
@@ -462,9 +453,11 @@ public class Neat {
     public NeatGenome crossover (NeatGenome parent1, NeatGenome parent2) {
 
         int best;
-
+        if(_DEBUG)
+            System.out.println("CROSSOVER: determine the best parent");
         //If parents have the same fitness select the longest one.
         //If they also have the same length select randomly
+        //TODO: should pick the shortest one?
         if (parent1.getFitness() == parent2.getFitness()) {
             if (parent1.getConnections().size() == parent2.getConnections().size())
                 best = ThreadLocalRandom.current().nextInt(1, 3);
@@ -488,13 +481,20 @@ public class Neat {
 
         ConnectionGene selectedGene = null;
 
+        if(_DEBUG)
+            System.out.println("CROSSOVER: parent1 size = " + parent1.getConnections().size());
+        if(_DEBUG)
+            System.out.println("CROSSOVER: parent2 size = " + parent2.getConnections().size());
         //While there are still genes to be parsed in at least one of the parents"
-        while(!(iterator1 == parent1.getConnections().size() &&
-                iterator2 == parent2.getConnections().size())) {
+        while(!(iterator1 >= parent1.getConnections().size() &&
+                iterator2 >= parent2.getConnections().size())) {
+
 
             //If we have gone over all genes of parent1, but there are still genes of parent 2 left we
             //can add them if parent 2 has the best fitness between both parents
             if(iterator1 >= parent1.getConnections().size()) {     //TODO: check if problems arise. Check book
+                if(_DEBUG)
+                    System.out.println("CROSSOVER: parent1 out of genes");
                 if(best == 2)
                     selectedGene = new ConnectionGene(parent2.getConnections().get(iterator2));
                 ++iterator2;
@@ -502,6 +502,8 @@ public class Neat {
             //If we have gone over all genes of parent2, but there are still genes of parent 1 left we
             //can add them if parent 1 has the best fitness between both parents
             else if(iterator2 >= parent2.getConnections().size()) {     //TODO: check if problems arise. Check book
+                if(_DEBUG)
+                    System.out.println("CROSSOVER: parent2 out of genes");
                 if(best == 1)
                     selectedGene = new ConnectionGene(parent1.getConnections().get(iterator1));
                 ++iterator1;
@@ -510,6 +512,8 @@ public class Neat {
             //over the next disjoint gene of parent 1 and add it if parent 1 has the best fitness between both parents
             else if(parent1.getConnections().get(iterator1).getInnovationN() <
                     parent2.getConnections().get(iterator2).getInnovationN()) {
+                if(_DEBUG)
+                    System.out.println("CROSSOVER: Parent1 lower innovation number");
                 if(best == 1)
                     selectedGene = new ConnectionGene(parent1.getConnections().get(iterator1));
                 ++iterator1;
@@ -518,13 +522,20 @@ public class Neat {
             //over the next disjoint gene of parent 2 and add it if parent 2 has the best fitness between both parents
             else if(parent1.getConnections().get(iterator1).getInnovationN() >
                     parent2.getConnections().get(iterator2).getInnovationN()) {
+                if(_DEBUG)
+                    System.out.println("CROSSOVER: Parent2 lower innovation number");
                 if(best == 2)
                     selectedGene = new ConnectionGene(parent1.getConnections().get(iterator1));
-                ++iterator1;
+                ++iterator2;
             }
             //If parent 1's gene has the same innovation number of parent 2's gene, select one of them randomly
             //TODO: maybe implment a weighted average between the parents gene's values?
-            else if(iterator1 == iterator2) {
+            else if(parent1.getConnections().get(iterator1).getInnovationN() ==
+                    parent2.getConnections().get(iterator2).getInnovationN()) {
+                if(_DEBUG)
+                    System.out.println("CROSSOVER: Same gene");
+                if(_DEBUG)
+                    System.out.println("CROSSOVER: Same gene actually goes in");
                 int choice = ThreadLocalRandom.current().nextInt(1, 3);
 
                 if(choice == 1)
@@ -535,15 +546,27 @@ public class Neat {
                 ++iterator1;
                 ++iterator2;
             }
+            else {
+                System.out.println("CROSSOVER: Shouldn't happen");
+                System.exit(0);
+            }
+
+            if(_DEBUG) {
+                System.out.println(iterator1);
+                System.out.println(iterator2);
+                System.out.println("CROSSOVER: baby connections");
+            }
 
             //Add selected gene, if it wasn't already added before
             if(babyConnections.size() == 0)
                 babyConnections.add(selectedGene);
             else
-            if(babyConnections.get(babyConnections.size() - 1).getInnovationN() != selectedGene.getInnovationN())
-                babyConnections.add(selectedGene);
+                if(babyConnections.get(babyConnections.size() - 1).getInnovationN() != selectedGene.getInnovationN())
+                    babyConnections.add(selectedGene);
 
 
+            if(_DEBUG)
+                System.out.println("CROSSOVER: adding baby neurons to connection");
             addBabyNeuron(selectedGene.getInputNeuron(), babyNeurons);
             addBabyNeuron(selectedGene.getOutputNeuron(), babyNeurons);
         }
@@ -629,6 +652,11 @@ public class Neat {
                 ++j;
             }
 
+            System.out.println("\nElements of species " /*TODO: Introduce species id*/);
+            for(NeatGenome ng : sp.getIndividuals()) {
+                System.out.println("GenomeID = " + ng.getGenomeID());
+                System.out.println("Fitness = " + ng.getFitness());
+            }
 
             if(sp.getBestFitness() >= sp.getIndividuals().get(0).getFitness())
                 sp.increaseNumberOfGenerationsWithNoImprovement();

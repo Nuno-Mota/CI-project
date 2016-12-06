@@ -6,7 +6,11 @@ import cicontest.torcs.genome.IGenome;
 import scr.Action;
 import scr.SensorModel;
 
-public class Neat4SpeedDriver extends AbstractDriver {
+import java.io.Serializable;
+
+public class Neat4SpeedDriver extends AbstractDriver implements Serializable {
+
+    private boolean             _DEBUG = false;
 
     private NeuralNetwork _neuralNetwork;
     private double        _fitness;
@@ -83,6 +87,8 @@ public class Neat4SpeedDriver extends AbstractDriver {
             action = new Action();
         }
 
+        if(_DEBUG)
+            System.out.println("NEAT4SPEEDDRIVER: Checking stopping conditions and fitness");
         //System.out.println("Distance raced = " + sensors.getDistanceRaced());
         if(sensors.getLastLapTime() != 0) {
             _fitness = 100 + sensors.getDistanceRaced()*(1 + 1/sensors.getLastLapTime());
@@ -99,6 +105,8 @@ public class Neat4SpeedDriver extends AbstractDriver {
         else
             _cyclesGoingBack = 0;
 
+        if(_DEBUG)
+            System.out.println("NEAT4SPEEDDRIVER: Restarting race for bad conditions");
         if(_cyclesWithoutMovingForward > 500 || sensors.getTrackEdgeSensors()[0] == -1 || _cyclesGoingBack > 500){
             _fitness = sensors.getDistanceRaced();
             action.restartRace = true;

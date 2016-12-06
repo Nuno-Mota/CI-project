@@ -10,6 +10,8 @@ public class NeuralNetwork implements Serializable {
      * Internal Variables *
      **********************/
 
+    private boolean             _DEBUG = false;
+
     private static final long serialVersionUID = -88L;
     private List<NeuralNetworkNeuron> _phenotypeNeurons = new ArrayList<>();
 
@@ -90,6 +92,8 @@ public class NeuralNetwork implements Serializable {
         //12 Inputs
         //TODO: add opponents to input, add lateralSpeed?, add zSpeed?, wheelSpinVel?
         //TODO: add gears
+        if(_DEBUG)
+            System.out.println("Neural Network getting sensor data");
         double[] inputs  = {sensorData.getAngleToTrackAxis()/Math.PI, sensorData.getSpeed()/350,
                             sensorData.getTrackEdgeSensors()[2]/200, sensorData.getTrackEdgeSensors()[4]/200,
                             sensorData.getTrackEdgeSensors()[6]/200, sensorData.getTrackEdgeSensors()[8]/200,
@@ -102,6 +106,9 @@ public class NeuralNetwork implements Serializable {
         int currentOutput = 0;
 
         //System.out.println(inputs.length);
+
+        if(_DEBUG)
+            System.out.println("Seting output values for input and bias neurons");
 
         while(_phenotypeNeurons.get(currentNeuron).getType() == 0) {
             //System.out.println("Type = " + _phenotypeNeurons.get(currentNeuron).getType());
@@ -116,6 +123,8 @@ public class NeuralNetwork implements Serializable {
         while(currentNeuron < _phenotypeNeurons.size()) {
             double sum = 0;
 
+            if(_DEBUG)
+                System.out.println("NEURAL NETWORK: Updating neuron's incoming values");
             for(NeuralNetworkConnection nnc : _phenotypeNeurons.get(currentNeuron).getIncoming()) {
 //                if(_phenotypeNeurons.get(currentNeuron).getType() == 1){
 ////                    for(NeuralNetworkConnection n :_phenotypeNeurons.get(currentNeuron).getIncoming()){
@@ -127,9 +136,13 @@ public class NeuralNetwork implements Serializable {
                 sum += weight*output;
             }
 
+            if(_DEBUG)
+                System.out.println("NEURAL NETWORK: Applying sigmoid to incoming value");
             _phenotypeNeurons.get(currentNeuron).setOutput(sigmoid(sum, _phenotypeNeurons.get(currentNeuron).getActivationResponse()));
 
 
+            if(_DEBUG)
+                System.out.println("NEURAL NETWORK: Getting outputs");
             if(_phenotypeNeurons.get(currentNeuron).getType() == 1) {
                 outputs[currentOutput++] = _phenotypeNeurons.get(currentNeuron).getOutput();
 //                System.out.println("Sigmoind: " + sigmoid(sum, _phenotypeNeurons.get(currentNeuron).getActivationResponse()));

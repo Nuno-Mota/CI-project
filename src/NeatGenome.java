@@ -228,7 +228,6 @@ public class NeatGenome implements Serializable{
         double upper = 0.4;    //Highest value of chance of a random connection being disabled
         int connectionIndex;
 
-        System.out.println("ConnectionSize = " + _connections.size());
 
         if(Math.random() <= Math.random() * (upper - lower) + lower) {
             while(numberOfTriesToEnableConnection-- != 0) {

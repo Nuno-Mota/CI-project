@@ -3,7 +3,11 @@ import cicontest.algorithm.abstracts.DriversUtils;
 import cicontest.torcs.controller.Driver;
 import cicontest.torcs.controller.Human;
 
-public class Neat4SpeedRace extends AbstractRace {
+import java.io.Serializable;
+
+public class Neat4SpeedRace extends AbstractRace implements Serializable {
+
+    private boolean             _DEBUG = false;
 
     public int[] runQualification(DefaultDriverGenome[] drivers, boolean withGUI){
         Neat4SpeedDriver[] driversList = new Neat4SpeedDriver[drivers.length + 1 ];
@@ -18,8 +22,12 @@ public class Neat4SpeedRace extends AbstractRace {
     public int[] runRace(Neat4SpeedDriver[] drivers, boolean withGUI){
         int size = Math.min(10, drivers.length);
         Neat4SpeedDriver[] driversList = new Neat4SpeedDriver[size];
+        if(_DEBUG)
+            System.out.println("NEAT4SPEEDRACE: Initializing drivers");
         for(int i=0; i<size; i++)
             driversList[i] = drivers[i];
+        if(_DEBUG)
+            System.out.println("NEAT4SPEEDRACE: Initializing race");
         return runRace(driversList, withGUI, true);
     }
 

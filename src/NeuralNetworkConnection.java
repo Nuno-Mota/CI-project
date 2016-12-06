@@ -1,5 +1,6 @@
+import java.io.Serializable;
 
-public class NeuralNetworkConnection {
+public class NeuralNetworkConnection implements Serializable {
 
     /**********************
      * Internal Variables *
