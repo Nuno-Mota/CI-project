@@ -105,7 +105,7 @@ public class NeatGenome implements Serializable{
 
     //Checked. Seems to be fine
     public NeatGenome(NeatGenome genomeToBeCopied) {
-        _genomeID        = _globalGenomeID++;
+        _genomeID        = _globalGenomeID++;  //TODO: When we copy the fittest genome of a species, we don't want to increment its ID
         _numberOfInputs  = genomeToBeCopied.getNumberOfInputs();
         _numberOfOutputs = genomeToBeCopied.getNumberOfOutputs();
 

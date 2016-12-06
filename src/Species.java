@@ -121,7 +121,7 @@ public class Species implements Serializable {
                 fitness *= _olderFitnessPenalty;
 
 
-            ng.setAdjustedFitness(fitness/_individuals.size());
+            ng.setAdjustedFitness(fitness/_individuals.size());  //TODO: We might penalize very good species with this too much
             _speciesFitness += ng.getAdjustedFitness();
         }
     }

@@ -190,7 +190,7 @@ public class Neat implements Serializable {
                         if(_DEBUG)
                             System.out.println("Select Best of Species");
                         List<NeatGenome> newSpeciesPop = new ArrayList<>();
-                        newSpeciesPop.add(new NeatGenome(sp.getIndividuals().get(0)));
+                        newSpeciesPop.add(sp.getIndividuals().get(0)); //TODO: Can we add the genome without copying it?
                         clearedSpecies.add(newSpeciesPop);
                         ++currentNumberOfOffspring;
                         maybeMoreSpawnsRequired = true;
@@ -218,12 +218,12 @@ public class Neat implements Serializable {
                                 if(_DEBUG)
                                     System.out.println("Selecting max index for parent selection");
 
-                                //get's the index (approx) of the element corresponding to _likelihoodOfBestMating% of the species
+                                //gets the index (approx) of the element corresponding to _likelihoodOfBestMating% of the species
                                 //so that better performing elements have a higher chance of mating
                                 meanIndx = (int)(size * _likelihoodOfBestMating);     //TODO: check if this works properly
 
                                 //adds gaussian noise, so that lower performing members have a chance of mating with better performing ones
-                                max      = (int)rand.nextGaussian() * (int)(size * 0.5) + meanIndx + 1;
+                                max      = (int) Math.abs(rand.nextGaussian() * size * 0.25) + meanIndx + 1;
 
                                 //attributes a value to the maxIndx, effectively determining which elements of
                                 //the species have a chance of mating
@@ -231,11 +231,6 @@ public class Neat implements Serializable {
                                     maxIndx = ThreadLocalRandom.current().nextInt(3, max);
                                 else
                                     maxIndx = 2;        //maxIndx needs to be at least 2 to select different parents
-
-                                //makes sure that the added gaussian noise doesn't exclude any of the
-                                //_likelihoodOfBestMating% best performing members of the species
-                                if(maxIndx < (int) Math.round(size * _likelihoodOfBestMating))
-                                    maxIndx = (int) Math.round(size * _likelihoodOfBestMating);
 
                                 //makes sure that the gaussian noise add doesn't create a maxIndx out
                                 //of range of the population arrayList
@@ -652,11 +647,11 @@ public class Neat implements Serializable {
                 ++j;
             }
 
-            System.out.println("\nElements of species " /*TODO: Introduce species id*/);
-            for(NeatGenome ng : sp.getIndividuals()) {
-                System.out.println("GenomeID = " + ng.getGenomeID());
-                System.out.println("Fitness = " + ng.getFitness());
-            }
+//            System.out.println("\nElements of species " /*TODO: Introduce species id*/);
+//            for(NeatGenome ng : sp.getIndividuals()) {
+//                System.out.println("GenomeID = " + ng.getGenomeID());
+//                System.out.println("Fitness = " + ng.getFitness());
+//            }
 
             if(sp.getBestFitness() >= sp.getIndividuals().get(0).getFitness())
                 sp.increaseNumberOfGenerationsWithNoImprovement();

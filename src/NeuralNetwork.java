@@ -94,7 +94,7 @@ public class NeuralNetwork implements Serializable {
         //TODO: add gears
         if(_DEBUG)
             System.out.println("Neural Network getting sensor data");
-        double[] inputs  = {sensorData.getAngleToTrackAxis()/Math.PI, sensorData.getSpeed()/350,
+        double[] inputs  = {sensorData.getAngleToTrackAxis()/Math.PI, sensorData.getSpeed()/315,
                             sensorData.getTrackEdgeSensors()[2]/200, sensorData.getTrackEdgeSensors()[4]/200,
                             sensorData.getTrackEdgeSensors()[6]/200, sensorData.getTrackEdgeSensors()[8]/200,
                             sensorData.getTrackEdgeSensors()[9]/200, sensorData.getTrackEdgeSensors()[10]/200,
