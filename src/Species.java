@@ -9,6 +9,8 @@ public class Species implements Serializable {
      * Internal Variables *
      **********************/
 
+    private static int           _globalSpeciesID   = 0;
+
     private List<NeatGenome>    _individuals = new ArrayList<NeatGenome>();
     private int                 _speciesID;
     private double              _bestFitness = 0;
@@ -31,6 +33,7 @@ public class Species implements Serializable {
      ***************/
 
     public Species(List<NeatGenome> individuals) {
+        _speciesID = ++_globalSpeciesID;
         _individuals = individuals;
     }
 

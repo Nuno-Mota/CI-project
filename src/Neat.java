@@ -180,6 +180,9 @@ public class Neat implements Serializable {
         Random  rand = new Random();
         boolean maybeMoreSpawnsRequired;
 
+        NeatGenome best = _currentPopulation.get(0);
+
+
         while(currentNumberOfOffspring < _populationSize) {
             maybeMoreSpawnsRequired = false;
             for(Species sp : _currentSpecies) {
@@ -262,8 +265,8 @@ public class Neat implements Serializable {
                                         System.out.println("Going to crossover selected parents");
 
                                     newPopulation.add(crossover(sp.getIndividuals().get(parent1Indx), sp.getIndividuals().get(parent2Indx)));
-                                    ++currentNumberOfOffspring;
                                 }
+                                ++currentNumberOfOffspring;
                             }
                             sp.setSpawnsRequired(sp.getSpawnsRequired() - 1);
                         }
@@ -393,7 +396,7 @@ public class Neat implements Serializable {
             //Start a race
             System.setOut(new NullPrintStream());
             Neat4SpeedRace race = new Neat4SpeedRace();
-            race.setTrack("aalborg", "road");
+            race.setTrack("alpine-1", "road");
             race.laps = 1;
             drivers[0] = new Neat4SpeedDriver(ng.getNeuralNetwork());
             System.setOut(original);
@@ -406,7 +409,7 @@ public class Neat implements Serializable {
             if(_DEBUG)
                 System.out.println("NEAT: starting race");
             System.setOut(new NullPrintStream());
-            race.runRace(drivers, false);
+            race.runRace(drivers, true);
             System.setOut(original);
 
             System.out.println("FITNESS = " + drivers[0].getFitness());
@@ -600,6 +603,22 @@ public class Neat implements Serializable {
 
         boolean createNewSpecies;
 
+        if(_DEBUG) {
+            for(Species sp : _currentSpecies) {
+                System.out.println("\nElements of species " + sp.getSpeciesID() + " before copying");
+                for(NeatGenome ng : sp.getIndividuals()) {
+                    System.out.println("GenomeID = " + ng.getGenomeID());
+                    System.out.println("Fitness = " + ng.getFitness());
+                }
+            }
+        }
+
+        NeatGenome best = _currentPopulation.get(0);
+
+        for(NeatGenome ng : _currentPopulation)
+            if(ng.getFitness() > best.getFitness())
+                best = ng;
+
         for(NeatGenome ng: _currentPopulation) {
             if(_currentSpecies.size() == 0) {
                 List<NeatGenome> membersOfSpecies = new ArrayList<>();
@@ -612,7 +631,8 @@ public class Neat implements Serializable {
                 createNewSpecies = true;
                 for(Species species : _currentSpecies) {
                     if(compatible(ng, species.getRepresentative())) {
-                        species.getIndividuals().add(ng);
+                        if(!species.getIndividuals().contains(ng))
+                            species.getIndividuals().add(ng);
                         createNewSpecies = false;
                         break;
                     }
@@ -629,6 +649,33 @@ public class Neat implements Serializable {
         }
 
         for(Species sp : _currentSpecies) {
+            for(NeatGenome ng : sp.getIndividuals()) {
+                for(Species spCheck : _currentSpecies) {
+                    if(sp.getSpeciesID() != spCheck.getSpeciesID() && spCheck.getIndividuals().contains(ng))
+                        spCheck.getIndividuals().remove(ng);
+                }
+            }
+        }
+
+        int k = 0;
+        while(k < _currentSpecies.size()) {
+            if(_currentSpecies.get(k).getIndividuals().size() == 0) {
+                _currentSpecies.remove(k);
+            }
+            else
+                ++k;
+        }
+
+        for(Species sp : _currentSpecies) {
+
+            if(_DEBUG){
+                System.out.println("\nElements of species " + sp.getSpeciesID());
+                for(NeatGenome ng : sp.getIndividuals()) {
+                    System.out.println("GenomeID = " + ng.getGenomeID());
+                    System.out.println("Fitness = " + ng.getFitness());
+                }
+            }
+
             //TODO: implement better sorter than bubblesort... Check if bubblesort works at all...
             int size = sp.getIndividuals().size();
             boolean sort = true;
@@ -647,13 +694,17 @@ public class Neat implements Serializable {
                 ++j;
             }
 
-//            System.out.println("\nElements of species " /*TODO: Introduce species id*/);
-//            for(NeatGenome ng : sp.getIndividuals()) {
-//                System.out.println("GenomeID = " + ng.getGenomeID());
-//                System.out.println("Fitness = " + ng.getFitness());
-//            }
+            if(_DEBUG) {
+                System.out.println("\nOrdered elements of species " + sp.getSpeciesID());
+                for(NeatGenome ng : sp.getIndividuals()) {
+                    System.out.println("GenomeID = " + ng.getGenomeID());
+                    System.out.println("Fitness = " + ng.getFitness());
+                }
+            }
 
-            if(sp.getBestFitness() >= sp.getIndividuals().get(0).getFitness())
+
+            if(sp.getBestFitness() >= sp.getIndividuals().get(0).getFitness() &&
+               !(best.getGenomeID() == sp.getIndividuals().get(0).getGenomeID()))
                 sp.increaseNumberOfGenerationsWithNoImprovement();
             else {
                 sp.setNumberOfGenerationsWithNoImprovement(0);

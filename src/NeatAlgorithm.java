@@ -16,10 +16,11 @@ public class NeatAlgorithm {
         int     _numberOfOutputs = 3;
         int     _populationSize  = 5;
         Neat    neat;
-        boolean _loadGenFromFile = false ;
+        boolean _loadGenFromFile = true ;
 
         //Set path to torcs.properties
         TorcsConfiguration.getInstance().initialize(new File("torcs.properties"));
+
         //Set path to memory
         String _pathnameSingleDriver = "memory/mydriver.mem";
         String _pathnameSingleDriverAndOpponents = "src/memory/Single_Driver_and_Opponents/lastGeneration.mem";
