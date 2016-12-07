@@ -830,7 +830,7 @@ public class Neat implements Serializable {
             e.printStackTrace();
         }
 
-        filename = "bestOfGen" + _generationNumber;
+        filename = "memory/best/bestOfGen" + _generationNumber;
         out = null;
         try {
             //create the memory folder manually

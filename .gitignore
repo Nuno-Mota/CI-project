@@ -5,3 +5,4 @@ torcs.properties
 lib/
 train_data/
 torcs_template.iml
+memory/
