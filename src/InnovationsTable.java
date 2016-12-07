@@ -9,6 +9,8 @@ public class InnovationsTable implements Serializable {
      **********************/
 
     private int                     _globalInnovationNumber = -1;
+    private int                     _globalGenomeID         = -1;
+    private int                     _globalSpeciesID        = -1;
     private int                     _globalNeuronNumber     = -1;
     private List<Innovation>        _innovations            = new ArrayList<>();
 
@@ -65,4 +67,8 @@ public class InnovationsTable implements Serializable {
     private void setInnovations(List<Innovation> innovations) { _innovations = innovations; }
 
     public int getNeuronID(int innovationID) { return _innovations.get(innovationID).getNeuronID(); }
+
+    public int getNewGenomeID() { return ++_globalGenomeID; }
+
+    public int getNewSpeciesID() { return ++_globalSpeciesID; }
 }

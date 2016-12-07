@@ -14,8 +14,6 @@ public class NeatGenome implements Serializable{
      * Internal Variables *
      **********************/
 
-    private static int            _globalGenomeID   = 0;
-
     private int                  _genomeID;
     private InnovationsTable     _innovationsTable = InnovationsTable.getInstance();
     private List<NeuronGene>     _neurons          = new ArrayList<>();
@@ -26,7 +24,6 @@ public class NeatGenome implements Serializable{
     private double               _amountToSpawn;
     private int                  _numberOfInputs;
     private int                  _numberOfOutputs;
-    private int                  _speciesID;       //For display's purpose. Check how useful these are
     private Random               _rand             = new Random();
 
 
@@ -60,7 +57,7 @@ public class NeatGenome implements Serializable{
     //Checked. Seems to be fine     //TODO:Missing adding connections and neurons to innovation's table
     public NeatGenome(int numberOfInputs, int numberOfOutputs) {
         readNgProperties();
-        _genomeID        = _globalGenomeID++;
+        _genomeID        = _innovationsTable.getNewGenomeID();
         _numberOfInputs  = numberOfInputs;
         _numberOfOutputs = numberOfOutputs;
 
@@ -93,7 +90,7 @@ public class NeatGenome implements Serializable{
     public NeatGenome(List<NeuronGene> neurons, List<ConnectionGene> connections,
                       int numberOfInputs, int numberOfOutputs) {
         readNgProperties();
-        _genomeID        = _globalGenomeID++;
+        _genomeID        = _innovationsTable.getNewGenomeID();
         _numberOfInputs  = numberOfInputs;
         _numberOfOutputs = numberOfOutputs;
 
@@ -118,7 +115,7 @@ public class NeatGenome implements Serializable{
     //Checked. Seems to be fine
     public NeatGenome(NeatGenome genomeToBeCopied) {
         readNgProperties();
-        _genomeID        = _globalGenomeID++;  //TODO: When we copy the fittest genome of a species, we don't want to increment its ID
+        _genomeID        = _innovationsTable.getNewGenomeID();  //TODO: When we copy the fittest genome of a species, we don't want to increment its ID
         _numberOfInputs  = genomeToBeCopied.getNumberOfInputs();
         _numberOfOutputs = genomeToBeCopied.getNumberOfOutputs();
 
@@ -197,9 +194,6 @@ public class NeatGenome implements Serializable{
 
     public int getNumberOfOutputs() { return _numberOfOutputs; }
     private void setNumberOfOutputs(int numberOfOutputs) { _numberOfOutputs = numberOfOutputs; }
-
-    public int getSpeciesID() { return _speciesID; }
-    private void setSpeciesID(int speciesID) { _speciesID = speciesID; }
 
 
 

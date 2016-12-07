@@ -14,7 +14,7 @@ public class NeatAlgorithm {
      * NEAT's main method *     //This is the one to be run when training the optimal RNN. Otherwise comment
      **********************/
 
-    public static void loadNaProperties(){
+    private static void loadNaProperties(){
         try (InputStream in = new FileInputStream("neat.properties")) {
             Properties prop = new Properties();
             prop.load(in);
@@ -22,11 +22,12 @@ public class NeatAlgorithm {
             _numberOfInputs     = Integer.parseInt(prop.getProperty("numberOfInputs"));
             _numberOfOutputs    = Integer.parseInt(prop.getProperty("numberOfOutputs"));
             _populationSize     = Integer.parseInt(prop.getProperty("populationSize"));
-            _loadGenFromFile    = Boolean.parseBoolean(prop.getProperty("loadGenFromFile"));
+            _loadGenFromFile    = Boolean.parseBoolean(prop.getProperty("loadGenomeFromFile"));
         } catch (IOException e) {
             System.err.println("Something went wrong while reading in the properties.");
         }
     }
+
     @SuppressWarnings("unchecked")
     public static void main(String[] args) {
 
@@ -37,7 +38,7 @@ public class NeatAlgorithm {
         TorcsConfiguration.getInstance().initialize(new File("torcs.properties"));
 
         //Set path to memory
-        String _pathnameSingleDriver = "memory/mydriver1.mem";
+        String _pathnameSingleDriver = "src/memory/Single_Driver/Full_Generations/GenBeep.java_serial";
         String _pathnameSingleDriverAndOpponents = "src/memory/Single_Driver_and_Opponents/lastGeneration.mem";
         String _pathnameTeamsAndOpponents = "src/memory/Teams_and_Opponents/lastGeneration.mem";
 
@@ -46,7 +47,7 @@ public class NeatAlgorithm {
             try {
                 FileInputStream fis   = new FileInputStream(savedGeneration);
                 ObjectInputStream ois = new ObjectInputStream(fis);
-                neat = (Neat) ois.readObject();
+                neat = (Neat)ois.readObject();
                 System.out.println("Loaded population from file.");
                 ois.close();
                 fis.close();

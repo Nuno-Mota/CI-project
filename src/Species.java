@@ -13,7 +13,7 @@ public class Species implements Serializable {
      * Internal Variables *
      **********************/
 
-    private static int           _globalSpeciesID   = 0;
+    private InnovationsTable     _innovationsTable = InnovationsTable.getInstance();
 
     private List<NeatGenome>    _individuals = new ArrayList<NeatGenome>();
     private int                 _speciesID;
@@ -41,7 +41,7 @@ public class Species implements Serializable {
 
     public Species(List<NeatGenome> individuals) {
         readSpeciesProperties();
-        _speciesID = ++_globalSpeciesID;
+        _speciesID = _innovationsTable.getNewSpeciesID();
         _individuals = individuals;
     }
 

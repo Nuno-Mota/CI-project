@@ -168,11 +168,12 @@ public class Neat implements Serializable {
         if(_generationNumber > 1)
             createNewGeneration();
 
-        ++_generationNumber;
+
         generatePhenotypes();
-        estimateFitness();//TODO: MISSING IMPLEMENTATION
+        estimateFitness();
         defineSpecies();
         saveRelevantData();
+        ++_generationNumber;
     }
 
 
@@ -217,11 +218,22 @@ public class Neat implements Serializable {
 
         NeatGenome best = _currentPopulation.get(0);
 
+        int k = 0;
+        while(k < _currentSpecies.size()) {
+            if(_currentSpecies.get(k).getNumberOfGenerationsWithNoImprovement() >= _maxGenWithoutImprovment) {
+                for(NeatGenome ng : _currentSpecies.get(k).getIndividuals()) {
+                    _currentPopulation.remove(ng);
+                }
+                _currentSpecies.remove(k);
+            }
+            else
+                ++k;
+        }
 
         while(currentNumberOfOffspring < _populationSize) {
             maybeMoreSpawnsRequired = false;
             for(Species sp : _currentSpecies) {
-                if(currentNumberOfOffspring < _populationSize && sp.getNumberOfGenerationsWithNoImprovement() < _maxGenWithoutImprovment) {
+                if(currentNumberOfOffspring < _populationSize) {
                     //Just serves the purpose of re-adding the best element of each species
                     //to the next generation, without having them suffer mutations
                     if(speciesIterator == 0) {
@@ -634,11 +646,13 @@ public class Neat implements Serializable {
     //Checked. Seems to be fine
     private void speciate() {
 
+        //boolean _DEBUG = false;
         boolean createNewSpecies;
 
         if(_DEBUG) {
             for(Species sp : _currentSpecies) {
                 System.out.println("\nElements of species " + sp.getSpeciesID() + " before copying");
+                System.out.println("Species Age = " + sp.getAgeOfSpecies());
                 for(NeatGenome ng : sp.getIndividuals()) {
                     System.out.println("GenomeID = " + ng.getGenomeID());
                     System.out.println("Fitness = " + ng.getFitness());
@@ -692,9 +706,8 @@ public class Neat implements Serializable {
 
         int k = 0;
         while(k < _currentSpecies.size()) {
-            if(_currentSpecies.get(k).getIndividuals().size() == 0) {
+            if(_currentSpecies.get(k).getIndividuals().size() == 0)
                 _currentSpecies.remove(k);
-            }
             else
                 ++k;
         }
@@ -709,7 +722,6 @@ public class Neat implements Serializable {
                 }
             }
 
-            //TODO: implement better sorter than bubblesort... Check if bubblesort works at all...
             int size = sp.getIndividuals().size();
             boolean sort = true;
             NeatGenome temp;
@@ -829,23 +841,20 @@ public class Neat implements Serializable {
      *********************/
 
     public void saveRelevantData() {
-        System.out.println("Saving data.");
+        System.out.println("Saving data. DO NOT STOP PROGRAM NOW!!!!!");
+
         String filename;
         if (_file1)
-            filename = "memory/mydriver1.mem";
+            filename = "src/memory/Single_Driver/Full_Generations/GenBeep.java_serial";
         else
-            filename = "memory/mydriver2.mem";
+            filename = "src/memory/Single_Driver/Full_Generations/GenBoop.java_serial";
         toggleFile();
 
-        NeatGenome best = _currentPopulation.get(0);
-        for(NeatGenome ng : _currentPopulation)
-            if(ng.getFitness() > best.getFitness())
-                best = ng;
 
-        //Store the state of this neural network
+
+        //Store the state of neat
         ObjectOutputStream out = null;
         try {
-            //create the memory folder manually
             out = new ObjectOutputStream(new FileOutputStream(filename));
         } catch (IOException e) {
             e.printStackTrace();
@@ -858,10 +867,62 @@ public class Neat implements Serializable {
             e.printStackTrace();
         }
 
-        filename = "memory/best/bestOfGen" + _generationNumber;
+
+
+
+
+        double averageFitness = 0;
+        double averageNumberOfConnections = 0;
+        double averageNumberOfNeurons = 0;
+
+        int maxNumberOfConnections = 0;
+        double fitnessOfMaxNumberOfConnections = 0;
+        int minNumberOfConnections = 0;
+        double fitnessOfMinNumberOfConnections = 0;
+
+        int maxNumberOfNeurons = 0;
+        double fitnessOfMaxNumberOfNeurons = 0;
+        int minNumberOfNeurons = 0;
+        double fitnessOfMinNumberOfNeurons = 0;
+
+
+        NeatGenome best = _currentPopulation.get(0);
+        maxNumberOfConnections = best.getConnections().size();
+        minNumberOfConnections = best.getConnections().size();
+        maxNumberOfNeurons = best.getNeurons().size();
+        minNumberOfNeurons = best.getNeurons().size();
+
+        for(NeatGenome ng : _currentPopulation) {
+            if(ng.getFitness() > best.getFitness())
+                best = ng;
+            if(ng.getConnections().size() > maxNumberOfConnections) {
+                maxNumberOfConnections = ng.getConnections().size();
+                fitnessOfMaxNumberOfConnections = ng.getFitness();
+            }
+            if(ng.getConnections().size() < minNumberOfConnections) {
+                maxNumberOfConnections = ng.getConnections().size();
+                fitnessOfMinNumberOfConnections = ng.getFitness();
+            }
+            if(ng.getNeurons().size() > maxNumberOfNeurons) {
+                maxNumberOfNeurons = ng.getNeurons().size();
+                fitnessOfMaxNumberOfNeurons = ng.getFitness();
+            }
+            if(ng.getNeurons().size() < minNumberOfNeurons) {
+                minNumberOfNeurons = ng.getNeurons().size();
+                fitnessOfMinNumberOfNeurons = ng.getFitness();
+            }
+            averageFitness += ng.getFitness();
+            averageNumberOfConnections += ng.getConnections().size();
+            averageNumberOfNeurons += ng.getNeurons().size();
+        }
+        averageFitness /= _currentPopulation.size();
+        averageNumberOfConnections /= _currentPopulation.size();
+        averageNumberOfNeurons /= _currentPopulation.size();
+
+
+        filename = "src/memory/Single_Driver/Best_of_each_Generation/bestOfGen" + _generationNumber + ".java_serial";
         out = null;
         try {
-            //create the memory folder manually
             out = new ObjectOutputStream(new FileOutputStream(filename));
         } catch (IOException e) {
             e.printStackTrace();
@@ -874,6 +935,24 @@ public class Neat implements Serializable {
             e.printStackTrace();
         }
 
-        System.out.println("Data saved.");
+
+        filename = "src/memory/Single_Driver/Statistics/data.txt";
+        try(FileWriter fw = new FileWriter(filename, true);
+            BufferedWriter bw = new BufferedWriter(fw);
+            PrintWriter outWriter = new PrintWriter(bw)) {
+            String info;
+            info = _generationNumber + " " + _populationSize + " " + _currentSpecies.size() +
+                   " " + best.getFitness() + " " + averageFitness + " " + averageNumberOfConnections +
+                   " " + averageNumberOfNeurons + " " + maxNumberOfConnections + " " + fitnessOfMaxNumberOfConnections +
+                   " " + minNumberOfConnections + " " + fitnessOfMinNumberOfConnections +
+                   " " + maxNumberOfNeurons + " " + fitnessOfMaxNumberOfNeurons +
+                   " " + minNumberOfNeurons + " " + fitnessOfMinNumberOfNeurons;
+            outWriter.println(info);
+        } catch (IOException e) {
+            System.out.println("Error appending to statistics file: IOException.");
+        }
+
+
+        System.out.println("Data saved. YOU CAN NOW STOP THE PROGRAM!");
     }
 }
