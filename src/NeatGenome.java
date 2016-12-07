@@ -205,12 +205,12 @@ public class NeatGenome implements Serializable{
     //Checked. Seems to be fine
     public void mutateWeights() {
 
-        //double lower = 0.1;     //Lowest value of chance of mutation occurring
-        //double upper = 0.75;    //Highest value of chance of mutation occurring
+        double lower = 0.1;     //Lowest value of chance of mutation occurring
+        double upper = 0.75;    //Highest value of chance of mutation occurring
 
         for(ConnectionGene cg : _connections)
-            //if(Math.random() <= Math.random() * (upper - lower) + lower)
-            if(Math.random() <= _chanceOfWeightMutation)                               //20% chance of getting an entirely new value
+            //if(Math.random() <= _chanceOfWeightMutation)                               //20% chance of getting an entirely new value
+            if(Math.random() <= Math.random() * (upper - lower) + lower)
                 if(Math.random() <= _chanceOfNewWeight)
                     cg.setWeight(_rand.nextGaussian()*_weightSTDEV + _weightMean);
                 else                                                    //80% chance of adding noise to the current weight value
@@ -222,12 +222,12 @@ public class NeatGenome implements Serializable{
     //Checked. Seems to be fine
     public void mutateActivationResponses() {
 
-        //double lower = 0.1;     //Lowest value of chance of mutation occurring
-        //double upper = 0.3;     //Highest value of chance of mutation occurring
+        double lower = 0.1;     //Lowest value of chance of mutation occurring
+        double upper = 0.3;     //Highest value of chance of mutation occurring
 
         for(NeuronGene ng : _neurons)
-            //if(Math.random() <= Math.random() * (upper - lower) + lower)
-            if(Math.random() <= _chanceOfArMutaton)
+            //if(Math.random() <= _chanceOfArMutaton)
+            if(Math.random() <= Math.random() * (upper - lower) + lower)
                 if(Math.random() <= _chanceOfArReinitialization)              //10% chance of getting an entirely new value
                     ng.setActivationResponse(_rand.nextGaussian()*_activationResponseSTDEV + _activationResponseMeanValue);
                 else                                  //80% chance of adding noise to the current weight value
@@ -239,12 +239,12 @@ public class NeatGenome implements Serializable{
     //Checked. Seems to be fine
     public void disableConnection(int numberOfTriesToDisableConnection) {
 
-        //double lower = 0.05;    //Lowest value of chance of a random connection being disabled
-        //double upper = 0.10;    //Highest value of chance of a random connection being disabled
+        double lower = 0.05;    //Lowest value of chance of a random connection being disabled
+        double upper = 0.10;    //Highest value of chance of a random connection being disabled
         int connectionIndex;
 
-        //if(Math.random() <= Math.random() * (upper - lower) + lower) {
-        if(Math.random() <= _chanceOfDisablingConnection) {
+        //if(Math.random() <= _chanceOfDisablingConnection) {
+        if(Math.random() <= Math.random() * (upper - lower) + lower) {
             while(numberOfTriesToDisableConnection-- > 0) {
                 connectionIndex = _rand.nextInt(_connections.size());
                 if(_connections.get(connectionIndex).getIsEnabled()) {
@@ -260,13 +260,13 @@ public class NeatGenome implements Serializable{
     //Checked. Seems to be fine
     public void enableConnection(int numberOfTriesToEnableConnection) {
 
-        //double lower = 0.3;    //Lowest value of chance of a random connection being disabled
-        //double upper = 0.4;    //Highest value of chance of a random connection being disabled
+        double lower = 0.3;    //Lowest value of chance of a random connection being disabled
+        double upper = 0.4;    //Highest value of chance of a random connection being disabled
         int connectionIndex;
 
 
-        //if(Math.random() <= Math.random() * (upper - lower) + lower) {
-        if(Math.random() <= _chanceOfEnablingConnection) {
+        //if(Math.random() <= _chanceOfEnablingConnection) {
+        if(Math.random() <= Math.random() * (upper - lower) + lower) {
             while(numberOfTriesToEnableConnection-- > 0) {
                 connectionIndex = ThreadLocalRandom.current().nextInt(0, _connections.size());
                 if(!_connections.get(connectionIndex).getIsEnabled()) {
