@@ -1,6 +1,7 @@
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -15,19 +16,27 @@ public class Neat implements Serializable {
     private int                 _numberOfInputs;
     private int                 _numberOfOutputs;
     private int                 _populationSize;
-    private int                 _generationNumber  = 1;
-    private List<NeatGenome>    _currentPopulation = new ArrayList<>();
-    private List<Species>       _currentSpecies    = new ArrayList<>();
-
-    private double              _compatibilityThreshold = 7.15;
-    private int                 c1 = 1, c2 = 1, c3 = 3;
-    private double              _bestOfSpeciesPercentage = 0.2;
-    private double              _probabilityOfMating = 0.85;
-    private double              _matingSTDEV = 0.25;
+    private int                 _generationNumber         = 1;
+    private List<NeatGenome>    _currentPopulation        = new ArrayList<>();
+    private List<Species>       _currentSpecies           = new ArrayList<>();
     private double              _averagePopulationFitness;
     private NeatGenome          _bestPerformingMember;
-    private int                 _maxGenWithoutImprovment = 10;
-    private boolean             _file1 = true;
+    private boolean             _file1                    = true;
+
+
+
+    /**********************
+     *     Parameters     *
+     **********************/
+    private double              _compatibilityThreshold;
+    private int                 c1,
+                                c2,
+                                c3 ;
+    private double              _probabilityOfMating;
+    private double              _bestOfSpeciesPercentage;
+    private double              _matingSTDEV;
+    private int                 _maxGenWithoutImprovment;
+
 
 
 
@@ -40,6 +49,7 @@ public class Neat implements Serializable {
         _numberOfInputs    = numberOfInputs;
         _numberOfOutputs   = numberOfOutputs;
         _populationSize    = populationSize;
+        readNeatProperties();
         createPopulation();
     }
 
@@ -53,8 +63,26 @@ public class Neat implements Serializable {
         _populationSize    = populationSize;
         _generationNumber  = generationNumber;
         _currentPopulation = currentPopulation;
+        readNeatProperties();
     }
 
+    public void readNeatProperties(){
+        try (InputStream in = new FileInputStream("neat.properties")) {
+            Properties prop = new Properties();
+            prop.load(in);
+            in.close();
+            _compatibilityThreshold        = Double.parseDouble(prop.getProperty("compatibilityThreshold"));
+            c1                             = Integer.parseInt(prop.getProperty("c1"));
+            c2                             = Integer.parseInt(prop.getProperty("c2"));
+            c3                             = Integer.parseInt(prop.getProperty("c3"));
+            _probabilityOfMating           = Double.parseDouble(prop.getProperty("probabilityOfMating"));
+            _bestOfSpeciesPercentage       = Double.parseDouble(prop.getProperty("bestOfSpeciesPercentage"));
+            _matingSTDEV                   = Double.parseDouble(prop.getProperty("matingSTDEV"));
+            _maxGenWithoutImprovment       = Integer.parseInt(prop.getProperty("maxGenWithoutImprovment"));
+        } catch (IOException e) {
+            System.err.println("Something went wrong while reading in the properties.");
+        }
+    }
 
 
     /***********************

@@ -2,21 +2,36 @@ import race.TorcsConfiguration;
 
 import java.io.*;
 import java.util.List;
+import java.util.Properties;
 
 public class NeatAlgorithm {
 
+    static int     _numberOfInputs;
+    static int     _numberOfOutputs;
+    static int     _populationSize;
+    static boolean _loadGenFromFile;
     /**********************
      * NEAT's main method *     //This is the one to be run when training the optimal RNN. Otherwise comment
      **********************/
 
+    public static void loadNaProperties(){
+        try (InputStream in = new FileInputStream("neat.properties")) {
+            Properties prop = new Properties();
+            prop.load(in);
+            in.close();
+            _numberOfInputs     = Integer.parseInt(prop.getProperty("numberOfInputs"));
+            _numberOfOutputs    = Integer.parseInt(prop.getProperty("numberOfOutputs"));
+            _populationSize     = Integer.parseInt(prop.getProperty("populationSize"));
+            _loadGenFromFile    = Boolean.parseBoolean(prop.getProperty("loadGenFromFile"));
+        } catch (IOException e) {
+            System.err.println("Something went wrong while reading in the properties.");
+        }
+    }
     @SuppressWarnings("unchecked")
     public static void main(String[] args) {
 
-        int     _numberOfInputs  = 12;
-        int     _numberOfOutputs = 3;
-        int     _populationSize  = 5;
-        Neat    neat;
-        boolean _loadGenFromFile = false ;
+        loadNaProperties();
+        Neat neat;
 
         //Set path to torcs.properties
         TorcsConfiguration.getInstance().initialize(new File("torcs.properties"));

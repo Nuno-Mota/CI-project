@@ -1,6 +1,10 @@
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class Species implements Serializable {
@@ -20,10 +24,13 @@ public class Species implements Serializable {
     private int                 _spawnsRequired;
     private double              _speciesFitness;
 
-    private static final int    _youngSpeciesThreshold = 30;
-    private static final int    _oldSpeciesThreshold   = 400;
-    private static final double _youngFitnessBonus     = 1.4;
-    private static final double _olderFitnessPenalty   = 0.9;    //TODO: variable penalty
+    /**********************
+     *     Parameters     *
+     **********************/
+    private static  int         _youngSpeciesThreshold;
+    private static  int         _oldSpeciesThreshold;
+    private static  double      _youngFitnessBonus;
+    private static  double      _olderFitnessPenalty;    //TODO: variable penalty
 
 
 
@@ -33,8 +40,24 @@ public class Species implements Serializable {
      ***************/
 
     public Species(List<NeatGenome> individuals) {
+        readSpeciesProperties();
         _speciesID = ++_globalSpeciesID;
         _individuals = individuals;
+    }
+
+    public void readSpeciesProperties(){
+        try (InputStream in = new FileInputStream("neat.properties")) {
+            Properties prop = new Properties();
+            prop.load(in);
+            in.close();
+            _youngSpeciesThreshold   = Integer.parseInt(prop.getProperty("youngSpeciesThreshold"));
+            _oldSpeciesThreshold     = Integer.parseInt(prop.getProperty("oldSpeciesThreshold"));
+            _youngFitnessBonus       = Double.parseDouble(prop.getProperty("youngFitnessBonus"));
+            _olderFitnessPenalty     = Double.parseDouble(prop.getProperty("olderFitnessPenalty"));
+
+        } catch (IOException e) {
+            System.err.println("Something went wrong while reading in the properties.");
+        }
     }
 
 

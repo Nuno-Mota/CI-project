@@ -1,23 +1,23 @@
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class NeatGenome implements Serializable{
 
-    private static int           _globalGenomeID   = 0;
-    private final double     _activationResponseSTDEV     = 0.5;  //TODO: check what is a proper value
-    private final double     _weightSTDEV                 = 2;
-    private final double     _weightMean                  = 3;
-    private final double     _chanceOfWeightMutation      = 0.8;
-    private final double     _chanceOfNewWeight           = 0.2;
     /**********************
      * Internal Variables *
      **********************/
 
-    private InnovationsTable     _innovationsTable = InnovationsTable.getInstance();
+    private static int            _globalGenomeID   = 0;
+
     private int                  _genomeID;
+    private InnovationsTable     _innovationsTable = InnovationsTable.getInstance();
     private List<NeuronGene>     _neurons          = new ArrayList<>();
     private List<ConnectionGene> _connections      = new ArrayList<>();
     private NeuralNetwork        _neuralNetwork;
@@ -26,16 +26,31 @@ public class NeatGenome implements Serializable{
     private double               _amountToSpawn;
     private int                  _numberOfInputs;
     private int                  _numberOfOutputs;
-    private int                  _speciesID;                          //For display's purpose. Check how useful these are
+    private int                  _speciesID;       //For display's purpose. Check how useful these are
     private Random               _rand             = new Random();
-    private double           _chanceOfArMutaton           = 0.1;
-    private double           _chanceOfArReinitialization  = 0.1;
-    private double           _activationResponseMeanValue = 3.5;  //TODO: check what is a proper value
-    private double           _chanceOfDisablingConnection = 0.2;
-    private double           _chanceOfEnablingConnection  = 0.2;
-    private double           _chanceOfAddingNeuron        = 0.7;
-    private double           _chanceOfAddingConnection    = 0.9;
-    private double           _chanceOfRecurrentConnection = 0.15;
+
+
+    /**********************
+     *     Parameters     *
+     **********************/
+
+    private double               _activationResponseMeanValue ;
+    private double               _activationResponseSTDEV;
+    private double               _chanceOfArMutaton;
+    private double               _chanceOfArReinitialization;
+
+    private  double              _weightMean;
+    private  double              _weightSTDEV;
+    private  double              _chanceOfWeightMutation;
+    private  double              _chanceOfNewWeight;
+
+    private double               _chanceOfAddingConnection;
+    private double               _chanceOfRecurrentConnection;
+    private double               _chanceOfDisablingConnection;
+    private double               _chanceOfEnablingConnection;
+
+    private double               _chanceOfAddingNeuron;
+
 
 
     /****************
@@ -44,10 +59,10 @@ public class NeatGenome implements Serializable{
 
     //Checked. Seems to be fine     //TODO:Missing adding connections and neurons to innovation's table
     public NeatGenome(int numberOfInputs, int numberOfOutputs) {
+        readNgProperties();
         _genomeID        = _globalGenomeID++;
         _numberOfInputs  = numberOfInputs;
         _numberOfOutputs = numberOfOutputs;
-
 
         //Create Input neurons
         for(int i = 0; i < _numberOfInputs; ++i)
@@ -62,7 +77,6 @@ public class NeatGenome implements Serializable{
             _neurons.add(new NeuronGene(i + _numberOfInputs + 1, 1, false, act, i/1.0, 1));
         }
 
-
         //Create possible Incoming and Outgoing connections for all Neurons
         createPossibleListsForEachNeuron(_neurons, _connections);
 
@@ -73,24 +87,18 @@ public class NeatGenome implements Serializable{
                 addNewConnection(_neurons.get(i).getNeuronID(), _neurons.get(j).getNeuronID(), false);
     }
 
-
-
-
     //TODO: Add constructor that randomizes initial connections
-
-
-
 
     //Checked by crossover. Seems to be fine
     public NeatGenome(List<NeuronGene> neurons, List<ConnectionGene> connections,
                       int numberOfInputs, int numberOfOutputs) {
+        readNgProperties();
         _genomeID        = _globalGenomeID++;
         _numberOfInputs  = numberOfInputs;
         _numberOfOutputs = numberOfOutputs;
 
         //Neurons are already unique when generated in crossover
         _neurons = neurons;
-
 
         //Make sure the connections point to the correct neurons in _neurons
         for(ConnectionGene cg : connections) {
@@ -107,10 +115,9 @@ public class NeatGenome implements Serializable{
     }
 
 
-
-
     //Checked. Seems to be fine
     public NeatGenome(NeatGenome genomeToBeCopied) {
+        readNgProperties();
         _genomeID        = _globalGenomeID++;  //TODO: When we copy the fittest genome of a species, we don't want to increment its ID
         _numberOfInputs  = genomeToBeCopied.getNumberOfInputs();
         _numberOfOutputs = genomeToBeCopied.getNumberOfOutputs();
@@ -137,6 +144,28 @@ public class NeatGenome implements Serializable{
     }
 
 
+    public void readNgProperties(){
+        try (InputStream in = new FileInputStream("neat.properties")) {
+            Properties prop = new Properties();
+            prop.load(in);
+            in.close();
+            _activationResponseMeanValue     = Double.parseDouble(prop.getProperty("activationResponseMeanValue"));
+            _activationResponseSTDEV         = Double.parseDouble(prop.getProperty("activationResponseSTDEV"));
+            _chanceOfArMutaton               = Double.parseDouble(prop.getProperty("chanceOfArMutaton"));
+            _chanceOfArReinitialization      = Double.parseDouble(prop.getProperty("chanceOfArReinitialization"));
+            _weightMean                      = Double.parseDouble(prop.getProperty("weightMean"));
+            _weightSTDEV                     = Double.parseDouble(prop.getProperty("weightSTDEV"));
+            _chanceOfWeightMutation          = Double.parseDouble(prop.getProperty("chanceOfWeightMutation"));
+            _chanceOfNewWeight               = Double.parseDouble(prop.getProperty("chanceOfNewWeight"));
+            _chanceOfAddingConnection        = Double.parseDouble(prop.getProperty("chanceOfAddingConnection"));
+            _chanceOfRecurrentConnection     = Double.parseDouble(prop.getProperty("chanceOfRecurrentConnection"));
+            _chanceOfDisablingConnection     = Double.parseDouble(prop.getProperty("chanceOfDisablingConnection"));
+            _chanceOfEnablingConnection      = Double.parseDouble(prop.getProperty("chanceOfEnablingConnection"));
+            _chanceOfAddingNeuron            = Double.parseDouble(prop.getProperty("chanceOfAddingNeuron"));
+        } catch (IOException e) {
+            System.err.println("Something went wrong while reading in the properties.");
+        }
+    }
 
     /***********************
      * Getters and Setters *
