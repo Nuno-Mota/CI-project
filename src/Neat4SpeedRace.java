@@ -7,12 +7,11 @@ import java.io.Serializable;
 
 public class Neat4SpeedRace extends AbstractRace implements Serializable {
 
-    private boolean             _DEBUG = false;
+    private boolean             _DEBUG = true;
 
     public int[] runQualification(DefaultDriverGenome[] drivers, boolean withGUI){
         Neat4SpeedDriver[] driversList = new Neat4SpeedDriver[drivers.length + 1 ];
         for(int i=0; i<drivers.length; i++){
-            driversList[i] = new Neat4SpeedDriver(null);//TODO: create NeuralNetwork to pass to driver
             driversList[i].loadGenome(drivers[i]);
         }
         return runQualification(driversList, withGUI);
@@ -28,59 +27,63 @@ public class Neat4SpeedRace extends AbstractRace implements Serializable {
             driversList[i] = drivers[i];
         if(_DEBUG)
             System.out.println("NEAT4SPEEDRACE: Initializing race");
-        return runRace(driversList, withGUI, true);
+        int[] results = new int[1];
+        results = runRace(driversList, withGUI, true);
+        if(_DEBUG)
+            System.out.println("NEAT4SPEEDRACE: Finished race");
+        return results;
     }
 
 
 
     public void showBest(){
-        if(DriversUtils.getStoredGenome() == null ){
-            System.err.println("No best-genome known");
-            return;
-        }
-
-        DefaultDriverGenome best = (DefaultDriverGenome) DriversUtils.getStoredGenome();
-        Neat4SpeedDriver driver = new Neat4SpeedDriver(null); //TODO: create NeuralNetwork to pass to driver
-        driver.loadGenome(best);
-
-        Neat4SpeedDriver[] driversList = new Neat4SpeedDriver[1];
-        driversList[0] = driver;
-        runQualification(driversList, true);
+//        if(DriversUtils.getStoredGenome() == null ){
+//            System.err.println("No best-genome known");
+//            return;
+//        }
+//
+//        DefaultDriverGenome best = (DefaultDriverGenome) DriversUtils.getStoredGenome();
+//        Neat4SpeedDriver driver = new Neat4SpeedDriver(null); //TODO: create NeuralNetwork to pass to driver
+//        driver.loadGenome(best);
+//
+//        Neat4SpeedDriver[] driversList = new Neat4SpeedDriver[1];
+//        driversList[0] = driver;
+//        runQualification(driversList, true);
     }
 
     public void showBestRace(){
-        if(DriversUtils.getStoredGenome() == null ){
-            System.err.println("No best-genome known");
-            return;
-        }
-
-        DefaultDriver[] driversList = new DefaultDriver[1];
-
-        for(int i=0; i<10; i++){
-            DefaultDriverGenome best = (DefaultDriverGenome) DriversUtils.getStoredGenome();
-            DefaultDriver driver = new DefaultDriver();
-            driver.loadGenome(best);
-            driversList[i] = driver;
-        }
-
-        runRace(driversList, true, true);
+//        if(DriversUtils.getStoredGenome() == null ){
+//            System.err.println("No best-genome known");
+//            return;
+//        }
+//
+//        DefaultDriver[] driversList = new DefaultDriver[1];
+//
+//        for(int i=0; i<10; i++){
+//            DefaultDriverGenome best = (DefaultDriverGenome) DriversUtils.getStoredGenome();
+//            DefaultDriver driver = new DefaultDriver();
+//            driver.loadGenome(best);
+//            driversList[i] = driver;
+//        }
+//
+//        runRace(driversList, true, true);
     }
 
     public void raceBest(){
-
-        if(DriversUtils.getStoredGenome() == null ){
-            System.err.println("No best-genome known");
-            return;
-        }
-
-        Driver[] driversList = new Driver[10];
-        for(int i=0; i<10; i++){
-            DefaultDriverGenome best = (DefaultDriverGenome) DriversUtils.getStoredGenome();
-            Neat4SpeedDriver driver = new Neat4SpeedDriver(null); //TODO: Creat NeuralNetwork to pass to driver
-            driver.loadGenome(best);
-            driversList[i] = driver;
-        }
-        driversList[0] = new Human();
-        runRace(driversList, true, true);
+//
+//        if(DriversUtils.getStoredGenome() == null ){
+//            System.err.println("No best-genome known");
+//            return;
+//        }
+//
+//        Driver[] driversList = new Driver[10];
+//        for(int i=0; i<10; i++){
+//            DefaultDriverGenome best = (DefaultDriverGenome) DriversUtils.getStoredGenome();
+//            Neat4SpeedDriver driver = new Neat4SpeedDriver(null); //TODO: Creat NeuralNetwork to pass to driver
+//            driver.loadGenome(best);
+//            driversList[i] = driver;
+//        }
+//        driversList[0] = new Human();
+//        runRace(driversList, true, true);
     }
 }

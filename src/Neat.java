@@ -444,20 +444,21 @@ public class Neat implements Serializable {
             Neat4SpeedRace race = new Neat4SpeedRace();
             race.setTrack("aalborg", "road");
             race.laps = 1;
-            drivers[0] = new Neat4SpeedDriver(ng.getNeuralNetwork());
             System.setOut(original);
 
-            System.out.println("\nGenomeID = " + ng.getGenomeID());
+            drivers[0] = new Neat4SpeedDriver(ng.getNeuralNetwork());
+
             if(_DEBUG)
                 System.out.println("Genome size = " + ng.getConnections().size());
-
-            //for speedup set withGUI to false
             if(_DEBUG)
                 System.out.println("NEAT: starting race");
-            System.setOut(new NullPrintStream());
-            race.runRace(drivers, false);
-            System.setOut(original);
 
+            //for speedup set withGUI to false
+            //System.setOut(new NullPrintStream());
+            race.runRace(drivers, false);
+            //System.setOut(original);
+
+            System.out.println("\nGenomeID = " + ng.getGenomeID());
             System.out.println("FITNESS = " + drivers[0].getFitness());
             ng.setFitness(drivers[0].getFitness());
         }
@@ -961,14 +962,9 @@ public class Neat implements Serializable {
 
 
     public void propagateInnovationsTable() {
-        System.out.println("NEAT's innovation table current genomeID = " + _innovationsTable.getGenomeID());
-        for(NeatGenome ng : _currentPopulation) {
+        for(NeatGenome ng : _currentPopulation)
             ng.setInnovationsTable(_innovationsTable);
-            System.out.println(ng.getInnovationsTable().getGenomeID());
-        }
-        for(Species sp : _currentSpecies) {
+        for(Species sp : _currentSpecies)
             sp.setInnovationsTable(_innovationsTable);
-            System.out.println(sp.getInnovationsTable().getGenomeID());
-        }
     }
 }

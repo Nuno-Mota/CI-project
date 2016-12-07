@@ -10,7 +10,7 @@ import java.io.Serializable;
 
 public class Neat4SpeedDriver extends AbstractDriver implements Serializable {
 
-    private boolean             _DEBUG = false;
+    private boolean       _DEBUG = true;
 
     private NeuralNetwork _neuralNetwork = new NeuralNetwork();
     private double        _fitness;
@@ -111,19 +111,33 @@ public class Neat4SpeedDriver extends AbstractDriver implements Serializable {
         else
             _cyclesGoingBack = 0;
 
-        if(_DEBUG)
-            System.out.println("NEAT4SPEEDDRIVER: Restarting race for bad conditions");
         if(_cyclesWithoutMovingForward > 500 || sensors.getTrackEdgeSensors()[0] == -1 || _cyclesGoingBack > 500){
             _fitness = sensors.getDistanceRaced();
             action.restartRace = true;
+        if(_DEBUG)
+            System.out.println("NEAT4SPEEDDRIVER: Restarting race for bad conditions");
         }
 
+        long startTime = 0, endTime = 0;
+        if(_DEBUG)
+            startTime = System.nanoTime();
+
         double[] outputs  = _neuralNetwork.update(sensors);
+
+        if(_DEBUG)
+            endTime = System.nanoTime();
+        if(_DEBUG)
+            System.out.println("Time Taken to update: " + (endTime - startTime)/1000000.0);
+
+
         action.steering   = outputs[0];
         action.accelerate = outputs[1];
         action.brake      = outputs[2];
-
-
+//        action.steering   = 0;
+//        action.accelerate = 1;
+//        action.brake      = 0;
+//
+//
 //        System.out.println("--------------" + getDriverName() + "--------------");
 //        System.out.println("Steering: " + action.steering);
 //        System.out.println("Acceleration: " + action.accelerate);

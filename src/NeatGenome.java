@@ -88,9 +88,7 @@ public class NeatGenome implements Serializable{
                       int numberOfInputs, int numberOfOutputs, InnovationsTable innovationsTable) {
         readNgProperties();
         _innovationsTable = innovationsTable;
-        System.out.println("CURRENT GENOME_ID = " + _innovationsTable.getGenomeID());
         _genomeID        = _innovationsTable.getNewGenomeID();
-        System.out.println("NEW ASSIGNED GENOME_ID = " + _genomeID);
         _numberOfInputs  = numberOfInputs;
         _numberOfOutputs = numberOfOutputs;
 
