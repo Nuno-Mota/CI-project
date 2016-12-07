@@ -9,14 +9,15 @@ public class NeuralNetworkNeuron implements Serializable {
      **********************/
 
     private int                           _neuronID;
-    private int                           _type;             // 0 = input, 1 = output, 2 = hidden, 3 = bias, 4 = none
+    // Type:  0 = input, 1 = output, 2 = hidden, 3 = bias, 4 = none
+    private int                           _type;
     private boolean                       _isRecurrent;
     private double                        _sumActivation;
     private double                        _activationResponse;
-    private double                        _output = 0;
+    private double                        _output                  = 0;
     private double                        _positionX, _positionY;
-    private List<NeuralNetworkConnection> _incoming = new ArrayList<>();
-    private List<NeuralNetworkConnection> _outgoing = new ArrayList<>();
+    private List<NeuralNetworkConnection> _incoming                = new ArrayList<>();
+    private List<NeuralNetworkConnection> _outgoing                = new ArrayList<>();
 
 
 

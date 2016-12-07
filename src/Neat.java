@@ -21,8 +21,9 @@ public class Neat implements Serializable {
 
     private double              _compatibilityThreshold = 7.15;
     private int                 c1 = 1, c2 = 1, c3 = 3;
-    private static final double _likelihoodOfBestMating = 0.2;
-    private static final double _probabilityOfMating = 0.85;
+    private double              _bestOfSpeciesPercentage = 0.2;
+    private double              _probabilityOfMating = 0.85;
+    private double              _matingSTDEV = 0.25;
     private double              _averagePopulationFitness;
     private NeatGenome          _bestPerformingMember;
     private int                 _maxGenWithoutImprovment = 10;
@@ -102,8 +103,8 @@ public class Neat implements Serializable {
         _currentSpecies = currentSpecies;
     }
 
-    public double getLikelihoodOfBestMating() {
-        return _likelihoodOfBestMating;
+    public double getBestOfSpeciesPercentage() {
+        return _bestOfSpeciesPercentage;
     }
 
     public double getProbabilityOfMating() {
@@ -227,12 +228,12 @@ public class Neat implements Serializable {
                                 if(_DEBUG)
                                     System.out.println("Selecting max index for parent selection");
 
-                                //gets the index (approx) of the element corresponding to _likelihoodOfBestMating% of the species
+                                //gets the index (approx) of the element corresponding to _bestOfSpeciesPercentage % of the species
                                 //so that better performing elements have a higher chance of mating
-                                meanIndx = (int)(size * _likelihoodOfBestMating);     //TODO: check if this works properly
+                                meanIndx = (int)(size * _bestOfSpeciesPercentage);
 
                                 //adds gaussian noise, so that lower performing members have a chance of mating with better performing ones
-                                max      = (int) Math.abs(rand.nextGaussian() * size * 0.25) + meanIndx + 1;
+                                max      = (int) Math.abs(rand.nextGaussian() * size * _matingSTDEV) + meanIndx + 1;
 
                                 //attributes a value to the maxIndx, effectively determining which elements of
                                 //the species have a chance of mating
@@ -351,20 +352,17 @@ public class Neat implements Serializable {
                 System.out.println("Add Connection Mutation");
 
             //Function that has a chance of adding a new (possibly looped) connection.
-            double addConnectionChance          = 0.90;
-            double chanceOfLoopedConnection     = 0.15;
             //input and bias neurons shouldn't have looped connections
             int    numberOfTriesToFindLoop      = ng.getNeurons().size() - _numberOfInputs -1;
             int    numberOfTriesToAddConnection = ng.getNeurons().size()/3; //parameter 3 was sort of random... Change as required
-            ng.addConnection(addConnectionChance, chanceOfLoopedConnection, numberOfTriesToFindLoop, numberOfTriesToAddConnection);
+            ng.addConnection(numberOfTriesToFindLoop, numberOfTriesToAddConnection);
 
             if(_DEBUG)
                 System.out.println("Add Neuron Mutation");
 
             //Function that has a chance of adding a new neuron to an existing connection.
-            double addNeuronChance                  = 0.70;
             int    numberOfTriesToFindOldConnection = ng.getConnections().size()/2;//_numberOfInputs*_numberOfOutputs;?
-            ng.addNeuron(addNeuronChance, numberOfTriesToFindOldConnection);
+            ng.addNeuron(numberOfTriesToFindOldConnection);
         }
 
 
@@ -376,7 +374,8 @@ public class Neat implements Serializable {
         for(List<NeatGenome> lng : clearedSpecies) {
             _currentSpecies.get(currentSpeciesIndex++).setIndividuals(lng);
             _currentPopulation.add(lng.get(0));
-        } System.out.println("Generation number " + _generationNumber + " created.");
+        }
+        System.out.println("Generation number " + _generationNumber + " created.");
     }
 
 

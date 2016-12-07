@@ -14,12 +14,8 @@ public class NeuronGene implements Serializable{
     private boolean          _isRecurrent;
     private double           _activationResponse;
     private double           _positionX, _positionY;
-    private List<NeuronGene> _possibleIncoming = new ArrayList<>();
-    private List<NeuronGene> _possibleOutgoing = new ArrayList<>();
-
-    private Random           _rand                        = new Random();
-    private double           _activationResponseMeanValue = 3.5;  //TODO: check what is a proper value
-    private final double     _activationResponseSTDEV     = 0.5;  //TODO: check what is a proper value
+    private List<NeuronGene> _possibleIncoming            = new ArrayList<>();
+    private List<NeuronGene> _possibleOutgoing            = new ArrayList<>();
 
 
 
@@ -81,7 +77,7 @@ public class NeuronGene implements Serializable{
     public double getActivationResponse() {
         return _activationResponse;
     }
-    private void setActivationResponse(double activationResponse) {
+    public void setActivationResponse(double activationResponse) {
         _activationResponse = activationResponse;
     }
 
@@ -115,17 +111,4 @@ public class NeuronGene implements Serializable{
         _possibleOutgoing = possibleOutgoing;
     }
 
-
-
-    /********************************
-     * Activation Response Mutation *
-     ********************************/
-
-    //Checked. Seems to be fine
-    public void mutateActivationResponse() {
-        if(Math.random() <= 0.1)                                //10% chance of getting an entirely new value
-            _activationResponse = _rand.nextGaussian()*_activationResponseSTDEV + _activationResponseMeanValue;
-        else                                                    //80% chance of adding noise to the current weight value
-            _activationResponse += 0.5*_rand.nextGaussian()*_activationResponseSTDEV;
-    }
 }

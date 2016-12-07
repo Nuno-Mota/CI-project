@@ -73,7 +73,7 @@ public class ConnectionGene implements Serializable{
     public double getWeight() {
         return _weight;
     }
-    private void setWeight(double weight) {
+    public void setWeight(double weight) {
         _weight = weight;
     }
 
@@ -107,21 +107,7 @@ public class ConnectionGene implements Serializable{
 
 
 
-    /*******************
-     * Weight Mutation *
-     *******************/
-
-    //Checked. Seems to be fine
-    public void mutateWeight() {
-        if(Math.random() <= 0.2)                                //20% chance of getting an entirely new value
-            _weight = _rand.nextGaussian()*_weightSTDEV;
-        else                                                    //80% chance of adding noise to the current weight value
-            _weight += 0.5*_rand.nextGaussian()*_weightSTDEV;
-    }
-
-
-
-    /********************************
+ /********************************
      * Innovation Number Comparison *
      ********************************/
 

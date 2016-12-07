@@ -154,7 +154,7 @@ public class NeuralNetwork implements Serializable {
             ++currentNeuron;
         }
         _steering      = outputs[0];
-        _acceleration  = Math.abs(outputs[1]);
+        _acceleration  = Math.abs(outputs[1]);  //Try this withoug abs, see what happens
         _breaking      = Math.abs(outputs[2]);
 
         outputs[1]     = Math.abs(outputs[1]);

@@ -6,10 +6,10 @@ public class NeuralNetworkConnection implements Serializable {
      * Internal Variables *
      **********************/
 
-    private NeuralNetworkNeuron _inputNeuron;
-    private NeuralNetworkNeuron _outputNeuron;
-    private double              _weight;
-    private boolean             _isRecurrent;
+    private NeuralNetworkNeuron   _inputNeuron;
+    private NeuralNetworkNeuron   _outputNeuron;
+    private double                _weight;
+    private boolean               _isRecurrent;
 
 
 

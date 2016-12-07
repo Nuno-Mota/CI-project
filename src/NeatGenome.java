@@ -6,13 +6,17 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class NeatGenome implements Serializable{
 
+    private static int           _globalGenomeID   = 0;
+    private final double     _activationResponseSTDEV     = 0.5;  //TODO: check what is a proper value
+    private final double     _weightSTDEV                 = 2;
+    private final double     _weightMean                  = 3;
+    private final double     _chanceOfWeightMutation      = 0.8;
+    private final double     _chanceOfNewWeight           = 0.2;
     /**********************
      * Internal Variables *
      **********************/
 
     private InnovationsTable     _innovationsTable = InnovationsTable.getInstance();
-    private static int           _globalGenomeID   = 0;
-
     private int                  _genomeID;
     private List<NeuronGene>     _neurons          = new ArrayList<>();
     private List<ConnectionGene> _connections      = new ArrayList<>();
@@ -23,13 +27,15 @@ public class NeatGenome implements Serializable{
     private int                  _numberOfInputs;
     private int                  _numberOfOutputs;
     private int                  _speciesID;                          //For display's purpose. Check how useful these are
-
     private Random               _rand             = new Random();
-    private final int            _weightSTDEV      = 2;               //Check for good value?
-
+    private double           _chanceOfArMutaton           = 0.1;
+    private double           _chanceOfArReinitialization  = 0.1;
     private double           _activationResponseMeanValue = 3.5;  //TODO: check what is a proper value
-    private final double     _activationResponseSTDEV     = 0.5;  //TODO: check what is a proper value
-
+    private double           _chanceOfDisablingConnection = 0.2;
+    private double           _chanceOfEnablingConnection  = 0.2;
+    private double           _chanceOfAddingNeuron        = 0.7;
+    private double           _chanceOfAddingConnection    = 0.9;
+    private double           _chanceOfRecurrentConnection = 0.15;
 
 
     /****************
@@ -172,44 +178,52 @@ public class NeatGenome implements Serializable{
      * Mutation methods *
      ********************/
 
+
     //Checked. Seems to be fine
     public void mutateWeights() {
 
-        double lower = 0.1;     //Lowest value of chance of mutation occurring
-        double upper = 0.75;    //Highest value of chance of mutation occurring
+        //double lower = 0.1;     //Lowest value of chance of mutation occurring
+        //double upper = 0.75;    //Highest value of chance of mutation occurring
 
         for(ConnectionGene cg : _connections)
-            if(Math.random() <= Math.random() * (upper - lower) + lower)
-                cg.mutateWeight();
+            //if(Math.random() <= Math.random() * (upper - lower) + lower)
+            if(Math.random() <= _chanceOfWeightMutation)                               //20% chance of getting an entirely new value
+                if(Math.random() <= _chanceOfNewWeight)
+                    cg.setWeight(_rand.nextGaussian()*_weightSTDEV + _weightMean);
+                else                                                    //80% chance of adding noise to the current weight value
+                    cg.setWeight(cg.getWeight() + _rand.nextGaussian()*_weightSTDEV);
     }
-
 
 
 
     //Checked. Seems to be fine
     public void mutateActivationResponses() {
 
-        double lower = 0.1;     //Lowest value of chance of mutation occurring
-        double upper = 0.3;     //Highest value of chance of mutation occurring
+        //double lower = 0.1;     //Lowest value of chance of mutation occurring
+        //double upper = 0.3;     //Highest value of chance of mutation occurring
 
         for(NeuronGene ng : _neurons)
-            if(Math.random() <= Math.random() * (upper - lower) + lower)
-                ng.mutateActivationResponse();
+            //if(Math.random() <= Math.random() * (upper - lower) + lower)
+            if(Math.random() <= _chanceOfArMutaton)
+                if(Math.random() <= _chanceOfArReinitialization)              //10% chance of getting an entirely new value
+                    ng.setActivationResponse(_rand.nextGaussian()*_activationResponseSTDEV + _activationResponseMeanValue);
+                else                                  //80% chance of adding noise to the current weight value
+                    ng.setActivationResponse(ng.getActivationResponse() + _rand.nextGaussian()*_activationResponseSTDEV);
     }
-
 
 
 
     //Checked. Seems to be fine
     public void disableConnection(int numberOfTriesToDisableConnection) {
 
-        double lower = 0.05;    //Lowest value of chance of a random connection being disabled
-        double upper = 0.10;    //Highest value of chance of a random connection being disabled
+        //double lower = 0.05;    //Lowest value of chance of a random connection being disabled
+        //double upper = 0.10;    //Highest value of chance of a random connection being disabled
         int connectionIndex;
 
-        if(Math.random() <= Math.random() * (upper - lower) + lower) {
-            while(numberOfTriesToDisableConnection-- != 0) {
-                connectionIndex = ThreadLocalRandom.current().nextInt(0, _connections.size());
+        //if(Math.random() <= Math.random() * (upper - lower) + lower) {
+        if(Math.random() <= _chanceOfDisablingConnection) {
+            while(numberOfTriesToDisableConnection-- > 0) {
+                connectionIndex = _rand.nextInt(_connections.size());
                 if(_connections.get(connectionIndex).getIsEnabled()) {
                     _connections.get(connectionIndex).setIsEnabled(false);
                     numberOfTriesToDisableConnection = 0;
@@ -220,17 +234,17 @@ public class NeatGenome implements Serializable{
 
 
 
-
     //Checked. Seems to be fine
     public void enableConnection(int numberOfTriesToEnableConnection) {
 
-        double lower = 0.3;    //Lowest value of chance of a random connection being disabled
-        double upper = 0.4;    //Highest value of chance of a random connection being disabled
+        //double lower = 0.3;    //Lowest value of chance of a random connection being disabled
+        //double upper = 0.4;    //Highest value of chance of a random connection being disabled
         int connectionIndex;
 
 
-        if(Math.random() <= Math.random() * (upper - lower) + lower) {
-            while(numberOfTriesToEnableConnection-- != 0) {
+        //if(Math.random() <= Math.random() * (upper - lower) + lower) {
+        if(Math.random() <= _chanceOfEnablingConnection) {
+            while(numberOfTriesToEnableConnection-- > 0) {
                 connectionIndex = ThreadLocalRandom.current().nextInt(0, _connections.size());
                 if(!_connections.get(connectionIndex).getIsEnabled()) {
                     _connections.get(connectionIndex).setIsEnabled(true);
@@ -244,10 +258,9 @@ public class NeatGenome implements Serializable{
 
 
     //Checked by addConnection from adding new connection in the mutation process. Seems to be fine
-    public void addConnection(double mutationRate, double chanceOfLooped,
-                              int numberOfTriesToFindLoop, int numberOfTriesToAddConnection) {
+    public void addConnection(int numberOfTriesToFindLoop, int numberOfTriesToAddConnection) {
 
-        if (Math.random() > mutationRate)
+        if (Math.random() > _chanceOfAddingConnection)
             return;
 
 
@@ -257,7 +270,7 @@ public class NeatGenome implements Serializable{
 
 
 
-        if (Math.random() <= chanceOfLooped) {
+        if (Math.random() <= _chanceOfRecurrentConnection) {
             while (numberOfTriesToFindLoop-- != 0){
 
 
@@ -308,9 +321,9 @@ public class NeatGenome implements Serializable{
 
 
     //Checked. seems to be fine
-    public void addNeuron(double mutationRate, int numberOfTriesToFindOldLink) {
+    public void addNeuron(int numberOfTriesToFindOldLink) {
 
-        if (Math.random() > mutationRate)
+        if (Math.random() > _chanceOfAddingNeuron)
             return;
 
 
@@ -372,7 +385,7 @@ public class NeatGenome implements Serializable{
 
 
         //TODO: make sure that this part works properly! Not according to the book!!!!
-        double activationResponse = 3;  //TODO: check what a proper value is
+
 
 
         int neuronID;
@@ -385,7 +398,7 @@ public class NeatGenome implements Serializable{
             neuronID = _innovationsTable.getNeuronID(innovationID);
 
 
-        NeuronGene newNeuron = new NeuronGene(neuronID, 2, false, activationResponse, newWidth,
+        NeuronGene newNeuron = new NeuronGene(neuronID, 2, false, _activationResponseMeanValue, newWidth,
                 newDepth);
         _neurons.add(newNeuron);
         createPossibleLists(newNeuron, _neurons, _connections);
