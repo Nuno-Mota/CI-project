@@ -2,6 +2,10 @@ import cicontest.algorithm.abstracts.AbstractRace;
 import cicontest.algorithm.abstracts.DriversUtils;
 import cicontest.torcs.controller.Driver;
 import cicontest.torcs.controller.Human;
+import cicontest.torcs.race.Race;
+import cicontest.torcs.race.RaceResult;
+import cicontest.torcs.race.RaceResults;
+import scr.Controller;
 
 import java.io.Serializable;
 
@@ -27,13 +31,53 @@ public class Neat4SpeedRace extends AbstractRace implements Serializable {
             driversList[i] = drivers[i];
         if(_DEBUG)
             System.out.println("NEAT4SPEEDRACE: Initializing race");
-        int[] results = new int[1];
+        int[] results;
         results = runRace(driversList, withGUI, true);
         if(_DEBUG)
             System.out.println("NEAT4SPEEDRACE: Finished race");
         return results;
     }
 
+    @Override
+    public int[] runRace(Driver[] drivers, boolean withGUI, boolean randomOrder) {
+        int[] fitness = new int[drivers.length];
+        if(drivers.length > 10) {
+            throw new RuntimeException("Only 10 drivers are allowed in a RACE");
+        } else {
+            Race race = new Race();
+            race.setTrack(this.tracktype, this.track);
+            race.setTermination(Race.Termination.LAPS, this.laps);
+            race.setStage(Controller.Stage.RACE);
+            Neat4SpeedDriver NEATDriver = (Neat4SpeedDriver)drivers[0];
+            NEATDriver.setRace(race);
+            drivers[0] = NEATDriver;
+            Driver[] results = drivers;
+            int i = drivers.length;
+
+            for(int var8 = 0; var8 < i; ++var8) {
+                Driver driver = results[var8];
+                race.addCompetitor(driver);
+            }
+
+            if(randomOrder) {
+                race.shuffleOrder();
+            }
+
+            RaceResults var10;
+            if(withGUI) {
+                var10 = race.runWithGUI();
+            } else {
+                var10 = race.run();
+            }
+
+            for(i = 0; i < drivers.length; ++i) {
+                fitness[i] = ((RaceResult)var10.get(drivers[i])).getPosition();
+            }
+
+            this.printResults(drivers, var10);
+            return fitness;
+        }
+    }
 
 
     public void showBest(){

@@ -454,9 +454,9 @@ public class Neat implements Serializable {
                 System.out.println("NEAT: starting race");
 
             //for speedup set withGUI to false
-            //System.setOut(new NullPrintStream());
+            System.setOut(new NullPrintStream());
             race.runRace(drivers, false);
-            //System.setOut(original);
+            System.setOut(original);
 
             System.out.println("\nGenomeID = " + ng.getGenomeID());
             System.out.println("FITNESS = " + drivers[0].getFitness());

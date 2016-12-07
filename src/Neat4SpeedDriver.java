@@ -3,6 +3,8 @@ import cicontest.torcs.controller.extras.ABS;
 import cicontest.torcs.controller.extras.AutomatedClutch;
 import cicontest.torcs.controller.extras.AutomatedGearbox;
 import cicontest.torcs.genome.IGenome;
+import cicontest.torcs.race.Race;
+import cicontest.torcs.race.RaceResult;
 import scr.Action;
 import scr.SensorModel;
 
@@ -10,13 +12,18 @@ import java.io.Serializable;
 
 public class Neat4SpeedDriver extends AbstractDriver implements Serializable {
 
-    private boolean       _DEBUG = true;
+    private boolean       _DEBUG = false;
 
     private NeuralNetwork _neuralNetwork = new NeuralNetwork();
     private double        _fitness;
     private double        _previousMaxDistRaced = 0;
     private int           _cyclesWithoutMovingForward = 0;
     private int           _cyclesGoingBack = 0;
+
+    private Race          _race;
+
+
+    public void setRace(Race race) { _race = race; }
 
 
     public Neat4SpeedDriver(NeuralNetwork neuralNetwork) {
@@ -113,7 +120,9 @@ public class Neat4SpeedDriver extends AbstractDriver implements Serializable {
 
         if(_cyclesWithoutMovingForward > 500 || sensors.getTrackEdgeSensors()[0] == -1 || _cyclesGoingBack > 500){
             _fitness = sensors.getDistanceRaced();
-            action.restartRace = true;
+            RaceResult result = new RaceResult();
+            result.setFinished(true);
+            _race.setResults(this, new RaceResult());
         if(_DEBUG)
             System.out.println("NEAT4SPEEDDRIVER: Restarting race for bad conditions");
         }
