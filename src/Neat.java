@@ -12,6 +12,7 @@ public class Neat implements Serializable {
      **********************/
 
     private boolean             _DEBUG = false;
+    private InnovationsTable     _innovationsTable = InnovationsTable.getInstance();
 
     private int                 _numberOfInputs;
     private int                 _numberOfOutputs;
@@ -184,7 +185,7 @@ public class Neat implements Serializable {
         System.out.println("Creating initial population.");
 
         for(int i = 0; i < _populationSize; ++i)
-            _currentPopulation.add(new NeatGenome(_numberOfInputs, _numberOfOutputs));
+            _currentPopulation.add(new NeatGenome(_numberOfInputs, _numberOfOutputs, _innovationsTable));
 
         System.out.println("Initial population created.");
     }
@@ -261,7 +262,7 @@ public class Neat implements Serializable {
                                 System.exit(0);
                             }
                             else if(size == 1) {//adds (again) the best and only element of the species, but this will be mutated
-                                newPopulation.add(new NeatGenome(sp.getIndividuals().get(0)));
+                                newPopulation.add(new NeatGenome(sp.getIndividuals().get(0), _innovationsTable));
                                 ++currentNumberOfOffspring;
                             }
                             else {
@@ -293,7 +294,7 @@ public class Neat implements Serializable {
                                 //There's a chance that the first potential parent doesn't mate at all and
                                 //just gets added to the new population (with future possible mutations)
                                 if(rand.nextDouble() > _probabilityOfMating)
-                                    newPopulation.add(new NeatGenome(sp.getIndividuals().get(parent1Indx)));
+                                    newPopulation.add(new NeatGenome(sp.getIndividuals().get(parent1Indx), _innovationsTable));
                                 else {
                                     parent2Indx = parent1Indx;
 
@@ -614,7 +615,7 @@ public class Neat implements Serializable {
             addBabyNeuron(selectedGene.getOutputNeuron(), babyNeurons);
         }
 
-        return new NeatGenome(babyNeurons, babyConnections, parent1.getNumberOfInputs(), parent1.getNumberOfOutputs());
+        return new NeatGenome(babyNeurons, babyConnections, parent1.getNumberOfInputs(), parent1.getNumberOfOutputs(), _innovationsTable);
     }
 
 
@@ -670,7 +671,7 @@ public class Neat implements Serializable {
             if(_currentSpecies.size() == 0) {
                 List<NeatGenome> membersOfSpecies = new ArrayList<>();
                 membersOfSpecies.add(ng);
-                Species newSpecies = new Species(membersOfSpecies);
+                Species newSpecies = new Species(membersOfSpecies, _innovationsTable);
                 newSpecies.setBestFitness(ng.getFitness());
                 _currentSpecies.add(newSpecies);
             }
@@ -688,7 +689,7 @@ public class Neat implements Serializable {
                 if(createNewSpecies) {
                     List<NeatGenome> membersOfSpecies = new ArrayList<>();
                     membersOfSpecies.add(ng);
-                    Species newSpecies = new Species(membersOfSpecies);
+                    Species newSpecies = new Species(membersOfSpecies, _innovationsTable);
                     newSpecies.setBestFitness(ng.getFitness());
                     _currentSpecies.add(newSpecies);
                 }
@@ -954,5 +955,20 @@ public class Neat implements Serializable {
 
 
         System.out.println("Data saved. YOU CAN NOW STOP THE PROGRAM!");
+    }
+
+
+
+
+    public void propagateInnovationsTable() {
+        System.out.println("NEAT's innovation table current genomeID = " + _innovationsTable.getGenomeID());
+        for(NeatGenome ng : _currentPopulation) {
+            ng.setInnovationsTable(_innovationsTable);
+            System.out.println(ng.getInnovationsTable().getGenomeID());
+        }
+        for(Species sp : _currentSpecies) {
+            sp.setInnovationsTable(_innovationsTable);
+            System.out.println(sp.getInnovationsTable().getGenomeID());
+        }
     }
 }

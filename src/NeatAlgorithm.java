@@ -63,6 +63,8 @@ public class NeatAlgorithm {
                 System.out.println("Error reading from generation file: Downcast class does not exist.");
                 return;
             }
+
+            neat.propagateInnovationsTable();
         }
         else
             neat = new Neat(_numberOfInputs, _numberOfOutputs, _populationSize);

@@ -68,6 +68,7 @@ public class InnovationsTable implements Serializable {
 
     public int getNeuronID(int innovationID) { return _innovations.get(innovationID).getNeuronID(); }
 
+    public int getGenomeID() { return _globalGenomeID; }
     public int getNewGenomeID() { return ++_globalGenomeID; }
 
     public int getNewSpeciesID() { return ++_globalSpeciesID; }
