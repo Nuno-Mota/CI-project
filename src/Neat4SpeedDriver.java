@@ -8,6 +8,7 @@ import cicontest.torcs.race.RaceResult;
 import scr.Action;
 import scr.SensorModel;
 
+import java.io.IOException;
 import java.io.Serializable;
 
 public class Neat4SpeedDriver extends AbstractDriver implements Serializable {
@@ -95,7 +96,7 @@ public class Neat4SpeedDriver extends AbstractDriver implements Serializable {
     }
 
     @Override
-    public Action defaultControl(Action action, SensorModel sensors) {
+    public Action defaultControl(Action action, SensorModel sensors) throws NullPointerException {
         if (action == null) {
             action = new Action();
         }
@@ -120,18 +121,30 @@ public class Neat4SpeedDriver extends AbstractDriver implements Serializable {
         else
             _cyclesGoingBack = 0;
 
-        //System.out.println(_cyclesWithoutMovingForward);
-        if(_cyclesWithoutMovingForward > 500 || sensors.getTrackEdgeSensors()[0] == -1 || _cyclesGoingBack > 500){
+        System.out.println(_cyclesWithoutMovingForward);
+        if(_cyclesWithoutMovingForward > 500 || sensors.getTrackEdgeSensors()[0] == -1 || _cyclesGoingBack > 500) {
             _fitness = sensors.getDistanceRaced();
+//            try {
+//                Runtime.getRuntime().exec("killall torcs-bin");
+//            } catch (IOException e) {
+//                System.out.println("Couldn't kill TORCS");
+//                System.exit(0);
+//            }
+
+        if(_DEBUG)
+            System.out.println("NEAT4SPEEDDRIVER: Restarting race for bad conditions");
+
+
 //            RaceResult result = new RaceResult();
 //            result.setFinished(true);
 //            _race.setResults(this, result);
-//            _race.setTermination(Race.Termination.DISTANCE, (int)_fitness);
-            action.restartRace = true;
+//            _race.setTermination(Race.Termination.TICKS, 0);
+//            throw new NullPointerException();
+            System.exit(0);
+//            action.restartRace = true;
 //            this.exit();
 //            this.shutdown();
-        if(_DEBUG)
-            System.out.println("NEAT4SPEEDDRIVER: Restarting race for bad conditions");
+//        return action;
         }
 
         long startTime = 0, endTime = 0;

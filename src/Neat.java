@@ -180,7 +180,6 @@ public class Neat implements Serializable {
         estimateFitness();
         defineSpecies();
         saveRelevantData();
-        ++_generationNumber;
     }
 
 
@@ -464,9 +463,13 @@ public class Neat implements Serializable {
 
 
                 //for speedup set withGUI to false
-                System.setOut(new NullPrintStream());
-                race.runRace(drivers, false);
-                System.setOut(original);
+                try {
+                    //System.setOut(new NullPrintStream());
+                    race.runRace(drivers, false);
+                    //System.setOut(original);
+                } catch (Exception e) {
+                    System.out.println("Crashed");
+                }
 
                 System.out.println("FITNESS for track " + _tracks[i][0] + " = " + drivers[0].getFitness());
                 ng.setFitness(ng.getFitness() + drivers[0].getFitness());
@@ -854,30 +857,6 @@ public class Neat implements Serializable {
     public void saveRelevantData() {
         System.out.println("Saving data. DO NOT STOP PROGRAM NOW!!!!!");
 
-        String filename;
-        if (_file1)
-            filename = "src/memory/Single_Driver/Full_Generations/GenBeep.java_serial";
-        else
-            filename = "src/memory/Single_Driver/Full_Generations/GenBoop.java_serial";
-        toggleFile();
-
-
-
-        //Store the state of neat
-        ObjectOutputStream out = null;
-        try {
-            out = new ObjectOutputStream(new FileOutputStream(filename));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        try {
-            if (out != null) {
-                out.writeObject(this);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
 
 
 
@@ -931,8 +910,10 @@ public class Neat implements Serializable {
         averageNumberOfNeurons /= _currentPopulation.size();
 
 
+        String filename;
+
         filename = "src/memory/Single_Driver/Best_of_each_Generation/bestOfGen" + _generationNumber + ".java_serial";
-        out = null;
+        ObjectOutputStream out = null;
         try {
             out = new ObjectOutputStream(new FileOutputStream(filename));
         } catch (IOException e) {
@@ -963,6 +944,31 @@ public class Neat implements Serializable {
             System.out.println("Error appending to statistics file: IOException.");
         }
 
+
+        ++_generationNumber;
+
+        if (_file1)
+            filename = "src/memory/Single_Driver/Full_Generations/GenBeep.java_serial";
+        else
+            filename = "src/memory/Single_Driver/Full_Generations/GenBoop.java_serial";
+        toggleFile();
+
+
+
+        //Store the state of neat
+        out = null;
+        try {
+            out = new ObjectOutputStream(new FileOutputStream(filename));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            if (out != null) {
+                out.writeObject(this);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         System.out.println("Data saved. YOU CAN NOW STOP THE PROGRAM!");
     }

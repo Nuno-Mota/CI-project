@@ -16,7 +16,7 @@ public class NEAT4SpeedDriverAlgorithm extends AbstractAlgorithm {
     public void run(boolean continue_from_checkpoint) {
         if (!continue_from_checkpoint) {
             //init NN
-            Neat4SpeedDriver genome = new Neat4SpeedDriver("src/memory/Single_Driver/Best_of_each_Generation/bestOfGen7.java_serial");
+            Neat4SpeedDriver genome = new Neat4SpeedDriver("src/memory/Single_Driver/Best_of_each_Generation/bestOfGen20.java_serial");
             drivers[0] = genome;
 
             //Start a race
