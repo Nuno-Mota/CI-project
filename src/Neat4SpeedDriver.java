@@ -5,6 +5,7 @@ import cicontest.torcs.controller.extras.AutomatedGearbox;
 import cicontest.torcs.genome.IGenome;
 import cicontest.torcs.race.Race;
 import cicontest.torcs.race.RaceResult;
+import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
 import scr.Action;
 import scr.SensorModel;
 
@@ -121,16 +122,20 @@ public class Neat4SpeedDriver extends AbstractDriver implements Serializable {
         else
             _cyclesGoingBack = 0;
 
-        //System.out.println(_cyclesWithoutMovingForward);
+        System.out.println(_cyclesWithoutMovingForward);
         if(_cyclesWithoutMovingForward > 500 || sensors.getTrackEdgeSensors()[0] == -1 || _cyclesGoingBack > 500) {
+            System.out.println("Ending Race!!!!");
             _fitness = sensors.getDistanceRaced();
-            Thread.currentThread().interrupt();
 //            try {
 //                Runtime.getRuntime().exec("killall torcs-bin");
 //            } catch (IOException e) {
 //                System.out.println("Couldn't kill TORCS");
 //                System.exit(0);
 //            }
+//            action.restartRace = true;
+            this.exit();
+            this.shutdown();
+            Thread.currentThread().destroy();
 
         if(_DEBUG)
             System.out.println("NEAT4SPEEDDRIVER: Restarting race for bad conditions");
@@ -142,7 +147,6 @@ public class Neat4SpeedDriver extends AbstractDriver implements Serializable {
 //            _race.setTermination(Race.Termination.TICKS, 0);
 //            throw new NullPointerException();
 //            System.exit(0);
-//            action.restartRace = true;
 //            this.exit();
 //            this.shutdown();
 //        return action;
