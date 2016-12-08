@@ -12,7 +12,13 @@ public class Neat implements Serializable {
      **********************/
 
     private boolean             _DEBUG = false;
-    private InnovationsTable     _innovationsTable = InnovationsTable.getInstance();
+//    private String[][]          _tracks = {{"wheel-2", "road"}, {"spring", "road"}, {"street-1", "road"},
+//                                           {"alpine-1", "road"}, {"e-track-1", "road"}, {"e-track-2", "road"},
+//                                           {"ole-road-1", "road"}, {"dirt-2", "dirt"}, {"dirt-4", "dirt"},
+//                                           {"dirt-6", "dirt"}, {"mixed-1", "dirt"}, {"mixed-2", "dirt"},
+//                                           {"f-speedway", "oval"}};
+    private String[][]          _tracks = {{"spring", "road"}};//FOR TESTING
+    private InnovationsTable    _innovationsTable = InnovationsTable.getInstance();
 
     private int                 _numberOfInputs;
     private int                 _numberOfOutputs;
@@ -241,7 +247,7 @@ public class Neat implements Serializable {
                         if(_DEBUG)
                             System.out.println("Select Best of Species");
                         List<NeatGenome> newSpeciesPop = new ArrayList<>();
-                        newSpeciesPop.add(sp.getIndividuals().get(0)); //TODO: Can we add the genome without copying it?
+                        newSpeciesPop.add(sp.getIndividuals().get(0));
                         clearedSpecies.add(newSpeciesPop);
                         ++currentNumberOfOffspring;
                         maybeMoreSpawnsRequired = true;
@@ -432,39 +438,42 @@ public class Neat implements Serializable {
 
 
     public void estimateFitness() {
-        //System.out.println("Starting fitness estimation.");
+        System.out.println("Starting fitness estimation.");
         PrintStream original = System.out;
+        int i;
 
         System.out.println("NUMBER OF SPECIES = " + _currentSpecies.size());
 
         Neat4SpeedDriver[] drivers = new Neat4SpeedDriver[1];
         for(NeatGenome ng : _currentPopulation){
-            //Start a race
-            System.setOut(new NullPrintStream());
-            Neat4SpeedRace race = new Neat4SpeedRace();
-            race.setTrack("aalborg", "road");
-            race.laps = 1;
-            System.setOut(original);
-
-            drivers[0] = new Neat4SpeedDriver(ng.getNeuralNetwork());
-
+            ng.setFitness(0);
+            System.out.println("\nGenomeID = " + ng.getGenomeID());
             if(_DEBUG)
                 System.out.println("Genome size = " + ng.getConnections().size());
             if(_DEBUG)
                 System.out.println("NEAT: starting race");
+            for(i = 0; i < _tracks.length; ++i) {
+                //Start a race
+                System.setOut(new NullPrintStream());
+                Neat4SpeedRace race = new Neat4SpeedRace();
+                race.setTrack(_tracks[i][0], _tracks[i][1]);
+                race.laps = 1;
+                System.setOut(original);
 
-            //for speedup set withGUI to false
-            System.setOut(new NullPrintStream());
-            race.runRace(drivers, false);
-            System.setOut(original);
+                drivers[0] = new Neat4SpeedDriver(ng.getNeuralNetwork());
 
-            System.out.println("\nGenomeID = " + ng.getGenomeID());
-            System.out.println("FITNESS = " + drivers[0].getFitness());
-            ng.setFitness(drivers[0].getFitness());
+
+                //for speedup set withGUI to false
+                System.setOut(new NullPrintStream());
+                race.runRace(drivers, false);
+                System.setOut(original);
+
+                System.out.println("FITNESS for track " + _tracks[i][0] + " = " + drivers[0].getFitness());
+                ng.setFitness(ng.getFitness() + drivers[0].getFitness());
+            }
+            System.out.println("TotalFitness = " + ng.getFitness());
         }
-
-
-        //System.out.println("Fitness estimation finished.");
+        System.out.println("Fitness estimation finished.");
     }
 
 

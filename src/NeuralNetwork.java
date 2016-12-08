@@ -90,9 +90,7 @@ public class NeuralNetwork implements Serializable {
 
     public double[] update(SensorModel sensorData) {
 
-        //12 Inputs
-        //TODO: add opponents to input, add lateralSpeed?, add zSpeed?, wheelSpinVel?
-        //TODO: add gears
+        //18 Inputs
         if(_DEBUG)
             System.out.println("Neural Network getting sensor data");
         double[] inputs  = {sensorData.getAngleToTrackAxis()/Math.PI, sensorData.getSpeed()/315,
@@ -100,7 +98,10 @@ public class NeuralNetwork implements Serializable {
                             sensorData.getTrackEdgeSensors()[6]/200, sensorData.getTrackEdgeSensors()[8]/200,
                             sensorData.getTrackEdgeSensors()[9]/200, sensorData.getTrackEdgeSensors()[10]/200,
                             sensorData.getTrackEdgeSensors()[12]/200, sensorData.getTrackEdgeSensors()[14]/200,
-                            sensorData.getTrackEdgeSensors()[16]/200, sensorData.getTrackPosition()};
+                            sensorData.getTrackEdgeSensors()[16]/200, sensorData.getTrackPosition(),
+                            sensorData.getLateralSpeed()/150, sensorData.getZSpeed()/150,
+                            sensorData.getWheelSpinVelocity()[0]/45, sensorData.getWheelSpinVelocity()[1]/45,
+                            sensorData.getWheelSpinVelocity()[2]/45, sensorData.getWheelSpinVelocity()[3]/45};
         double[] outputs = {0.0, 0.0, 0.0};
 
         int currentNeuron = 0;
@@ -127,11 +128,6 @@ public class NeuralNetwork implements Serializable {
             if(_DEBUG)
                 System.out.println("NEURAL NETWORK: Updating neuron's incoming values");
             for(NeuralNetworkConnection nnc : _phenotypeNeurons.get(currentNeuron).getIncoming()) {
-//                if(_phenotypeNeurons.get(currentNeuron).getType() == 1){
-////                    for(NeuralNetworkConnection n :_phenotypeNeurons.get(currentNeuron).getIncoming()){
-////                        System.out.println(n.getWeight());
-////                    }
-//                }
                 double weight = nnc.getWeight();
                 double output = nnc.getInputNeuron().getOutput();
                 sum += weight*output;
@@ -146,15 +142,12 @@ public class NeuralNetwork implements Serializable {
                 System.out.println("NEURAL NETWORK: Getting outputs");
             if(_phenotypeNeurons.get(currentNeuron).getType() == 1) {
                 outputs[currentOutput++] = _phenotypeNeurons.get(currentNeuron).getOutput();
-//                System.out.println("Sigmoind: " + sigmoid(sum, _phenotypeNeurons.get(currentNeuron).getActivationResponse()));
-//                System.out.println("Sum" + sum);
-//                System.out.println("ActivationResponse:" + _phenotypeNeurons.get(currentNeuron).getActivationResponse());
             }
 
             ++currentNeuron;
         }
         _steering      = outputs[0];
-        _acceleration  = Math.abs(outputs[1]);  //Try this withoug abs, see what happens
+        _acceleration  = Math.abs(outputs[1]);  //Try this without abs, see what happens
         _breaking      = Math.abs(outputs[2]);
 
         outputs[1]     = Math.abs(outputs[1]);

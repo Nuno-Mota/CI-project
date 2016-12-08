@@ -102,9 +102,11 @@ public class Neat4SpeedDriver extends AbstractDriver implements Serializable {
 
         if(_DEBUG)
             System.out.println("NEAT4SPEEDDRIVER: Checking stopping conditions and fitness");
-        //System.out.println("Distance raced = " + sensors.getDistanceRaced());
+//        System.out.println("Distance raced = " + sensors.getDistanceRaced());
+//        System.out.println("Track Position = " + sensors.getTrackPosition());
+//        System.out.println("Angle to Axis = " + sensors.getAngleToTrackAxis());
         if(sensors.getLastLapTime() != 0) {
-            _fitness = 100 + sensors.getDistanceRaced()*(1 + 1/sensors.getLastLapTime());
+            _fitness = 100 + sensors.getDistanceRaced()*(1 + 100/sensors.getLastLapTime());
             action.restartRace = true;
         }
         if(_previousMaxDistRaced >= sensors.getDistanceRaced())
@@ -118,11 +120,16 @@ public class Neat4SpeedDriver extends AbstractDriver implements Serializable {
         else
             _cyclesGoingBack = 0;
 
+        //System.out.println(_cyclesWithoutMovingForward);
         if(_cyclesWithoutMovingForward > 500 || sensors.getTrackEdgeSensors()[0] == -1 || _cyclesGoingBack > 500){
             _fitness = sensors.getDistanceRaced();
-            RaceResult result = new RaceResult();
-            result.setFinished(true);
-            _race.setResults(this, new RaceResult());
+//            RaceResult result = new RaceResult();
+//            result.setFinished(true);
+//            _race.setResults(this, result);
+//            _race.setTermination(Race.Termination.DISTANCE, (int)_fitness);
+            action.restartRace = true;
+//            this.exit();
+//            this.shutdown();
         if(_DEBUG)
             System.out.println("NEAT4SPEEDDRIVER: Restarting race for bad conditions");
         }
