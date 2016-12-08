@@ -12,12 +12,12 @@ public class Neat implements Serializable {
      **********************/
 
     private boolean             _DEBUG = false;
-//    private String[][]          _tracks = {{"wheel-2", "road"}, {"spring", "road"}, {"street-1", "road"},
-//                                           {"alpine-1", "road"}, {"e-track-1", "road"}, {"e-track-2", "road"},
-//                                           {"ole-road-1", "road"}, {"dirt-2", "dirt"}, {"dirt-4", "dirt"},
-//                                           {"dirt-6", "dirt"}, {"mixed-1", "dirt"}, {"mixed-2", "dirt"},
-//                                           {"f-speedway", "oval"}};
-    private String[][]          _tracks = {{"spring", "road"}};//FOR TESTING
+    private String[][]          _tracks = {{"wheel-2", "road"}, {"spring", "road"}, {"street-1", "road"},
+                                           {"alpine-1", "road"}, {"e-track-1", "road"}, {"e-track-2", "road"},
+                                           {"ole-road-1", "road"}, {"dirt-2", "dirt"}, {"dirt-4", "dirt"},
+                                           {"dirt-6", "dirt"}, {"mixed-1", "dirt"}, {"mixed-2", "dirt"},
+                                           {"f-speedway", "oval"}};
+//    private String[][]          _tracks = {{"wheel-2", "road"}};//FOR TESTING
     private InnovationsTable    _innovationsTable = InnovationsTable.getInstance();
 
     private int                 _numberOfInputs;
@@ -208,9 +208,6 @@ public class Neat implements Serializable {
         int speciesIterator = 0;
         List<NeatGenome> newPopulation = new ArrayList<>();
         List<List<NeatGenome>> clearedSpecies = new ArrayList<>();   //Species with just the representative
-
-        //TODO: Completely remove species that have not improved for a few generations. Right now their elements might still be
-        //TODO: selected in tournament mode, though the chance of that happening is small
 
         int     amountToSpawn;
         int     size;
@@ -444,13 +441,15 @@ public class Neat implements Serializable {
         System.out.println("NUMBER OF SPECIES = " + _currentSpecies.size());
 
         Neat4SpeedDriver[] drivers = new Neat4SpeedDriver[1];
-        for(NeatGenome ng : _currentPopulation){
+        for(NeatGenome ng : _currentPopulation) {
             ng.setFitness(0);
             System.out.println("\nGenomeID = " + ng.getGenomeID());
+            System.out.println("Starting Fitness = " + ng.getFitness());
             if(_DEBUG)
                 System.out.println("Genome size = " + ng.getConnections().size());
             if(_DEBUG)
                 System.out.println("NEAT: starting race");
+
             for(i = 0; i < _tracks.length; ++i) {
                 //Start a race
                 System.setOut(new NullPrintStream());
@@ -463,13 +462,17 @@ public class Neat implements Serializable {
 
 
                 //for speedup set withGUI to false
+                System.setOut(new NullPrintStream());
+                WorkAround myWorkAround = new WorkAround(race, drivers, false);
+                Thread t = new Thread(myWorkAround);
+                t.start();
                 try {
-                    //System.setOut(new NullPrintStream());
-                    race.runRace(drivers, false);
-                    //System.setOut(original);
-                } catch (Exception e) {
-                    System.out.println("Crashed");
+                    t.join();
+                } catch (InterruptedException e) {
+                    if(_DEBUG)
+                        System.out.println("Closing Torcs");
                 }
+                System.setOut(original);
 
                 System.out.println("FITNESS for track " + _tracks[i][0] + " = " + drivers[0].getFitness());
                 ng.setFitness(ng.getFitness() + drivers[0].getFitness());

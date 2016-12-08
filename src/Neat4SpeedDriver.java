@@ -121,9 +121,10 @@ public class Neat4SpeedDriver extends AbstractDriver implements Serializable {
         else
             _cyclesGoingBack = 0;
 
-        System.out.println(_cyclesWithoutMovingForward);
+        //System.out.println(_cyclesWithoutMovingForward);
         if(_cyclesWithoutMovingForward > 500 || sensors.getTrackEdgeSensors()[0] == -1 || _cyclesGoingBack > 500) {
             _fitness = sensors.getDistanceRaced();
+            Thread.currentThread().interrupt();
 //            try {
 //                Runtime.getRuntime().exec("killall torcs-bin");
 //            } catch (IOException e) {
@@ -140,7 +141,7 @@ public class Neat4SpeedDriver extends AbstractDriver implements Serializable {
 //            _race.setResults(this, result);
 //            _race.setTermination(Race.Termination.TICKS, 0);
 //            throw new NullPointerException();
-            System.exit(0);
+//            System.exit(0);
 //            action.restartRace = true;
 //            this.exit();
 //            this.shutdown();
