@@ -446,44 +446,53 @@ public class Neat implements Serializable {
     public void estimateFitness() {
         System.out.println("Starting fitness estimation.");
         PrintStream original = System.out;
-        int i;
+        int i, j = 0;
 
         System.out.println("NUMBER OF SPECIES = " + _currentSpecies.size());
 
         Neat4SpeedDriver[] drivers = new Neat4SpeedDriver[1];
         for(NeatGenome ng : _currentPopulation) {
-            ng.setFitness(0);
-            System.out.println("\nGenomeID = " + ng.getGenomeID());
-            //System.out.println("Starting Fitness = " + ng.getFitness());
-            if(_DEBUG)
-                System.out.println("Genome size = " + ng.getConnections().size());
-            if(_DEBUG)
-                System.out.println("NEAT: starting race");
+            if(j < _currentPopulation.size() - _currentSpecies.size()) { //Avoids recalculating the lest elements of the
+                                                                         //population, which were the best of the species
+                                                                         //of the previous one and are unchanged.
+                ng.setFitness(0);
+                System.out.println("\nGenomeID = " + ng.getGenomeID());
+                //System.out.println("Starting Fitness = " + ng.getFitness());
+                if(_DEBUG)
+                    System.out.println("Genome size = " + ng.getConnections().size());
+                if(_DEBUG)
+                    System.out.println("NEAT: starting race");
 
-            for(i = 0; i < _tracks.length; ++i) {
-                //Start a race
-                System.setOut(new NullPrintStream());
-                Neat4SpeedRace race = new Neat4SpeedRace();
-                race.setTrack(_tracks[i][0], _tracks[i][1]);
-                race.laps = 1;
-                System.setOut(original);
+                for(i = 0; i < _tracks.length; ++i) {
+                    //Start a race
+                    System.setOut(new NullPrintStream());
+                    Neat4SpeedRace race = new Neat4SpeedRace();
+                    race.setTrack(_tracks[i][0], _tracks[i][1]);
+                    race.laps = 1;
+                    System.setOut(original);
 
-                drivers[0] = new Neat4SpeedDriver(ng.getNeuralNetwork());
+                    drivers[0] = new Neat4SpeedDriver(ng.getNeuralNetwork());
 
 
-                //for speedup set withGUI to false
-                System.setOut(new NullPrintStream());
-                race.runRace(drivers, false);
-                System.setOut(original);
+                    //for speedup set withGUI to false
+                    System.setOut(new NullPrintStream());
+                    race.runRace(drivers, false);
+                    System.setOut(original);
 
-                System.out.println("FITNESS for track " + _trackName[i] + " = " + df4.format(drivers[0].getFitness()) +
-                                   " ---- " + df2.format(100*drivers[0].getDistanceRaced()/_trackSize[i]) + "% completed." +
-                                   " ---- Time taken: " + df2.format(drivers[0].getTimeTaken()) + "s.");
-                ng.setFitness(ng.getFitness() + drivers[0].getFitness());
+                    System.out.println("FITNESS for track " + _trackName[i] + " = " + df4.format(drivers[0].getFitness()) +
+                                       " ---- " + df2.format(100*drivers[0].getDistanceRaced()/_trackSize[i]) + "% completed." +
+                                       " ---- Time taken: " + df2.format(drivers[0].getTimeTaken()) + "s.");
+                    ng.setFitness(ng.getFitness() + drivers[0].getFitness());
+                }
+                System.out.println("TotalFitness = " + ng.getFitness());
             }
-            System.out.println("TotalFitness = " + ng.getFitness());
+            else {
+                System.out.println("\nGenomeID = " + ng.getGenomeID() + " was the best of his species in the last generation!");
+                System.out.println("TotalFitness calculated in the last generation = " + ng.getFitness());
+            }
+            ++j;
         }
-        System.out.println("Fitness estimation finished.");
+        System.out.println("\nFitness estimation finished.");
     }
 
 
@@ -851,6 +860,9 @@ public class Neat implements Serializable {
 
         double score = ((c1 * excessGenes / maxGenes) + (c2 * disjointGenes / maxGenes)
                 + (c3 * weightDifference / matchingGenes));
+
+
+        System.out.println("Compatibility Score: " + score);
 
         return score < _compatibilityThreshold;
     }
