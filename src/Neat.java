@@ -182,8 +182,10 @@ public class Neat implements Serializable {
 
     public void epoch() {
 
-        if(_generationNumber > 1)
+        if(_generationNumber > 1) {
+            readNeatProperties();
             createNewGeneration();
+        }
 
 
         generatePhenotypes();
@@ -679,6 +681,7 @@ public class Neat implements Serializable {
         //boolean _DEBUG = false;
         boolean createNewSpecies;
 
+
         if(_DEBUG) {
             for(Species sp : _currentSpecies) {
                 System.out.println("\nElements of species " + sp.getSpeciesID() + " before copying");
@@ -697,6 +700,7 @@ public class Neat implements Serializable {
                 best = ng;
 
         for(NeatGenome ng: _currentPopulation) {
+            System.out.println("Checking GenomeID = " + ng.getGenomeID());
             if(_currentSpecies.size() == 0) {
                 List<NeatGenome> membersOfSpecies = new ArrayList<>();
                 membersOfSpecies.add(ng);
@@ -741,6 +745,8 @@ public class Neat implements Serializable {
             else
                 ++k;
         }
+
+        
 
         for(Species sp : _currentSpecies) {
 
@@ -863,7 +869,11 @@ public class Neat implements Serializable {
 
 
         System.out.println("Compatibility Score: " + score);
-
+        System.out.println("CT = " + _compatibilityThreshold);
+        if(score < _compatibilityThreshold)
+            System.out.println("Compatible");
+        else
+            System.out.println("Not Compatible");
         return score < _compatibilityThreshold;
     }
 
