@@ -14,14 +14,14 @@ public class DefaultDriver extends AbstractDriver {
 
     public DefaultDriver() {
         initialize();
-        //neuralNetwork = new NeuralNetwork(12, 8, 2);
-//        neuralNetwork = neuralNetwork.loadGenome();
+        neuralNetwork = new NeuralNetwork();
+        neuralNetwork = neuralNetwork.loadGenome("memory/mydriver.mem");
     }
 
     private void initialize() {
         this.enableExtras(new AutomatedClutch());
         this.enableExtras(new AutomatedGearbox());
-     //   this.enableExtras(new AutomatedRecovering());
+        this.enableExtras(new AutomatedRecovering());
         this.enableExtras(new ABS());
     }
 
@@ -36,20 +36,17 @@ public class DefaultDriver extends AbstractDriver {
 
     @Override
     public double getAcceleration(SensorModel sensors) {
-        double[] sensorArray = new double[4];
-        double output = neuralNetwork.getOutput(sensors);
-        return 1;
+        return neuralNetwork.getAcceleration();
     }
 
     @Override
     public double getSteering(SensorModel sensors) {
-        Double output = neuralNetwork.getOutput(sensors);
-        return 0.5;
+        return neuralNetwork.getSteering();
     }
 
     @Override
     public String getDriverName() {
-        return "Example Controller";
+        return "NEAT4SPEED";
     }
 
     @Override
@@ -75,31 +72,15 @@ public class DefaultDriver extends AbstractDriver {
         if (action == null) {
             action = new Action();
         }
-        action.steering = DriversUtils.alignToTrackAxis(sensors, 0.5);
-        if (sensors.getSpeed() > 60.0D) {
-            action.accelerate = 0.0D;
-            action.brake = 0.0D;
-        }
-
-        if (sensors.getSpeed() > 70.0D) {
-            action.accelerate = 0.0D;
-            action.brake = -1.0D;
-        }
-
-        if (sensors.getSpeed() <= 60.0D) {
-            action.accelerate = (80.0D - sensors.getSpeed()) / 80.0D;
-            action.brake = 0.0D;
-        }
-
-        if (sensors.getSpeed() < 30.0D) {
-            action.accelerate = 1.0D;
-            action.brake = 0.0D;
-        }
-        System.out.println("--------------" + getDriverName() + "--------------");
-        System.out.println("Steering: " + action.steering);
-        System.out.println("Acceleration: " + action.accelerate);
-        System.out.println("Brake: " + action.brake);
-        System.out.println("-----------------------------------------------");
+        double[] outputs  = neuralNetwork.update(sensors);
+        action.steering   = outputs[0];
+        action.accelerate = outputs[1];
+        action.brake      = outputs[2];
+//        System.out.println("--------------" + getDriverName() + "--------------");
+//        System.out.println("Steering: " + action.steering);
+//        System.out.println("Acceleration: " + action.accelerate);
+//        System.out.println("Brake: " + action.brake);
+//        System.out.println("-----------------------------------------------");
         return action;
     }
 }

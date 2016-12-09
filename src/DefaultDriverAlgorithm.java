@@ -9,8 +9,6 @@ import race.TorcsConfiguration;
 
 public class DefaultDriverAlgorithm extends AbstractAlgorithm {
 
-    private static final long serialVersionUID = 654963126362653L;
-
     DefaultDriverGenome[] drivers = new DefaultDriverGenome[1];
     int[] results = new int[1];
 
@@ -30,7 +28,7 @@ public class DefaultDriverAlgorithm extends AbstractAlgorithm {
             race.laps = 1;
 
             //for speedup set withGUI to false
-            results = race.runRace(drivers, false);
+            results = race.runRace(drivers, true);
 
             // Save genome/nn
             DriversUtils.storeGenome(drivers[0]);
@@ -39,12 +37,6 @@ public class DefaultDriverAlgorithm extends AbstractAlgorithm {
         DriversUtils.createCheckpoint(this);
         //DriversUtils.clearCheckpoint();
     }
-
-
-
-    /************************
-     * Driver's main method *     //This is the one to be run when racing. Otherwise comment for training?
-     ************************/
 
     public static void main(String[] args) {
 
