@@ -132,13 +132,15 @@ public class Neat4SpeedDriver extends AbstractDriver implements Serializable {
 //                System.out.println("Couldn't kill TORCS");
 //                System.exit(0);
 //            }
-//            action.restartRace = true;
-            this.exit();
-            this.shutdown();
-            Thread.currentThread().destroy();
-
         if(_DEBUG)
             System.out.println("NEAT4SPEEDDRIVER: Restarting race for bad conditions");
+
+            action.restartRace = true;
+            return action;
+//            this.exit();
+//            this.shutdown();
+//            Thread.currentThread().destroy();
+
 
 
 //            RaceResult result = new RaceResult();

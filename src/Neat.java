@@ -462,17 +462,18 @@ public class Neat implements Serializable {
 
 
                 //for speedup set withGUI to false
-                //System.setOut(new NullPrintStream());
-                WorkAround myWorkAround = new WorkAround(race, drivers, false);
-                Thread t = new Thread(myWorkAround);
-                t.start();
-                try {
-                    t.join();
-                } catch (InterruptedException e) {
-                    if(_DEBUG)
-                        System.out.println("Closing Torcs");
-                }
-                //System.setOut(original);
+                System.setOut(new NullPrintStream());
+//                WorkAround myWorkAround = new WorkAround(race, drivers, false);
+//                Thread t = new Thread(myWorkAround);
+//                t.start();
+//                try {
+//                    t.join();
+//                } catch (InterruptedException e) {
+//                    if(_DEBUG)
+//                        System.out.println("Closing Torcs");
+//                }
+                race.runRace(drivers, false);
+                System.setOut(original);
 
                 System.out.println("FITNESS for track " + _tracks[i][0] + " = " + drivers[0].getFitness());
                 ng.setFitness(ng.getFitness() + drivers[0].getFitness());

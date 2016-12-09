@@ -1,4 +1,5 @@
-public class WorkAround implements Runnable {
+public class WorkAround implements Runnable {   //TODO: THIS CLASS IS ACTUALLY NEVER USED! FOUND A BETTER WAY AROUND
+                                                //TODO: Didn't even work properly, to be honest....
 
     /**********************
      * Internal Variables *
