@@ -1,0 +1,21 @@
+e-track-5 oval 1621.73
+alpine-1 road 6355.65
+wheel-2 road 6205.46
+dirt-6 dirt 3147.46
+#Put all unused tracks below this point. # symbol must stay
+below track list. It's shitty, I know :D
+
+
+
+aalborg road 2587.54
+wheel-2 road 6205.46
+spring road 22129.77
+street-1 road 3823.05
+e-track-1 road 3243.64
+e-track-2 road 5380.50
+ole-road-1 road 6282.81
+dirt-2 dirt 1760.94
+dirt-4 dirt 3260.43
+mixed-1 dirt 1014.22
+mixed-2 dirt 1412.90
+f-speedway oval 3703.83

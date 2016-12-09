@@ -74,8 +74,13 @@ public class NeatAlgorithm {
 
         while (true) {
             //TODO: CHECKING ZONE 0
+            neat.readNeatProperties();
+            neat.readTracks();
+            for (NeatGenome ng : neat.getCurrentPopulation())
+                ng.readNgProperties();
+            for (Species sp : neat.getCurrentSpecies())
+                sp.readSpeciesProperties();
             neat.epoch();
-            //neat.saveRelevantData();
         }
     }
 }

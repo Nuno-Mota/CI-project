@@ -33,14 +33,19 @@ public class NeatGenome implements Serializable{
 
     private double               _activationResponseMeanValue ;
     private double               _activationResponseSTDEV;
+    private double               _chanceOfArMutation;
+    private double               _activationResponseReinitSTDEV;
     private double               _chanceOfArReinitialization;
 
     private  double              _weightMean;
-    private  double              _weightSTDEV;
+    private  double              _newWeightSTDEV;
+    private  double              _chanceOfWeightMutation;
+    private  double              _perturbWeightSTDEV;
     private  double              _chanceOfNewWeight;
 
     private double               _chanceOfAddingConnection;
     private double               _chanceOfRecurrentConnection;
+    private double               _chanceOfDisablingConnection;
 
     private double               _chanceOfAddingNeuron;
 
@@ -147,11 +152,16 @@ public class NeatGenome implements Serializable{
             in.close();
             _activationResponseMeanValue     = Double.parseDouble(prop.getProperty("activationResponseMeanValue"));
             _activationResponseSTDEV         = Double.parseDouble(prop.getProperty("activationResponseSTDEV"));
+            _chanceOfArMutation              = Double.parseDouble(prop.getProperty("chanceOfArMutation"));
             _chanceOfArReinitialization      = Double.parseDouble(prop.getProperty("chanceOfArReinitialization"));
+            _activationResponseReinitSTDEV   = Double.parseDouble(prop.getProperty("activationResponseReinitSTDEV"));
             _weightMean                      = Double.parseDouble(prop.getProperty("weightMean"));
-            _weightSTDEV                     = Double.parseDouble(prop.getProperty("weightSTDEV"));
+            _chanceOfWeightMutation         = Double.parseDouble(prop.getProperty("chanceOfWeightMutation"));
+            _perturbWeightSTDEV              = Double.parseDouble(prop.getProperty("perturbWeightSTDEV"));
+            _newWeightSTDEV                  = Double.parseDouble(prop.getProperty("newWeightSTDEV"));
             _chanceOfNewWeight               = Double.parseDouble(prop.getProperty("chanceOfNewWeight"));
             _chanceOfAddingConnection        = Double.parseDouble(prop.getProperty("chanceOfAddingConnection"));
+            _chanceOfDisablingConnection     = Double.parseDouble(prop.getProperty("chanceOfDisablingConnection"));
             _chanceOfRecurrentConnection     = Double.parseDouble(prop.getProperty("chanceOfRecurrentConnection"));
             _chanceOfAddingNeuron            = Double.parseDouble(prop.getProperty("chanceOfAddingNeuron"));
         } catch (IOException e) {
@@ -207,12 +217,12 @@ public class NeatGenome implements Serializable{
         double upper = 0.75;    //Highest value of chance of mutation occurring
 
         for(ConnectionGene cg : _connections)
-            //if(Math.random() <= _chanceOfWeightMutation)                               //20% chance of getting an entirely new value
-            if(Math.random() <= Math.random() * (upper - lower) + lower)
+            if(Math.random() <= _chanceOfWeightMutation)                               //20% chance of getting an entirely new value
+            //if(Math.random() <= Math.random() * (upper - lower) + lower)
                 if(Math.random() <= _chanceOfNewWeight)
-                    cg.setWeight(_rand.nextGaussian()*_weightSTDEV + _weightMean);
+                    cg.setWeight(_rand.nextGaussian()*_newWeightSTDEV + _weightMean);
                 else                                                    //80% chance of adding noise to the current weight value
-                    cg.setWeight(cg.getWeight() + 0.5*_rand.nextGaussian()*_weightSTDEV);
+                    cg.setWeight(cg.getWeight() + _rand.nextGaussian()*_perturbWeightSTDEV);
     }
 
 
@@ -224,10 +234,10 @@ public class NeatGenome implements Serializable{
         double upper = 0.3;     //Highest value of chance of mutation occurring
 
         for(NeuronGene ng : _neurons)
-            //if(Math.random() <= _chanceOfArMutaton)
-            if(Math.random() <= Math.random() * (upper - lower) + lower)
+            if(Math.random() <= _chanceOfArMutation)
+            //if(Math.random() <= Math.random() * (upper - lower) + lower)
                 if(Math.random() <= _chanceOfArReinitialization)              //10% chance of getting an entirely new value
-                    ng.setActivationResponse(_rand.nextGaussian()*_activationResponseSTDEV + _activationResponseMeanValue);
+                    ng.setActivationResponse(_rand.nextGaussian()*_activationResponseReinitSTDEV + _activationResponseMeanValue);
                 else                                  //80% chance of adding noise to the current weight value
                     ng.setActivationResponse(ng.getActivationResponse() + _rand.nextGaussian()*_activationResponseSTDEV);
     }
@@ -241,8 +251,8 @@ public class NeatGenome implements Serializable{
         double upper = 0.10;    //Highest value of chance of a random connection being disabled
         int connectionIndex;
 
-        //if(Math.random() <= _chanceOfDisablingConnection) {
-        if(Math.random() <= Math.random() * (upper - lower) + lower) {
+        if(Math.random() <= _chanceOfDisablingConnection) {
+        //if(Math.random() <= Math.random() * (upper - lower) + lower) {
             while(numberOfTriesToDisableConnection-- > 0) {
                 connectionIndex = _rand.nextInt(_connections.size());
                 if(_connections.get(connectionIndex).getIsEnabled()) {
@@ -495,7 +505,7 @@ public class NeatGenome implements Serializable{
         outputNeuron.getPossibleIncoming().remove(inputNeuron);
 
         //Assigns weight of the connection
-        double weight = _rand.nextGaussian()*_weightSTDEV;
+        double weight = _rand.nextGaussian()*_newWeightSTDEV;
 
         //Determines if the connection is recurrent by determining if the connection is not "pointing" in the output's direction
         if (inputNeuron.getPositionY() > outputNeuron.getPositionY())

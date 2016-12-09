@@ -137,7 +137,7 @@ public class Neat4SpeedDriver extends AbstractDriver implements Serializable {
 
 
         if(sensors.getLastLapTime() != 0) {
-            _fitness = 100 + sensors.getDistanceRaced()*(1 + 100.0/sensors.getLastLapTime());
+            _fitness = 100.0 + sensors.getDistanceRaced()*(1.0 + 5.0/sensors.getLastLapTime());
             _distanceRaced = sensors.getDistanceRaced();
             _timeTaken     = sensors.getLastLapTime();
             action.restartRace = true;
@@ -181,6 +181,7 @@ public class Neat4SpeedDriver extends AbstractDriver implements Serializable {
 
         action.steering   = outputs[0];
         action.accelerate = outputs[1];
+        //action.accelerate = 1;
         action.brake      = outputs[2];
 
 

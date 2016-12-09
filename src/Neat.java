@@ -13,16 +13,18 @@ public class Neat implements Serializable {
      **********************/
 
     private boolean             _DEBUG     = false;
-    private String[][]          _tracks    = {{"wheel-2", "road"}, {"spring", "road"}, {"street-1", "road"},
+/*    private String[][]          _tracks    = {{"wheel-2", "road"}, {"spring", "road"}, {"street-1", "road"},
                                               {"alpine-1", "road"}, {"e-track-1", "road"}, {"e-track-2", "road"},
                                               {"ole-road-1", "road"}, {"dirt-2", "dirt"}, {"dirt-4", "dirt"},
                                               {"dirt-6", "dirt"}, {"mixed-1", "dirt"}, {"mixed-2", "dirt"},
                                               {"f-speedway", "oval"}};
     private String[]            _trackName = {"wheel-2   ", "spring    ", "street-1  ", "alpine-1  ", "e-track-1 ", "e-track-2 ",
                                               "ole-road-1", "dirt-2    ", "dirt-4    ", "dirt-6    ", "mixed-1   ", "mixed-2   ", "f-speedway"};
-//    private String[][]          _tracks = {{"wheel-2", "road"}};//FOR TESTING
     private double[]            _trackSize = {6205.46, 22129.77, 3823.05, 6355.65, 3243.64, 5380.50,
-                                              6282.81, 1760.94, 3260.43, 3147.46, 1014.22, 1412.90, 3703.83};
+                                              6282.81, 1760.94, 3260.43, 3147.46, 1014.22, 1412.90, 3703.83};*/
+
+    private ArrayList<String[]>          _tracks = new ArrayList<>();
+    private ArrayList<Double>         _trackSize = new ArrayList<>();
 
     private InnovationsTable    _innovationsTable = InnovationsTable.getInstance();
 
@@ -46,7 +48,7 @@ public class Neat implements Serializable {
      *     Parameters     *
      **********************/
     private double              _compatibilityThreshold;
-    private int                 c1,
+    private double              c1,
                                 c2,
                                 c3 ;
     private double              _probabilityOfMating;
@@ -89,15 +91,38 @@ public class Neat implements Serializable {
             prop.load(in);
             in.close();
             _compatibilityThreshold        = Double.parseDouble(prop.getProperty("compatibilityThreshold"));
-            c1                             = Integer.parseInt(prop.getProperty("c1"));
-            c2                             = Integer.parseInt(prop.getProperty("c2"));
-            c3                             = Integer.parseInt(prop.getProperty("c3"));
+            c1                             = Double.parseDouble(prop.getProperty("c1"));
+            c2                             = Double.parseDouble(prop.getProperty("c2"));
+            c3                             = Double.parseDouble(prop.getProperty("c3"));
             _probabilityOfMating           = Double.parseDouble(prop.getProperty("probabilityOfMating"));
             _bestOfSpeciesPercentage       = Double.parseDouble(prop.getProperty("bestOfSpeciesPercentage"));
             _matingSTDEV                   = Double.parseDouble(prop.getProperty("matingSTDEV"));
             _maxGenWithoutImprovment       = Integer.parseInt(prop.getProperty("maxGenWithoutImprovment"));
         } catch (IOException e) {
             System.err.println("Something went wrong while reading in the properties.");
+        }
+    }
+
+    public void readTracks(){
+        String line;
+        _tracks = new ArrayList<>();
+        _trackSize = new ArrayList<>();
+        try {
+            InputStream fis = new FileInputStream("tracks.txt");
+            InputStreamReader isr = new InputStreamReader(fis);
+            BufferedReader br = new BufferedReader(isr);
+            while (true) {
+                line = br.readLine();
+                if (line == null || line.startsWith("#"))
+                    break;
+                String[] words = line.split(" ");
+                String[] trackInfo = {words[0], words[1]};
+                _tracks.add(trackInfo);
+                _trackSize.add(Double.parseDouble(words[2]));
+            }
+        }catch(Exception e) {
+            System.err.println("Error while reading in tracks.");
+            e.printStackTrace();
         }
     }
 
@@ -285,43 +310,46 @@ public class Neat implements Serializable {
 
                                 //gets the index (approx) of the element corresponding to _bestOfSpeciesPercentage % of the species
                                 //so that better performing elements have a higher chance of mating
-                                meanIndx = (int)(size * _bestOfSpeciesPercentage);
+                                //meanIndx = (int)(size * _bestOfSpeciesPercentage);
 
                                 //adds gaussian noise, so that lower performing members have a chance of mating with better performing ones
-                                max      = (int) Math.abs(rand.nextGaussian() * size * _matingSTDEV) + meanIndx + 1;
+                                //max      = (int) Math.abs(rand.nextGaussian() * size * _matingSTDEV) + meanIndx + 1;
 
                                 //attributes a value to the maxIndx, effectively determining which elements of
                                 //the species have a chance of mating
-                                if(max >= 4)
-                                    maxIndx = ThreadLocalRandom.current().nextInt(3, max);
-                                else
-                                    maxIndx = 2;        //maxIndx needs to be at least 2 to select different parents
+                                //if(max >= 4)
+                                //    maxIndx = ThreadLocalRandom.current().nextInt(3, max);
+                                //else
+                                //    maxIndx = 2;        //maxIndx needs to be at least 2 to select different parents
 
                                 //makes sure that the gaussian noise add doesn't create a maxIndx out
                                 //of range of the population arrayList
-                                if(maxIndx > size)      //size is always greater or equal to 2
-                                    maxIndx = size;
+                                //if(maxIndx > size)      //size is always greater or equal to 2
+                                //    maxIndx = size;
 
                                 //Selects first potential parent
-                                parent1Indx = ThreadLocalRandom.current().nextInt(0, maxIndx);
+                                do {
+                                    parent1Indx = (int) Math.abs(ThreadLocalRandom.current().nextGaussian() * size * _matingSTDEV);
+                                }while (parent1Indx >= size);
 
                                 //There's a chance that the first potential parent doesn't mate at all and
                                 //just gets added to the new population (with future possible mutations)
                                 if(rand.nextDouble() > _probabilityOfMating)
                                     newPopulation.add(new NeatGenome(sp.getIndividuals().get(parent1Indx), _innovationsTable));
                                 else {
-                                    parent2Indx = parent1Indx;
+
 
                                     if(_DEBUG)
                                         System.out.println("Selecting 2nd parent");
-                                    if(_DEBUG)
-                                        System.out.println("MaxIndx = " + maxIndx);
+//                                    if(_DEBUG)
+//                                        System.out.println("MaxIndx = " + maxIndx);
                                     if(_DEBUG)
                                         System.out.println("Number Of Individuals = " + sp.getIndividuals().size());
 
                                     //selects the second parent, making sure that it is not the same
-                                    while(parent1Indx == parent2Indx)
-                                        parent2Indx = ThreadLocalRandom.current().nextInt(0, maxIndx);
+                                    do {
+                                        parent2Indx = (int) Math.abs(ThreadLocalRandom.current().nextGaussian() * size * _matingSTDEV);
+                                    }while (parent2Indx >= size || parent2Indx == parent1Indx);
 
                                     if(_DEBUG)
                                         System.out.println("Going to crossover selected parents");
@@ -451,7 +479,7 @@ public class Neat implements Serializable {
         int i, j = 0;
 
         System.out.println("NUMBER OF SPECIES = " + _currentSpecies.size());
-
+        Neat4SpeedRace race;
         Neat4SpeedDriver[] drivers = new Neat4SpeedDriver[1];
         for(NeatGenome ng : _currentPopulation) {
             if(j < _currentPopulation.size() - _currentSpecies.size()) { //Avoids recalculating the lest elements of the
@@ -465,11 +493,11 @@ public class Neat implements Serializable {
                 if(_DEBUG)
                     System.out.println("NEAT: starting race");
 
-                for(i = 0; i < _tracks.length; ++i) {
+                for(i = 0; i < _tracks.size(); ++i) {
                     //Start a race
                     System.setOut(new NullPrintStream());
-                    Neat4SpeedRace race = new Neat4SpeedRace();
-                    race.setTrack(_tracks[i][0], _tracks[i][1]);
+                    race = new Neat4SpeedRace();
+                    race.setTrack(_tracks.get(i)[0], _tracks.get(i)[1]);
                     race.laps = 1;
                     System.setOut(original);
 
@@ -481,8 +509,8 @@ public class Neat implements Serializable {
                     race.runRace(drivers, false);
                     System.setOut(original);
 
-                    System.out.println("FITNESS for track " + _trackName[i] + " = " + df4.format(drivers[0].getFitness()) +
-                                       " ---- " + df2.format(100*drivers[0].getDistanceRaced()/_trackSize[i]) + "% completed." +
+                    System.out.println("FITNESS for track " + _tracks.get(i)[0] + " = " + df4.format(drivers[0].getFitness()) +
+                                       " ---- " + df2.format(100*drivers[0].getDistanceRaced()/_trackSize.get(i)) + "% completed." +
                                        " ---- Time taken: " + df2.format(drivers[0].getTimeTaken()) + "s.");
                     ng.setFitness(ng.getFitness() + drivers[0].getFitness());
                 }
@@ -617,6 +645,12 @@ public class Neat implements Serializable {
                     selectedGene = new ConnectionGene(parent1.getConnections().get(iterator1));
                 else
                     selectedGene = new ConnectionGene(parent2.getConnections().get(iterator2));
+
+                // A gene has a chance to disabled if it is disabled in either parent
+                if (!parent1.getConnections().get(iterator1).getIsEnabled()
+                        || !parent1.getConnections().get(iterator1).getIsEnabled())
+                    if (Math.random() < 0.75)
+                        selectedGene.setIsEnabled(false);
 
                 ++iterator1;
                 ++iterator2;
