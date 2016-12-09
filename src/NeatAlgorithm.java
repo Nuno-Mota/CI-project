@@ -38,7 +38,7 @@ public class NeatAlgorithm {
         TorcsConfiguration.getInstance().initialize(new File("torcs.properties"));
 
         //Set path to memory
-        String _pathnameSingleDriver = "src/memory/Single_Driver/Full_Generations/GenBeep.java_serial";
+        String _pathnameSingleDriver = "src/memory/Single_Driver/Full_Generations/GenBoop.java_serial";
         String _pathnameSingleDriverAndOpponents = "src/memory/Single_Driver_and_Opponents/lastGeneration.mem";
         String _pathnameTeamsAndOpponents = "src/memory/Teams_and_Opponents/lastGeneration.mem";
 

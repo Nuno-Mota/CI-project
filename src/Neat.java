@@ -1,4 +1,5 @@
 import java.io.*;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -11,13 +12,18 @@ public class Neat implements Serializable {
      * Internal Variables *
      **********************/
 
-    private boolean             _DEBUG = false;
-    private String[][]          _tracks = {{"wheel-2", "road"}, {"spring", "road"}, {"street-1", "road"},
-                                           {"alpine-1", "road"}, {"e-track-1", "road"}, {"e-track-2", "road"},
-                                           {"ole-road-1", "road"}, {"dirt-2", "dirt"}, {"dirt-4", "dirt"},
-                                           {"dirt-6", "dirt"}, {"mixed-1", "dirt"}, {"mixed-2", "dirt"},
-                                           {"f-speedway", "oval"}};
+    private boolean             _DEBUG     = false;
+    private String[][]          _tracks    = {{"wheel-2", "road"}, {"spring", "road"}, {"street-1", "road"},
+                                              {"alpine-1", "road"}, {"e-track-1", "road"}, {"e-track-2", "road"},
+                                              {"ole-road-1", "road"}, {"dirt-2", "dirt"}, {"dirt-4", "dirt"},
+                                              {"dirt-6", "dirt"}, {"mixed-1", "dirt"}, {"mixed-2", "dirt"},
+                                              {"f-speedway", "oval"}};
+    private String[]            _trackName = {"wheel-2   ", "spring    ", "street-1  ", "alpine-1  ", "e-track-1 ", "e-track-2 ",
+                                              "ole-road-1", "dirt-2    ", "dirt-4    ", "dirt-6    ", "mixed-1   ", "mixed-2   ", "f-speedway"};
 //    private String[][]          _tracks = {{"wheel-2", "road"}};//FOR TESTING
+    private double[]            _trackSize = {6205.46, 22129.77, 3823.05, 6355.65, 3243.64, 5380.50,
+                                              6282.81, 1760.94, 3260.43, 3147.46, 1014.22, 1412.90, 3703.83};
+
     private InnovationsTable    _innovationsTable = InnovationsTable.getInstance();
 
     private int                 _numberOfInputs;
@@ -28,7 +34,11 @@ public class Neat implements Serializable {
     private List<Species>       _currentSpecies           = new ArrayList<>();
     private double              _averagePopulationFitness;
     private NeatGenome          _bestPerformingMember;
+
     private boolean             _file1                    = true;
+    DecimalFormat df2 = new DecimalFormat("0.00");
+    DecimalFormat df4 = new DecimalFormat("0.0000");
+    DecimalFormat dfF = new DecimalFormat("00000.0000");
 
 
 
@@ -444,7 +454,7 @@ public class Neat implements Serializable {
         for(NeatGenome ng : _currentPopulation) {
             ng.setFitness(0);
             System.out.println("\nGenomeID = " + ng.getGenomeID());
-            System.out.println("Starting Fitness = " + ng.getFitness());
+            //System.out.println("Starting Fitness = " + ng.getFitness());
             if(_DEBUG)
                 System.out.println("Genome size = " + ng.getConnections().size());
             if(_DEBUG)
@@ -463,19 +473,12 @@ public class Neat implements Serializable {
 
                 //for speedup set withGUI to false
                 System.setOut(new NullPrintStream());
-//                WorkAround myWorkAround = new WorkAround(race, drivers, false);
-//                Thread t = new Thread(myWorkAround);
-//                t.start();
-//                try {
-//                    t.join();
-//                } catch (InterruptedException e) {
-//                    if(_DEBUG)
-//                        System.out.println("Closing Torcs");
-//                }
                 race.runRace(drivers, false);
                 System.setOut(original);
 
-                System.out.println("FITNESS for track " + _tracks[i][0] + " = " + drivers[0].getFitness());
+                System.out.println("FITNESS for track " + _trackName[i] + " = " + df4.format(drivers[0].getFitness()) +
+                                   " ---- " + df2.format(100*drivers[0].getDistanceRaced()/_trackSize[i]) + "% completed." +
+                                   " ---- Time taken: " + df2.format(drivers[0].getTimeTaken()) + "s.");
                 ng.setFitness(ng.getFitness() + drivers[0].getFitness());
             }
             System.out.println("TotalFitness = " + ng.getFitness());
@@ -938,11 +941,13 @@ public class Neat implements Serializable {
             PrintWriter outWriter = new PrintWriter(bw)) {
             String info;
             info = _generationNumber + " " + _populationSize + " " + _currentSpecies.size() +
-                   " " + best.getFitness() + " " + averageFitness + " " + averageNumberOfConnections +
-                   " " + averageNumberOfNeurons + " " + maxNumberOfConnections + " " + fitnessOfMaxNumberOfConnections +
-                   " " + minNumberOfConnections + " " + fitnessOfMinNumberOfConnections +
-                   " " + maxNumberOfNeurons + " " + fitnessOfMaxNumberOfNeurons +
-                   " " + minNumberOfNeurons + " " + fitnessOfMinNumberOfNeurons;
+                   " " + df4.format(best.getFitness()) + " " + df4.format(averageFitness) +
+                   " " + df2.format(averageNumberOfConnections) +
+                   " " + df2.format(averageNumberOfNeurons) +
+                   " " + maxNumberOfConnections + " " + df4.format(fitnessOfMaxNumberOfConnections) +
+                   " " + minNumberOfConnections + " " + df4.format(fitnessOfMinNumberOfConnections) +
+                   " " + maxNumberOfNeurons + " " + df4.format(fitnessOfMaxNumberOfNeurons) +
+                   " " + minNumberOfNeurons + " " + df4.format(fitnessOfMinNumberOfNeurons);
             outWriter.println(info);
         } catch (IOException e) {
             System.out.println("Error appending to statistics file: IOException.");

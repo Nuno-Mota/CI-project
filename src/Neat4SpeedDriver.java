@@ -14,24 +14,32 @@ import java.io.Serializable;
 
 public class Neat4SpeedDriver extends AbstractDriver implements Serializable {
 
+    /**********************
+     * Internal Variables *
+     **********************/
+
     private boolean       _DEBUG = false;
 
     private NeuralNetwork _neuralNetwork = new NeuralNetwork();
+
     private double        _fitness;
+    private double        _distanceRaced;
+    private double        _timeTaken;
+
     private double        _previousMaxDistRaced = 0;
     private int           _cyclesWithoutMovingForward = 0;
     private int           _cyclesGoingBack = 0;
 
-    private Race          _race;
 
 
-    public void setRace(Race race) { _race = race; }
+    /****************
+     * Constructors *
+     ****************/
 
 
     public Neat4SpeedDriver(NeuralNetwork neuralNetwork) {
         initialize();
         _neuralNetwork = neuralNetwork;
-//        neuralNetwork = neuralNetwork.loadGenome();
     }
 
     public Neat4SpeedDriver(String path){
@@ -41,8 +49,26 @@ public class Neat4SpeedDriver extends AbstractDriver implements Serializable {
 
 
 
-    public double getFitness() { return _fitness; }
 
+    /***********************
+     * Getters and Setters *
+     ***********************/
+
+    public double getFitness() { return _fitness; }
+    private void setFitness(double fitness) { _fitness = fitness; }
+
+    public double getDistanceRaced() { return _distanceRaced; }
+    private void setDistanceRaced(double distanceRaced) { _distanceRaced = distanceRaced; }
+
+    public double getTimeTaken() { return _timeTaken; }
+    private void setTimeTaken(double timeTaken) { _timeTaken = timeTaken; }
+
+
+
+
+    /*********************
+     * Overriden methods *
+     *********************/
 
     private void initialize() {
         this.enableExtras(new AutomatedClutch());
@@ -102,13 +128,18 @@ public class Neat4SpeedDriver extends AbstractDriver implements Serializable {
             action = new Action();
         }
 
-        if(_DEBUG)
+        if(_DEBUG) {
             System.out.println("NEAT4SPEEDDRIVER: Checking stopping conditions and fitness");
-//        System.out.println("Distance raced = " + sensors.getDistanceRaced());
-//        System.out.println("Track Position = " + sensors.getTrackPosition());
-//        System.out.println("Angle to Axis = " + sensors.getAngleToTrackAxis());
+            System.out.println("Distance raced = " + sensors.getDistanceRaced());
+            System.out.println("Track Position = " + sensors.getTrackPosition());
+            System.out.println("Angle to Axis = " + sensors.getAngleToTrackAxis());
+        }
+
+
         if(sensors.getLastLapTime() != 0) {
-            _fitness = 100 + sensors.getDistanceRaced()*(1 + 100/sensors.getLastLapTime());
+            _fitness = 100 + sensors.getDistanceRaced()*(1 + 100.0/sensors.getLastLapTime());
+            _distanceRaced = sensors.getDistanceRaced();
+            _timeTaken     = sensors.getLastLapTime();
             action.restartRace = true;
         }
         if(_previousMaxDistRaced >= sensors.getDistanceRaced())
@@ -125,33 +156,15 @@ public class Neat4SpeedDriver extends AbstractDriver implements Serializable {
         System.out.println(_cyclesWithoutMovingForward);
         if(_cyclesWithoutMovingForward > 500 || sensors.getTrackEdgeSensors()[0] == -1 || _cyclesGoingBack > 500) {
             System.out.println("Ending Race!!!!");
-            _fitness = sensors.getDistanceRaced();
-//            try {
-//                Runtime.getRuntime().exec("killall torcs-bin");
-//            } catch (IOException e) {
-//                System.out.println("Couldn't kill TORCS");
-//                System.exit(0);
-//            }
         if(_DEBUG)
             System.out.println("NEAT4SPEEDDRIVER: Restarting race for bad conditions");
 
+            _fitness       = sensors.getDistanceRaced();
+            _distanceRaced = sensors.getDistanceRaced();
+            _timeTaken     = sensors.getCurrentLapTime();
+
             action.restartRace = true;
             return action;
-//            this.exit();
-//            this.shutdown();
-//            Thread.currentThread().destroy();
-
-
-
-//            RaceResult result = new RaceResult();
-//            result.setFinished(true);
-//            _race.setResults(this, result);
-//            _race.setTermination(Race.Termination.TICKS, 0);
-//            throw new NullPointerException();
-//            System.exit(0);
-//            this.exit();
-//            this.shutdown();
-//        return action;
         }
 
         long startTime = 0, endTime = 0;
@@ -169,11 +182,8 @@ public class Neat4SpeedDriver extends AbstractDriver implements Serializable {
         action.steering   = outputs[0];
         action.accelerate = outputs[1];
         action.brake      = outputs[2];
-//        action.steering   = 0;
-//        action.accelerate = 1;
-//        action.brake      = 0;
-//
-//
+
+
 //        System.out.println("--------------" + getDriverName() + "--------------");
 //        System.out.println("Steering: " + action.steering);
 //        System.out.println("Acceleration: " + action.accelerate);

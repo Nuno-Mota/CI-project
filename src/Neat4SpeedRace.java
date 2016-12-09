@@ -49,7 +49,6 @@ public class Neat4SpeedRace extends AbstractRace implements Serializable {
             race.setTermination(Race.Termination.LAPS, this.laps);
             race.setStage(Controller.Stage.RACE);
             Neat4SpeedDriver NEATDriver = (Neat4SpeedDriver)drivers[0];
-            NEATDriver.setRace(race);
             drivers[0] = NEATDriver;
             Driver[] results = drivers;
             int i = drivers.length;
