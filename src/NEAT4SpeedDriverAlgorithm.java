@@ -6,7 +6,7 @@ import race.TorcsConfiguration;
 import java.io.File;
 
 public class NEAT4SpeedDriverAlgorithm extends AbstractAlgorithm {
-    Neat4SpeedDriver[] drivers = new Neat4SpeedDriver[1];
+    Neat4SpeedDriver[] drivers = new Neat4SpeedDriver[2];
     int[] results = new int[1];
 
     public Class<? extends Driver> getDriverClass() {
@@ -16,13 +16,16 @@ public class NEAT4SpeedDriverAlgorithm extends AbstractAlgorithm {
     public void run(boolean continue_from_checkpoint) {
         if (!continue_from_checkpoint) {
             //init NN
-            String path = "src/memory/Single_Driver/Best_of_each_Generation/bestOfGen12.java_serial";
-            Neat4SpeedDriver genome = new Neat4SpeedDriver(path);
+            String path1 = "src/memory/Single_Driver/Best_of_each_Generation/bestOfGen96.java_serial";
+            String path2 = "src/memory/Single_Driver/Best_of_each_Generation/bestOfGen95.java_serial";
+            Neat4SpeedDriver genome = new Neat4SpeedDriver(path1);
+            Neat4SpeedDriverFILLER genome2 = new Neat4SpeedDriverFILLER(path2);
             drivers[0] = genome;
+            drivers[1] = genome2;
 
             //Start a race
             Neat4SpeedRace race = new Neat4SpeedRace();
-            race.setTrack("f-speedway", "oval");
+            race.setTrack("aalborg", "road");
             race.laps = 1;
 
             //for speedup set withGUI to false

@@ -39,10 +39,10 @@ public class NeatAlgorithm {
 
         //Set path to memory
         String _pathnameSingleDriver = "src/memory/Single_Driver/Full_Generations/GenBoop.java_serial";
-        String _pathnameSingleDriverAndOpponents = "src/memory/Single_Driver_and_Opponents/lastGeneration.mem";
-        String _pathnameTeamsAndOpponents = "src/memory/Teams_and_Opponents/lastGeneration.mem";
+        String _pathnameSingleDriverAndOpponents = "src/memory/Single_Driver_and_Opponents/Full_Generations/GenBoop.java_serial";
+        String _pathnameTeamsAndOpponents = "src/memory/Teams_and_Opponents/Full_Generations/lastGeneration.mem";
 
-        File savedGeneration = new File(_pathnameSingleDriver);
+        File savedGeneration = new File(_pathnameSingleDriverAndOpponents);
         if (savedGeneration.exists() && !savedGeneration.isDirectory() && _loadGenFromFile) {   //If there is a population in memory load it
             try {
                 FileInputStream fis   = new FileInputStream(savedGeneration);

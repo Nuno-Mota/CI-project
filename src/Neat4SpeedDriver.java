@@ -25,6 +25,7 @@ public class Neat4SpeedDriver extends AbstractDriver implements Serializable {
     private double        _fitness;
     private double        _distanceRaced;
     private double        _timeTaken;
+    private int           _position;
 
     private double        _previousMaxDistRaced = 0;
     private int           _cyclesWithoutMovingForward = 0;
@@ -36,6 +37,7 @@ public class Neat4SpeedDriver extends AbstractDriver implements Serializable {
      * Constructors *
      ****************/
 
+    public Neat4SpeedDriver() {}
 
     public Neat4SpeedDriver(NeuralNetwork neuralNetwork) {
         initialize();
@@ -62,6 +64,9 @@ public class Neat4SpeedDriver extends AbstractDriver implements Serializable {
 
     public double getTimeTaken() { return _timeTaken; }
     private void setTimeTaken(double timeTaken) { _timeTaken = timeTaken; }
+
+    public int getPosition() { return _position; }
+    private void setPosition(int position) { _position = position; }
 
 
 
@@ -135,11 +140,18 @@ public class Neat4SpeedDriver extends AbstractDriver implements Serializable {
             System.out.println("Angle to Axis = " + sensors.getAngleToTrackAxis());
         }
 
+        for(int j = 0; j < 36; ++j) {
+            if(sensors.getOpponentSensors()[j] < 0.4)
+                _fitness += -2;
+            if(sensors.getOpponentSensors()[j] < 0.1)
+                _fitness += -5;
+        }
 
         if(sensors.getLastLapTime() != 0) {
-            _fitness = 100 + sensors.getDistanceRaced()*(1 + 100.0/sensors.getLastLapTime());
             _distanceRaced = sensors.getDistanceRaced();
             _timeTaken     = sensors.getLastLapTime();
+            _position      = sensors.getRacePosition();
+            _fitness = 100 + _distanceRaced*(1 + 100.0/_timeTaken) + 1000.0/_position;
             action.restartRace = true;
         }
         if(_previousMaxDistRaced >= sensors.getDistanceRaced())
@@ -153,7 +165,7 @@ public class Neat4SpeedDriver extends AbstractDriver implements Serializable {
         else
             _cyclesGoingBack = 0;
 
-        System.out.println(_cyclesWithoutMovingForward);
+        //System.out.println(_cyclesWithoutMovingForward);
         if(_cyclesWithoutMovingForward > 500 || sensors.getTrackEdgeSensors()[0] == -1 || _cyclesGoingBack > 500) {
             System.out.println("Ending Race!!!!");
         if(_DEBUG)

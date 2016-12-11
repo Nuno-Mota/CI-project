@@ -449,10 +449,16 @@ public class Neat implements Serializable {
         System.out.println("Starting fitness estimation.");
         PrintStream original = System.out;
         int i, j = 0;
+        boolean _OPPONENTS = true;
 
         System.out.println("NUMBER OF SPECIES = " + _currentSpecies.size());
 
-        Neat4SpeedDriver[] drivers = new Neat4SpeedDriver[1];
+        Neat4SpeedDriver[] drivers;
+        if(!_OPPONENTS)
+            drivers = new Neat4SpeedDriver[1];
+        else
+            drivers = new Neat4SpeedDriver[10];
+
         for(NeatGenome ng : _currentPopulation) {
             if(j < _currentPopulation.size() - _currentSpecies.size()) { //Avoids recalculating the lest elements of the
                                                                          //population, which were the best of the species
@@ -475,6 +481,18 @@ public class Neat implements Serializable {
 
                     drivers[0] = new Neat4SpeedDriver(ng.getNeuralNetwork());
 
+                    if(_OPPONENTS) {
+                        List<NeatGenome> selectedGenomes = new ArrayList<>();
+                        while(selectedGenomes.size() < 9) {
+                            int selected = ThreadLocalRandom.current().nextInt(0, _currentPopulation.size());
+                            if(!selectedGenomes.contains(_currentPopulation.get(selected)) &&
+                               ng.getGenomeID() != _currentPopulation.get(selected).getGenomeID())
+                                selectedGenomes.add(_currentPopulation.get(selected));
+                        }
+
+                        for(int l = 1; l < 10; ++l)
+                            drivers[l] = new Neat4SpeedDriverFILLER(selectedGenomes.get(l-1).getNeuralNetwork());
+                    }
 
                     //for speedup set withGUI to false
                     System.setOut(new NullPrintStream());
@@ -483,7 +501,8 @@ public class Neat implements Serializable {
 
                     System.out.println("FITNESS for track " + _trackName[i] + " = " + df4.format(drivers[0].getFitness()) +
                                        " ---- " + df2.format(100*drivers[0].getDistanceRaced()/_trackSize[i]) + "% completed." +
-                                       " ---- Time taken: " + df2.format(drivers[0].getTimeTaken()) + "s.");
+                                       " ---- Time taken: " + df2.format(drivers[0].getTimeTaken()) + "s" +
+                                       " ---- Position: " + drivers[0].getPosition());
                     ng.setFitness(ng.getFitness() + drivers[0].getFitness());
                 }
                 System.out.println("TotalFitness = " + ng.getFitness());
@@ -700,7 +719,7 @@ public class Neat implements Serializable {
                 best = ng;
 
         for(NeatGenome ng: _currentPopulation) {
-            System.out.println("Checking GenomeID = " + ng.getGenomeID());
+            //System.out.println("Checking GenomeID = " + ng.getGenomeID());
             if(_currentSpecies.size() == 0) {
                 List<NeatGenome> membersOfSpecies = new ArrayList<>();
                 membersOfSpecies.add(ng);
@@ -746,7 +765,7 @@ public class Neat implements Serializable {
                 ++k;
         }
 
-        
+
 
         for(Species sp : _currentSpecies) {
 
@@ -868,12 +887,12 @@ public class Neat implements Serializable {
                 + (c3 * weightDifference / matchingGenes));
 
 
-        System.out.println("Compatibility Score: " + score);
-        System.out.println("CT = " + _compatibilityThreshold);
-        if(score < _compatibilityThreshold)
-            System.out.println("Compatible");
-        else
-            System.out.println("Not Compatible");
+//        System.out.println("Compatibility Score: " + score);
+//        System.out.println("CT = " + _compatibilityThreshold);
+//        if(score < _compatibilityThreshold)
+//            System.out.println("Compatible");
+//        else
+//            System.out.println("Not Compatible");
         return score < _compatibilityThreshold;
     }
 
@@ -941,7 +960,7 @@ public class Neat implements Serializable {
 
         String filename;
 
-        filename = "src/memory/Single_Driver/Best_of_each_Generation/bestOfGen" + _generationNumber + ".java_serial";
+        filename = "src/memory/Single_Driver_and_Opponents/Best_of_each_Generation/bestOfGen" + _generationNumber + ".java_serial";
         ObjectOutputStream out = null;
         try {
             out = new ObjectOutputStream(new FileOutputStream(filename));
@@ -957,7 +976,7 @@ public class Neat implements Serializable {
         }
 
 
-        filename = "src/memory/Single_Driver/Statistics/data.txt";
+        filename = "src/memory/Single_Driver_and_Opponents/Statistics/data.txt";
         try(FileWriter fw = new FileWriter(filename, true);
             BufferedWriter bw = new BufferedWriter(fw);
             PrintWriter outWriter = new PrintWriter(bw)) {
@@ -979,9 +998,9 @@ public class Neat implements Serializable {
         ++_generationNumber;
 
         if (_file1)
-            filename = "src/memory/Single_Driver/Full_Generations/GenBeep.java_serial";
+            filename = "src/memory/Single_Driver_and_Opponents/Full_Generations/GenBeep.java_serial";
         else
-            filename = "src/memory/Single_Driver/Full_Generations/GenBoop.java_serial";
+            filename = "src/memory/Single_Driver_and_Opponents/Full_Generations/GenBoop.java_serial";
         toggleFile();
 
 

@@ -90,7 +90,7 @@ public class NeuralNetwork implements Serializable {
 
     public double[] update(SensorModel sensorData) {
 
-        //18 Inputs
+        //36 Inputs
         if(_DEBUG)
             System.out.println("Neural Network getting sensor data");
         double[] inputs  = {sensorData.getAngleToTrackAxis()/Math.PI, sensorData.getSpeed()/315,
@@ -101,7 +101,16 @@ public class NeuralNetwork implements Serializable {
                             sensorData.getTrackEdgeSensors()[16]/200, sensorData.getTrackPosition(),
                             sensorData.getLateralSpeed()/150, sensorData.getZSpeed()/150,
                             sensorData.getWheelSpinVelocity()[0]/45, sensorData.getWheelSpinVelocity()[1]/45,
-                            sensorData.getWheelSpinVelocity()[2]/45, sensorData.getWheelSpinVelocity()[3]/45};
+                            sensorData.getWheelSpinVelocity()[2]/45, sensorData.getWheelSpinVelocity()[3]/45,
+                            sensorData.getOpponentSensors()[1]/200, sensorData.getOpponentSensors()[4]/200,
+                            sensorData.getOpponentSensors()[6]/200, sensorData.getOpponentSensors()[8]/200,
+                            sensorData.getOpponentSensors()[9]/200, sensorData.getOpponentSensors()[10]/200,
+                            sensorData.getOpponentSensors()[12]/200, sensorData.getOpponentSensors()[14]/200,
+                            sensorData.getOpponentSensors()[17]/200, sensorData.getOpponentSensors()[19]/200,
+                            sensorData.getOpponentSensors()[22]/200, sensorData.getOpponentSensors()[24]/200,
+                            sensorData.getOpponentSensors()[26]/200, sensorData.getOpponentSensors()[27]/200,
+                            sensorData.getOpponentSensors()[28]/200, sensorData.getOpponentSensors()[30]/200,
+                            sensorData.getOpponentSensors()[32]/200, sensorData.getOpponentSensors()[35]/200};
         double[] outputs = {0.0, 0.0, 0.0};
 
         int currentNeuron = 0;
