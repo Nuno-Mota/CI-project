@@ -6,27 +6,41 @@ import java.util.Properties;
 
 public class NeatAlgorithm {
 
-    static int     _numberOfInputs;
-    static int     _numberOfOutputs;
-    static int     _populationSize;
-    static boolean _loadGenFromFile;
     /**********************
-     * NEAT's main method *     //This is the one to be run when training the optimal RNN. Otherwise comment
+     * Internal Variables *
      **********************/
+
+    private static int     _numberOfInputs;
+    private static int     _numberOfOutputs;
+    private static int     _populationSize;
+    private static boolean _loadGenFromFile;
+
+
+
+    /**************************
+     * Load NEAT's Properties *
+     **************************/
 
     private static void loadNaProperties(){
         try (InputStream in = new FileInputStream("neat.properties")) {
             Properties prop = new Properties();
             prop.load(in);
             in.close();
-            _numberOfInputs     = Integer.parseInt(prop.getProperty("numberOfInputs"));
-            _numberOfOutputs    = Integer.parseInt(prop.getProperty("numberOfOutputs"));
-            _populationSize     = Integer.parseInt(prop.getProperty("populationSize"));
-            _loadGenFromFile    = Boolean.parseBoolean(prop.getProperty("loadGenomeFromFile"));
+
+            _numberOfInputs  = Integer.parseInt(prop.getProperty("numberOfInputs"));
+            _numberOfOutputs = Integer.parseInt(prop.getProperty("numberOfOutputs"));
+            _populationSize  = Integer.parseInt(prop.getProperty("populationSize"));
+            _loadGenFromFile = Boolean.parseBoolean(prop.getProperty("loadGenomeFromFile"));
         } catch (IOException e) {
             System.err.println("Something went wrong while reading in the properties.");
         }
     }
+
+
+
+    /**********************
+     * NEAT's main method *
+     **********************/
 
     @SuppressWarnings("unchecked")
     public static void main(String[] args) {
@@ -51,7 +65,6 @@ public class NeatAlgorithm {
                 System.out.println("Loaded population from file.");
                 ois.close();
                 fis.close();
-                
 
             } catch (FileNotFoundException e) {
                 System.out.println("Error opening generation file: File does not exist.");
@@ -68,14 +81,11 @@ public class NeatAlgorithm {
         }
         else
             neat = new Neat(_numberOfInputs, _numberOfOutputs, _populationSize);
-            //neat = new Neat(Integer.parseInt(args[0]), Integer.parseInt(args[1]), Integer.parseInt(args[2]));
 
 
+        neat.readNeatProperties();
 
-        while (true) {
-            //TODO: CHECKING ZONE 0
+        while (true)
             neat.epoch();
-            //neat.saveRelevantData();
-        }
     }
 }

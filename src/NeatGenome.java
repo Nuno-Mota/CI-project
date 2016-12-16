@@ -8,7 +8,7 @@ import java.util.Properties;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class NeatGenome implements Serializable{
+public class NeatGenome implements Serializable {
 
     /**********************
      * Internal Variables *
@@ -25,6 +25,7 @@ public class NeatGenome implements Serializable{
     private int                  _numberOfInputs;
     private int                  _numberOfOutputs;
     private Random               _rand             = new Random();
+
 
 
     /**********************
@@ -50,7 +51,7 @@ public class NeatGenome implements Serializable{
      * Constructors *
      ****************/
 
-    //Checked. Seems to be fine     //TODO:Missing adding connections and neurons to innovation's table
+    //Checked. Seems to be fine     //TODO:Missing adding connections and neurons to innovation's table. Important?
     public NeatGenome(int numberOfInputs, int numberOfOutputs, InnovationsTable innovationsTable) {
         readNgProperties();
         _innovationsTable = innovationsTable;
@@ -77,9 +78,12 @@ public class NeatGenome implements Serializable{
 
         //For each input neuron create connections with every output neuron
         for(int i = 0; i < _numberOfInputs; ++i)
-            for(int j = _numberOfInputs; j < _numberOfInputs + _numberOfOutputs; ++j)
+            for(int j = _numberOfInputs + 1; j < _numberOfInputs + 1 + _numberOfOutputs; ++j)
                 addNewConnection(_neurons.get(i).getNeuronID(), _neurons.get(j).getNeuronID(), false);
     }
+
+
+
 
     //TODO: Add constructor that randomizes initial connections
 
@@ -110,11 +114,13 @@ public class NeatGenome implements Serializable{
     }
 
 
+
+
     //Checked. Seems to be fine
     public NeatGenome(NeatGenome genomeToBeCopied, InnovationsTable innovationsTable) {
         readNgProperties();
         _innovationsTable = innovationsTable;
-        _genomeID        = _innovationsTable.getNewGenomeID();  //TODO: When we copy the fittest genome of a species, we don't want to increment its ID
+        _genomeID        = _innovationsTable.getNewGenomeID();
         _numberOfInputs  = genomeToBeCopied.getNumberOfInputs();
         _numberOfOutputs = genomeToBeCopied.getNumberOfOutputs();
 
@@ -140,6 +146,8 @@ public class NeatGenome implements Serializable{
     }
 
 
+
+
     public void readNgProperties(){
         try (InputStream in = new FileInputStream("neat.properties")) {
             Properties prop = new Properties();
@@ -158,6 +166,8 @@ public class NeatGenome implements Serializable{
             System.err.println("Something went wrong while reading in the properties.");
         }
     }
+
+
 
     /***********************
      * Getters and Setters *
@@ -405,9 +415,6 @@ public class NeatGenome implements Serializable{
         int innovationID = _innovationsTable.getInnovationID(newInnovation);
 
 
-        //TODO: make sure that this part works properly! Not according to the book!!!!
-
-
 
         int neuronID;
 
@@ -491,7 +498,7 @@ public class NeatGenome implements Serializable{
         //Corrects possible incoming and outgoing lists for each referenced neuron
         NeuronGene inputNeuron  = getNeuron(inputNeuronID);
         NeuronGene outputNeuron = getNeuron(outputNeuronID);
-        inputNeuron.getPossibleOutgoing().remove(outputNeuron);//TODO: Check null pointer exception validity
+        inputNeuron.getPossibleOutgoing().remove(outputNeuron);
         outputNeuron.getPossibleIncoming().remove(inputNeuron);
 
         //Assigns weight of the connection
@@ -532,42 +539,6 @@ public class NeatGenome implements Serializable{
     public void createPossibleListsForEachNeuron(List<NeuronGene> neurons, List<ConnectionGene> connections) {
         for(NeuronGene ng : neurons)
             createPossibleLists(ng, neurons, connections);
-//        for(NeuronGene ng : neurons) {
-//            if(ng.getType() == 3) {
-//                for(NeuronGene ngTest : neurons) {
-//                    if(ngTest.getType() != 3) {
-//                        boolean add = true;
-//                        for(ConnectionGene cg : connections)
-//                            if(cg.getInputNeuron().getNeuronID()  == ng.getNeuronID() &&
-//                                    cg.getOutputNeuron().getNeuronID() == ngTest.getNeuronID())
-//                                add = false;
-//                        if(add)
-//                            ng.getPossibleOutgoing().add(ngTest);
-//                    }
-//                }
-//            }
-//            else {
-//                for(NeuronGene ngTest : neurons) {
-//                    boolean add = true;
-//                    if (ngTest.getType() != 3) {
-//                        for (ConnectionGene cg : connections)
-//                            if (cg.getInputNeuron().getNeuronID() == ng.getNeuronID() &&
-//                                    cg.getOutputNeuron().getNeuronID() == ngTest.getNeuronID())
-//                                add = false;
-//                        if (add)
-//                            ng.getPossibleOutgoing().add(ngTest);
-//                    }
-//
-//                    add = true;
-//                    for (ConnectionGene cg : connections)
-//                        if (cg.getInputNeuron().getNeuronID() == ngTest.getNeuronID() &&
-//                                cg.getOutputNeuron().getNeuronID() == ng.getNeuronID())
-//                            add = false;
-//                    if (add)
-//                        ng.getPossibleIncoming().add(ngTest);
-//                }
-//            }
-//        }
     }
 
 

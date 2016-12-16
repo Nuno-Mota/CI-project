@@ -13,16 +13,18 @@ public class Neat implements Serializable {
      **********************/
 
     private boolean             _DEBUG     = false;
-    private String[][]          _tracks    = {{"wheel-2", "road"}, {"spring", "road"}, {"street-1", "road"},
-                                              {"alpine-1", "road"}, {"e-track-1", "road"}, {"e-track-2", "road"},
-                                              {"ole-road-1", "road"}, {"dirt-2", "dirt"}, {"dirt-4", "dirt"},
-                                              {"dirt-6", "dirt"}, {"mixed-1", "dirt"}, {"mixed-2", "dirt"},
-                                              {"f-speedway", "oval"}};
-    private String[]            _trackName = {"wheel-2   ", "spring    ", "street-1  ", "alpine-1  ", "e-track-1 ", "e-track-2 ",
-                                              "ole-road-1", "dirt-2    ", "dirt-4    ", "dirt-6    ", "mixed-1   ", "mixed-2   ", "f-speedway"};
-//    private String[][]          _tracks = {{"wheel-2", "road"}};//FOR TESTING
-    private double[]            _trackSize = {6205.46, 22129.77, 3823.05, 6355.65, 3243.64, 5380.50,
-                                              6282.81, 1760.94, 3260.43, 3147.46, 1014.22, 1412.90, 3703.83};
+//    private String[][]          _tracks    = {{"wheel-2", "road"}, {"spring", "road"}, {"street-1", "road"},
+//                                              {"alpine-1", "road"}, {"e-track-1", "road"}, {"e-track-2", "road"},
+//                                              {"ole-road-1", "road"}, {"dirt-2", "dirt"}, {"dirt-4", "dirt"},
+//                                              {"dirt-6", "dirt"}, {"mixed-1", "dirt"}, {"mixed-2", "dirt"},
+//                                              {"f-speedway", "oval"}};
+//    private String[]            _trackName = {"wheel-2   ", "spring    ", "street-1  ", "alpine-1  ", "e-track-1 ", "e-track-2 ",
+//                                              "ole-road-1", "dirt-2    ", "dirt-4    ", "dirt-6    ", "mixed-1   ", "mixed-2   ", "f-speedway"};
+//    private double[]            _trackSize = {6205.46, 22129.77, 3823.05, 6355.65, 3243.64, 5380.50,
+//                                              6282.81, 1760.94, 3260.43, 3147.46, 1014.22, 1412.90, 3703.83};
+    private String[][]          _tracks    = {{"dirt-2", "dirt"}};
+    private String[]            _trackName = {"dirt-2    "};
+    private double[]            _trackSize = {1760.94};
 
     private InnovationsTable    _innovationsTable = InnovationsTable.getInstance();
 
@@ -45,10 +47,11 @@ public class Neat implements Serializable {
     /**********************
      *     Parameters     *
      **********************/
+
     private double              _compatibilityThreshold;
     private int                 c1,
                                 c2,
-                                c3 ;
+                                c3;
     private double              _probabilityOfMating;
     private double              _bestOfSpeciesPercentage;
     private double              _matingSTDEV;
@@ -73,29 +76,20 @@ public class Neat implements Serializable {
 
 
 
-    public Neat (int numberOfInputs, int numberOfOutputs, int populationSize, int generationNumber,
-                 List<NeatGenome> currentPopulation) {
-        _numberOfInputs    = numberOfInputs;
-        _numberOfOutputs   = numberOfOutputs;
-        _populationSize    = populationSize;
-        _generationNumber  = generationNumber;
-        _currentPopulation = currentPopulation;
-        readNeatProperties();
-    }
-
     public void readNeatProperties(){
         try (InputStream in = new FileInputStream("neat.properties")) {
             Properties prop = new Properties();
             prop.load(in);
             in.close();
-            _compatibilityThreshold        = Double.parseDouble(prop.getProperty("compatibilityThreshold"));
-            c1                             = Integer.parseInt(prop.getProperty("c1"));
-            c2                             = Integer.parseInt(prop.getProperty("c2"));
-            c3                             = Integer.parseInt(prop.getProperty("c3"));
-            _probabilityOfMating           = Double.parseDouble(prop.getProperty("probabilityOfMating"));
-            _bestOfSpeciesPercentage       = Double.parseDouble(prop.getProperty("bestOfSpeciesPercentage"));
-            _matingSTDEV                   = Double.parseDouble(prop.getProperty("matingSTDEV"));
-            _maxGenWithoutImprovment       = Integer.parseInt(prop.getProperty("maxGenWithoutImprovment"));
+
+            _compatibilityThreshold  = Double.parseDouble(prop.getProperty("compatibilityThreshold"));
+            c1                       = Integer.parseInt(prop.getProperty("c1"));
+            c2                       = Integer.parseInt(prop.getProperty("c2"));
+            c3                       = Integer.parseInt(prop.getProperty("c3"));
+            _probabilityOfMating     = Double.parseDouble(prop.getProperty("probabilityOfMating"));
+            _bestOfSpeciesPercentage = Double.parseDouble(prop.getProperty("bestOfSpeciesPercentage"));
+            _matingSTDEV             = Double.parseDouble(prop.getProperty("matingSTDEV"));
+            _maxGenWithoutImprovment = Integer.parseInt(prop.getProperty("maxGenWithoutImprovment"));
         } catch (IOException e) {
             System.err.println("Something went wrong while reading in the properties.");
         }
@@ -182,10 +176,8 @@ public class Neat implements Serializable {
 
     public void epoch() {
 
-        if(_generationNumber > 1) {
-            readNeatProperties();
+        if(_generationNumber > 1)
             createNewGeneration();
-        }
 
 
         generatePhenotypes();
@@ -212,7 +204,7 @@ public class Neat implements Serializable {
 
     //Checked. Seems to be fine
     public void createNewGeneration() {
-        //System.out.println("Creating next generation. This will be generation number " + _generationNumber + ".");
+        System.out.println("Creating next generation. This will be generation number " + _generationNumber + ".");
 
 
         //BFS alternative that automatically adds members from every species, without increasing population size.
@@ -230,8 +222,6 @@ public class Neat implements Serializable {
         int     parent2Indx;
         Random  rand = new Random();
         boolean maybeMoreSpawnsRequired;
-
-        NeatGenome best = _currentPopulation.get(0);
 
         int k = 0;
         while(k < _currentSpecies.size()) {
@@ -502,20 +492,20 @@ public class Neat implements Serializable {
 
     //Checked. Seems to be fine
     public void defineSpecies() {
-//        if (_generationNumber == 1)
-//            System.out.println("Defining population species.");
-//        else
-//            System.out.println("Redefining population species.");
+        if (_generationNumber == 1)
+            System.out.println("Defining population species.");
+        else
+            System.out.println("Redefining population species.");
 
         speciate();
 
         System.out.println("\nBEST FITNESS = " + getBestPerformingMember().getFitness());
         System.out.println("BEST GENOME = " + getBestPerformingMember().getGenomeID());
 
-//        if (_generationNumber == 1)
-//            System.out.println("Population species defined.");
-//        else
-//            System.out.println("Population species redefined.");
+        if (_generationNumber == 1)
+            System.out.println("Population species defined.");
+        else
+            System.out.println("Population species redefined.");
     }
 
 
@@ -530,14 +520,13 @@ public class Neat implements Serializable {
         int best;
         if(_DEBUG)
             System.out.println("CROSSOVER: determine the best parent");
-        //If parents have the same fitness select the longest one.
+        //If parents have the same fitness select the shortest one.
         //If they also have the same length select randomly
-        //TODO: should pick the shortest one?
         if (parent1.getFitness() == parent2.getFitness()) {
             if (parent1.getConnections().size() == parent2.getConnections().size())
                 best = ThreadLocalRandom.current().nextInt(1, 3);
             else
-                best = (parent1.getConnections().size() > parent2.getConnections().size()) ? 1 : 2;
+                best = (parent1.getConnections().size() < parent2.getConnections().size()) ? 1 : 2;
         }
         //Else select the most fit parent
         else
@@ -560,6 +549,7 @@ public class Neat implements Serializable {
             System.out.println("CROSSOVER: parent1 size = " + parent1.getConnections().size());
         if(_DEBUG)
             System.out.println("CROSSOVER: parent2 size = " + parent2.getConnections().size());
+
         //While there are still genes to be parsed in at least one of the parents"
         while(!(iterator1 >= parent1.getConnections().size() &&
                 iterator2 >= parent2.getConnections().size())) {
@@ -567,7 +557,7 @@ public class Neat implements Serializable {
 
             //If we have gone over all genes of parent1, but there are still genes of parent 2 left we
             //can add them if parent 2 has the best fitness between both parents
-            if(iterator1 >= parent1.getConnections().size()) {     //TODO: check if problems arise. Check book
+            if(iterator1 >= parent1.getConnections().size()) {
                 if(_DEBUG)
                     System.out.println("CROSSOVER: parent1 out of genes");
                 if(best == 2)
@@ -576,7 +566,7 @@ public class Neat implements Serializable {
             }
             //If we have gone over all genes of parent2, but there are still genes of parent 1 left we
             //can add them if parent 1 has the best fitness between both parents
-            else if(iterator2 >= parent2.getConnections().size()) {     //TODO: check if problems arise. Check book
+            else if(iterator2 >= parent2.getConnections().size()) {
                 if(_DEBUG)
                     System.out.println("CROSSOVER: parent2 out of genes");
                 if(best == 1)
@@ -868,12 +858,6 @@ public class Neat implements Serializable {
                 + (c3 * weightDifference / matchingGenes));
 
 
-        System.out.println("Compatibility Score: " + score);
-        System.out.println("CT = " + _compatibilityThreshold);
-        if(score < _compatibilityThreshold)
-            System.out.println("Compatible");
-        else
-            System.out.println("Not Compatible");
         return score < _compatibilityThreshold;
     }
 
@@ -885,9 +869,6 @@ public class Neat implements Serializable {
 
     public void saveRelevantData() {
         System.out.println("Saving data. DO NOT STOP PROGRAM NOW!!!!!");
-
-
-
 
 
         double averageFitness = 0;

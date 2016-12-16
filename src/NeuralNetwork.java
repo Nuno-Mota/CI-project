@@ -107,20 +107,13 @@ public class NeuralNetwork implements Serializable {
         int currentNeuron = 0;
         int currentOutput = 0;
 
-        //System.out.println(inputs.length);
-
         if(_DEBUG)
             System.out.println("Seting output values for input and bias neurons");
 
-        while(_phenotypeNeurons.get(currentNeuron).getType() == 0) {
-            //System.out.println("Type = " + _phenotypeNeurons.get(currentNeuron).getType());
-            //System.out.println(currentNeuron);
+        while(_phenotypeNeurons.get(currentNeuron).getType() == 0)
             _phenotypeNeurons.get(currentNeuron).setOutput(inputs[currentNeuron++]);
-            //++currentNeuron;
-        }
 
-        _phenotypeNeurons.get(currentNeuron).setOutput(1);
-        ++currentNeuron;
+        _phenotypeNeurons.get(currentNeuron++).setOutput(1);
 
         while(currentNeuron < _phenotypeNeurons.size()) {
             double sum = 0;
@@ -135,14 +128,15 @@ public class NeuralNetwork implements Serializable {
 
             if(_DEBUG)
                 System.out.println("NEURAL NETWORK: Applying sigmoid to incoming value");
+
             _phenotypeNeurons.get(currentNeuron).setOutput(sigmoid(sum, _phenotypeNeurons.get(currentNeuron).getActivationResponse()));
 
 
             if(_DEBUG)
                 System.out.println("NEURAL NETWORK: Getting outputs");
-            if(_phenotypeNeurons.get(currentNeuron).getType() == 1) {
+            if(_phenotypeNeurons.get(currentNeuron).getType() == 1)
                 outputs[currentOutput++] = _phenotypeNeurons.get(currentNeuron).getOutput();
-            }
+
 
             ++currentNeuron;
         }

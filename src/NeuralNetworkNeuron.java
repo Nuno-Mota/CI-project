@@ -9,8 +9,7 @@ public class NeuralNetworkNeuron implements Serializable {
      **********************/
 
     private int                           _neuronID;
-    // Type:  0 = input, 1 = output, 2 = hidden, 3 = bias, 4 = none
-    private int                           _type;
+    private int                           _type;        // Type:  0 = input, 1 = output, 2 = hidden, 3 = bias, 4 = none
     private boolean                       _isRecurrent;
     private double                        _sumActivation;
     private double                        _activationResponse;
@@ -33,21 +32,6 @@ public class NeuralNetworkNeuron implements Serializable {
         _positionX          = genotype.getPositionX();
         _positionY          = genotype.getPositionY();
     }
-
-
-    /*public NeuralNetworkNeuron(int neuronID, int type, boolean isRecurrent, double sumActivation,
-                               double activationResponse, double positionX, double positionY,
-                               List<NeuralNetworkConnection> incoming, List<NeuralNetworkConnection> outgoing) {
-        _neuronID           = neuronID;
-        _type               = type;
-        _isRecurrent        = isRecurrent;
-        _sumActivation      = sumActivation;
-        _activationResponse = activationResponse;
-        _positionX          = positionX;
-        _positionY          = positionY;
-        _incoming           = incoming;
-        _outgoing           = outgoing;
-    }*/
 
 
 

@@ -1,7 +1,7 @@
 import java.io.Serializable;
 import java.util.Random;
 
-public class ConnectionGene implements Serializable{
+public class ConnectionGene implements Serializable {
 
     /**********************
      * Internal Variables *
@@ -100,16 +100,5 @@ public class ConnectionGene implements Serializable{
     }
     public void setNumberOfTimesDisabled(int numberOfTimesDisabled) {
         _numberOfTimesDisabled = numberOfTimesDisabled;
-    }
-
-
-
- /********************************
-     * Innovation Number Comparison *
-     ********************************/
-
-    //This function is not used. Check if it would yield any improvement
-    public boolean hasSmallerInnovationNumber(ConnectionGene toCompare) {
-        return _innovationN < toCompare.getInnovationN();
     }
 }

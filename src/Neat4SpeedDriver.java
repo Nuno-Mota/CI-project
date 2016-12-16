@@ -183,12 +183,6 @@ public class Neat4SpeedDriver extends AbstractDriver implements Serializable {
         action.accelerate = outputs[1];
         action.brake      = outputs[2];
 
-
-//        System.out.println("--------------" + getDriverName() + "--------------");
-//        System.out.println("Steering: " + action.steering);
-//        System.out.println("Acceleration: " + action.accelerate);
-//        System.out.println("Brake: " + action.brake);
-//        System.out.println("-----------------------------------------------");
         return action;
     }
 }
